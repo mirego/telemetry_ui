@@ -1,0 +1,26 @@
+# App artifacts
+/_build
+/db
+/deps
+/*.ez
+/cover
+/tmp
+
+# Generated on crash by the VM
+erl_crash.dump
+
+# Generated on crash by NPM
+npm-debug.log
+
+# Static artifacts
+/assets/node_modules
+
+# Since we are building assets from assets/, we ignore priv/static
+/priv/static
+
+# Local environment variable files
+.env.local
+.env.*.local
+
+# Sobelow version breadcrumb
+.sobelow
