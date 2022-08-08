@@ -20,20 +20,32 @@ defmodule TelemetryUI do
 
     def cast(section) when is_struct(section, __MODULE__), do: section
 
-    def cast({metric, component, options}) do
+    def cast({metric, options}) do
+      {component, options} = Keyword.pop_lazy(options, :component, fn -> default_component(metric) end)
+      {layout, options} = Keyword.pop(options, :layout, %{})
+      options = Enum.into(Keyword.merge(options, default_options(metric)), %{})
       title = metric.description || Enum.join(metric.name, ".")
-      %__MODULE__{title: title, component: component, metric: {metric, options}}
+
+      %__MODULE__{title: title, layout: layout, component: component, metric: {metric, options}}
     end
 
-    def cast(metric) when is_struct(metric, Metrics.Distribution), do: cast({metric, Component.Chart, %{type: "bar", query_aggregate: {:list, :average}}})
+    def cast(metric) when is_struct(metric) do
+      cast({metric, [{:component, default_component(metric)} | default_options(metric)]})
+    end
 
-    def cast(metric) when is_struct(metric, Metrics.Summary), do: cast({metric, Component.Chart, %{type: "lines", query_aggregate: {:list, :average}}})
+    def cast(metric) do
+      raise ArgumentError, "metric defintion can either be a %Telemetry.Metrics{} or a 2 elements tuple {%Telemetry.Metrics{}, []}. Got: #{inspect(metric)}"
+    end
 
-    def cast(metric) when is_struct(metric, Metrics.LastValue), do: cast({metric, Component.Value, %{unit: metric.unit}})
+    defp default_component(metric) when is_struct(metric, Metrics.Distribution), do: Component.Chart
+    defp default_component(metric) when is_struct(metric, Metrics.Summary), do: Component.Chart
+    defp default_component(_metric), do: Component.Value
 
-    def cast(metric) when is_struct(metric, Metrics.Sum), do: cast({metric, Component.Value, %{unit: metric.unit}})
-
-    def cast(metric) when is_struct(metric, Metrics.Counter), do: cast({metric, Component.Value, %{}})
+    defp default_options(metric) when is_struct(metric, Metrics.Distribution), do: [type: "bar", query_aggregate: {:list, :average}]
+    defp default_options(metric) when is_struct(metric, Metrics.Summary), do: [type: "lines", query_aggregate: {:list, :average}]
+    defp default_options(metric) when is_struct(metric, Metrics.LastValue), do: [unit: metric.unit]
+    defp default_options(metric) when is_struct(metric, Metrics.Sum), do: [unit: metric.unit]
+    defp default_options(_metric), do: []
   end
 
   defmodule Theme do

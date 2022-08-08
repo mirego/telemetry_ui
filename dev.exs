@@ -84,7 +84,10 @@ defmodule TelemetryUIConfig do
     metrics = [
       counter("phoenix.router_dispatch.stop.duration", description: "Number of requests", unit: {:native, :millisecond}, keep: keep),
       last_value("phoenix.router_dispatch.stop.duration", description: "Last GraphQL request duration", unit: {:native, :millisecond}, keep: keep),
-      summary("phoenix.router_dispatch.stop.duration", description: "Average GraphQL request duration", unit: {:native, :millisecond}, keep: keep),
+      {
+        summary("phoenix.router_dispatch.stop.duration", description: "Average GraphQL request duration", unit: {:native, :millisecond}, keep: keep),
+        layout: %{colorway: ~w(#f00 #ff0 #00f #f0f #0f0)}
+      },
       distribution(
         "phoenix.router_dispatch.stop.duration",
         unit: {:native, :millisecond},
