@@ -47,7 +47,10 @@ defmodule TelemetryUI.Mixfile do
       # Linting
       {:credo, "~> 1.1", only: [:dev, :test]},
       {:credo_envvar, "~> 0.1", only: [:dev, :test], runtime: false},
-      {:credo_naming, "~> 1.0", only: [:dev, :test], runtime: false}
+      {:credo_naming, "~> 1.0", only: [:dev, :test], runtime: false},
+
+      # Docs
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 
