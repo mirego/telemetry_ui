@@ -20,6 +20,7 @@ defmodule TelemetryUI.Web.View do
     <!DOCTYPE html>
     <html lang="en">
       <head>
+        <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <%= csrf_meta_tag() %>
         <style><%= raw render("app.css") %></style>

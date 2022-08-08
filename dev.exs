@@ -43,18 +43,18 @@ defmodule DemoWeb.Router do
   use Phoenix.Router
   use Plug.ErrorHandler
 
-  pipeline :telemetry_ui do
-    plug(:allow_metrix)
-  end
-
   get("/graphql", DemoWeb.GraphQLController, :index)
+
+  pipeline :telemetry_ui do
+    plug(:allow)
+  end
 
   scope "/" do
     pipe_through :telemetry_ui
     get("/metrics", TelemetryUI.Web, [])
   end
 
-  defp allow_metrix(conn, _), do: assign(conn, :telemetry_ui_allowed, true)
+  defp allow(conn, _), do: assign(conn, :telemetry_ui_allowed, true)
 end
 
 defmodule DemoWeb.Endpoint do
