@@ -32,12 +32,10 @@ defmodule TelemetryUI.Mixfile do
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_view, "~> 0.17"},
       {:jason, "~> 1.0"},
-      {:phoenix_ecto, "~> 4.0"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
-      {:plug_cowboy, "~> 2.0"},
       {:postgrex, "~> 0.16"},
-      {:telemetry, "~> 1.0", override: true},
+      {:telemetry, "~> 1.0"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:timex, "~> 3.7"},
@@ -46,7 +44,7 @@ defmodule TelemetryUI.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
 
       # Linting
-      {:credo, "~> 1.1", only: [:dev, :test], override: true},
+      {:credo, "~> 1.1", only: [:dev, :test]},
       {:credo_envvar, "~> 0.1", only: [:dev, :test], runtime: false},
       {:credo_naming, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
