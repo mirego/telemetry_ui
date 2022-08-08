@@ -83,11 +83,11 @@ defmodule TelemetryUIConfig do
 
     metrics = [
       counter("phoenix.router_dispatch.stop.duration", description: "Number of requests", unit: {:native, :millisecond}, keep: keep),
-      last_value("phoenix.router_dispatch.stop.duration", description: "Last GraphQL request duration", unit: {:native, :millisecond}, keep: keep),
       {
-        summary("phoenix.router_dispatch.stop.duration", description: "Average GraphQL request duration", unit: {:native, :millisecond}, keep: keep),
-        layout: %{colorway: ~w(#f00 #ff0 #00f #f0f #0f0)}
+        summary("phoenix.router_dispatch.stop.duration", description: "Average HTTP request duration", unit: {:native, :millisecond}, keep: keep),
+        query_aggregate: :average, component: TelemetryUI.Web.Component.Value
       },
+      summary("phoenix.router_dispatch.stop.duration", description: "Average HTTP request duration", unit: {:native, :millisecond}, keep: keep),
       distribution(
         "phoenix.router_dispatch.stop.duration",
         unit: {:native, :millisecond},
@@ -115,7 +115,7 @@ defmodule TelemetryUIConfig do
 
     [
       metrics: metrics,
-      theme: %{header_color: "#666", title: "Telemetry UI"},
+      theme: %{header_color: "#111", title: "Telemetry UI"},
       adapter: TelemetryUI.Adapter.EctoPostgres,
       pruner: [threshold: [months: -1], interval: 84_000],
       write_buffer: [max_buffer_size: 10_000, flush_interval_ms: 5_000]

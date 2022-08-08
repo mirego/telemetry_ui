@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://user-images.githubusercontent.com/464900/183483800-f313a3c0-1877-4c37-ac07-e08bed3f2276.png" width="500" />
   <br /><br />
-  Telemetry based metrics UI. Take your <a href="https://github.com/beam-telemetry/telemetry"><code>telemetry</code></a> metrics and display them in a web page.
+  Telemetry-based metrics UI. Take your <a href="https://github.com/beam-telemetry/telemetry"><code>telemetry</code></a> metrics and display them in a web page.
   <br /><br />
   <a href="https://hex.pm/packages/telemetry_ui"><img src="https://img.shields.io/hexpm/v/telemetry_ui.svg" /></a>
 </div>
@@ -13,6 +13,8 @@
 Your data should not have to be uploaded somewhere else to have insighful metrics.
 
 It comes with a Postgres adapter, powered by Ecto, to quickly (and efficiently) store and query your application events.
+
+<img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/183487842-095023b1-0fb6-4a53-ae21-4734f581fa43.png">
 
 ## Usage
 

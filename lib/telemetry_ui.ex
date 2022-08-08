@@ -23,7 +23,7 @@ defmodule TelemetryUI do
     def cast({metric, options}) do
       {component, options} = Keyword.pop_lazy(options, :component, fn -> default_component(metric) end)
       {layout, options} = Keyword.pop(options, :layout, %{})
-      options = Enum.into(Keyword.merge(options, default_options(metric)), %{})
+      options = Enum.into(Keyword.merge(default_options(metric), options), %{})
       title = metric.description || Enum.join(metric.name, ".")
 
       %__MODULE__{title: title, layout: layout, component: component, metric: {metric, options}}
@@ -49,7 +49,7 @@ defmodule TelemetryUI do
   end
 
   defmodule Theme do
-    defstruct header_color: "#555", title: "/metrics", logo: ~s(
+    defstruct header_color: "#111", title: "/metrics", logo: ~s(
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-symmetry-vertical" viewBox="0 0 16 16">
         <path d="M7 2.5a.5.5 0 0 0-.939-.24l-6 11A.5.5 0 0 0 .5 14h6a.5.5 0 0 0 .5-.5v-11zm2.376-.484a.5.5 0 0 1 .563.245l6 11A.5.5 0 0 1 15.5 14h-6a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .376-.484zM10 4.46V13h4.658L10 4.46z"/>
       </svg>)
