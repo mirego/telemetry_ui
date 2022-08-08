@@ -140,3 +140,13 @@ def enable_telemetry_ui(conn, _), do: assign(conn, :telemetry_ui_allowed, true)
 ```
 
 That’s it! You can declare as many metrics as you want and they will render in HTML on your page!
+
+## License
+
+`TelemetryUI` is © 2022 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/mix_audit/blob/master/LICENSE.md) file.
+
+## About Mirego
+
+[Mirego](https://www.mirego.com) is a team of passionate people who believe that work is a place where you can innovate and have fun. We’re a team of [talented people](https://life.mirego.com) who imagine and build beautiful Web and mobile applications. We come together to share ideas and [change the world](http://www.mirego.org).
+
+We also [love open-source software](https://open.mirego.com) and we try to give back to the community as much as we can.

@@ -16,6 +16,14 @@ defmodule TelemetryUI.Mixfile do
       aliases: aliases(),
       xref: [exclude: IEx],
       description: "Telemetry based metrics UI",
+      source_url: "https://github.com/mirego/telemetry_ui",
+      homepage_url: "https://github.com/mirego/telemetry_ui",
+      docs: [
+        extras: ["README.md"],
+        main: "readme",
+        source_ref: "v#{@version}",
+        source_url: "https://github.com/mirego/telemetry_ui"
+      ],
       deps: deps()
     ]
   end
@@ -63,8 +71,7 @@ defmodule TelemetryUI.Mixfile do
   defp package do
     [
       maintainers: ["Simon Prévost"],
-      organization: "mirego",
-      licenses: ["MIT"],
+      licenses: ["BSD-3-Clause"],
       links: %{github: "https://github.com/mirego/telemetry_ui"},
       files: ~w(dist lib mix.exs README.md)
     ]
