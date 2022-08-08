@@ -1,18 +1,18 @@
-# Telemetry UI
-
-Telemetry based metrics UI. Take your `telemetry` metrics and display them in a web page.
-
-- [Features](#features)
-- [Usage](#usage)
-  - [Installation](#installation)
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/464900/183483800-f313a3c0-1877-4c37-ac07-e08bed3f2276.png" width="500" />
+  <br /><br />
+  Telemetry based metrics UI. Take your <a href="https://github.com/beam-telemetry/telemetry"><code>telemetry</code></a> metrics and display them in a web page.
+  <br /><br />
+  <a href="https://hex.pm/packages/telemetry_ui"><img src="https://img.shields.io/hexpm/v/telemetry_ui.svg" /></a>
+</div>
 
 ## Features
 
-TelemetryUI’s primary goal is to display your application metrics without external infrastructure dependencies.
+`telemetry_ui`’s primary goal is to display [your application metrics](https://hexdocs.pm/telemetry_metrics) without external infrastructure dependencies. [Phoenix](https://hexdocs.pm/phoenix/telemetry.html), [Absinthe](https://hexdocs.pm/absinthe/telemetry.html), [Ecto](https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events), [Erlang VM](https://hexdocs.pm/telemetry_poller/readme.html), [Tesla](https://hexdocs.pm/tesla/Tesla.Middleware.Telemetry.html), [Redix](https://hexdocs.pm/redix/telemetry.html), [Oban](https://hexdocs.pm/oban/Oban.Telemetry.html) and others expose all sorts of data that can be useful. You can also emit your own events from your application.
 
 Your data should not have to be uploaded somewhere else to have insighful metrics.
 
-It comes with a Postgres adapter to quickly (and efficiently) store and query your application events.
+It comes with a Postgres adapter, powered by Ecto, to quickly (and efficiently) store and query your application events.
 
 ## Usage
 
