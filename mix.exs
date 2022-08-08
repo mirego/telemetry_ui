@@ -63,6 +63,7 @@ defmodule TelemetryUI.Mixfile do
   defp package do
     [
       maintainers: ["Simon Prévost"],
+      organization: "mirego",
       licenses: ["MIT"],
       links: %{github: "https://github.com/mirego/telemetry_ui"},
       files: ~w(dist lib mix.exs README.md)
