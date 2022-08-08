@@ -143,7 +143,7 @@ That’s it! You can declare as many metrics as you want and they will render in
 
 ## License
 
-`TelemetryUI` is © 2022 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/mix_audit/blob/master/LICENSE.md) file.
+`TelemetryUI` is © 2022 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/telemetry_ui/blob/master/LICENSE.md) file.
 
 ## About Mirego
 
