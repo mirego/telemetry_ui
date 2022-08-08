@@ -1,5 +1,7 @@
 # Telemetry UI
 
+Telemetry based metrics UI. Take your `telemetry` metrics and display them in a web page.
+
 - [Features](#features)
 - [Usage](#usage)
   - [Installation](#installation)
@@ -7,6 +9,7 @@
 ## Features
 
 TelemetryUI’s primary goal is to display your application metrics without external infrastructure dependencies.
+
 Your data should not have to be uploaded somewhere else to have insighful metrics.
 
 It comes with a Postgres adapter to quickly (and efficiently) store and query your application events.

@@ -15,6 +15,7 @@ defmodule TelemetryUI.Mixfile do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       xref: [exclude: IEx],
+      description: "Telemetry based metrics UI",
       deps: deps()
     ]
   end
@@ -60,6 +61,7 @@ defmodule TelemetryUI.Mixfile do
     [
       maintainers: ["Simon Prévost"],
       licenses: ["MIT"],
+      links: %{github: "https://github.com/mirego/telemetry_ui"},
       files: ~w(dist lib mix.exs README.md)
     ]
   end
