@@ -47,7 +47,7 @@ prepare:
 
 .PHONY: dev
 dev: ## Run the dev server to test the lib
-	elixir dev.exs --no-halt
+	elixir dev/server.exs --no-halt
 
 .PHONY: dependencies
 dependencies: ## Install dependencies

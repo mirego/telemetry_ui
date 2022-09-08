@@ -7,6 +7,23 @@ defmodule TelemetryUI.Web do
   plug(:fetch_query_params)
   plug(:index)
 
+  def index(conn = %{params: %{"vega-lite-source" => id}}, _) do
+    data =
+      case TelemetryUI.section_by_id(id) do
+        section when is_struct(section, TelemetryUI.Section) ->
+          {_filter, params} = fetch_filter_params(%TelemetryUI.Web.Filter{}, conn.params["filter"])
+
+          TelemetryUI.metric_data(section.definition, params)
+
+        _ ->
+          []
+      end
+
+    conn
+    |> put_resp_header("content-type", "application/json")
+    |> send_resp(200, Jason.encode!(data))
+  end
+
   def index(conn, _) do
     {filter, params} = fetch_filter_params(%TelemetryUI.Web.Filter{}, conn.params["filter"])
 
@@ -14,16 +31,9 @@ defmodule TelemetryUI.Web do
     conn = assign(conn, :params, params)
     conn = assign(conn, :sections, TelemetryUI.sections())
     conn = assign(conn, :theme, TelemetryUI.theme())
-    conn = assign(conn, :adapter, TelemetryUI.adapter())
+    conn = assign(conn, :filter_options, TelemetryUI.Scraper.filter_options(params))
 
-    metrics_data =
-      for section <- conn.assigns.sections do
-        {section, TelemetryUI.Scraper.metric(section, params, TelemetryUI.adapter())}
-      end
-
-    conn = assign(conn, :metrics_data, metrics_data)
-
-    content = Phoenix.HTML.Safe.to_iodata(TelemetryUI.Web.View.render("index.html", conn.assigns))
+    content = Phoenix.HTML.Safe.to_iodata(TelemetryUI.Web.View.render("index.html", Map.put(conn.assigns, :conn, conn)))
 
     conn
     |> put_resp_header("content-type", "text/html")

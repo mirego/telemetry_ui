@@ -1,4 +1,6 @@
 defmodule TelemetryUI.Web.View do
+  @moduledoc false
+
   use Phoenix.HTML
 
   import Phoenix.LiveView.Helpers
@@ -22,65 +24,63 @@ defmodule TelemetryUI.Web.View do
       <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <%= csrf_meta_tag() %>
-        <style><%= raw render("app.css") %></style>
         <title><%= @theme.title %></title>
-        <script type="text/javascript"><%= raw(render("app.js")) %></script>
+        <style><%= raw render("app.css") %></style>
+        <%= csrf_meta_tag() %>
       </head>
 
-      <body><div class="lg:w-1/2 max-w-4xl mx-auto">
-        <header class="flex justify-between p-5 lg:px-0 text-white">
-          <div class="theme-background" style={"background-color: #{@theme.header_color}"}></div>
-          <h1 class="text-xl font-light font-mono flex items-center gap-3">
-            <div class="text-white"><%= {:safe, @theme.logo} %></div>
-            <%= @theme.title %>
-          </h1>
+      <body class="bg-zinc-50 dark:bg-zinc-800">
+        <div class="bg-white dark:bg-zinc-900 shadow-sm">
+          <header class="lg:w-1/2 max-w-4xl mx-auto flex justify-between p-2 mb-4 lg:px-0" style={theme_color_style(@theme)}>
+            <h1 class="text-base font-light font-mono flex items-center gap-3"><%= {:safe, @theme.logo} %><%= @theme.title %></h1>
 
-          <.form let={f} for={@filter} telemetry-component="Form" method="get">
-            <%= select(f, :frame, frame_options(), class: "p-2 bg-transparent border-white/25 text-white text-sm pr-8") %>
-          </.form>
-        </header>
+            <.form let={f} for={@filter} telemetry-component="Form" method="get" class="flex align-items-center">
+              <%= select(f, :frame, frame_options(), class: "p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8") %>
 
-        <div>
-          <%= for {section, data} <- @metrics_data do %>
-            <%= section.component.draw(%{section: section, data: data}) %>
-          <% end %>
+              <button telemetry-component="ThemeSwitch" class="right-3 absolute top-4">
+                <span class="dark:block hidden text-zinc-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                  </svg>
+                </span>
+
+                <span class="dark:hidden block text-zinc-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                  </svg>
+                </span>
+              </button>
+            </.form>
+          </header>
         </div>
 
-        <script><%= scripts(@sections) %></script>
-        <style><%= styles(@sections) %></style>
+        <div class="lg:w-1/2 max-w-4xl mx-auto md:grid grid-cols-1 gap-4">
+          <%= for section <- @sections do %>
+            <%= TelemetryUI.Web.Component.draw(
+              section.component,
+              %TelemetryUI.Web.Component.Assigns{filters: @filter_options, section: section, conn: @conn, theme: @theme}
+            ) %>
+          <% end %>
+        </div>
 
         <footer class="p-5 text-center opacity-25 text-xs">
           Built with ♥ by the team @ <a href="https://www.mirego.com">Mirego</a>.
         </footer>
-      </div></body>
+      </body>
+
+      <script type="text/javascript"><%= raw(render("app.js")) %></script>
     </html>
     """
   end
 
-  def scripts(sections) do
-    sections
-    |> Enum.map(& &1.component.script)
-    |> Enum.uniq()
-    |> Enum.join("\n")
-    |> raw()
-  end
+  defp theme_color_style(theme), do: ~s(color: #{theme.header_color})
 
-  def styles(sections) do
-    sections
-    |> Enum.map(& &1.component.style)
-    |> Enum.uniq()
-    |> Enum.join("\n")
-    |> raw()
-  end
-
-  def frame_options do
+  defp frame_options do
     for {value, _} <- TelemetryUI.Web.Filter.frame_options() do
-      {option_to_label(value), value}
+      {
+        String.capitalize(String.replace(to_string(value), "_", " ")),
+        value
+      }
     end
-  end
-
-  defp option_to_label(option) do
-    String.capitalize(String.replace(to_string(option), "_", " "))
   end
 end

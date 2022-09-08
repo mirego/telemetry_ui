@@ -18,6 +18,7 @@ npm-debug.log
 
 # Since we are building assets from assets/, we ignore priv/static
 /priv/static
+/priv/my-app
 
 # Local environment variable files
 .env.local

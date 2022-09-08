@@ -21,7 +21,7 @@ common_checks = [
   {Credo.Check.Readability.TrailingBlankLine},
   {Credo.Check.Readability.TrailingWhiteSpace},
   {Credo.Check.Readability.VariableNames},
-  {Credo.Check.Refactor.ABCSize, max_size: 40},
+  {Credo.Check.Refactor.ABCSize, max_size: 80},
   {Credo.Check.Refactor.CaseTrivialMatches},
   {Credo.Check.Refactor.CondStatements},
   {Credo.Check.Refactor.FunctionArity},
@@ -57,7 +57,7 @@ common_checks = [
       name: "default",
       strict: true,
       files: %{
-        included: ["*.exs", "lib/", "priv/", "config/", "rel/"],
+        included: ["*.exs", "lib/", "config/", "rel/"],
         excluded: []
       },
       checks:

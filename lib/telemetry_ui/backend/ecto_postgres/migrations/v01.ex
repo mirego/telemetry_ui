@@ -1,9 +1,9 @@
-defmodule TelemetryUI.Adapter.EctoPostres.Migrations.V01 do
+defmodule TelemetryUI.Backend.EctoPostgres.Migrations.V01 do
   @moduledoc false
 
   use Ecto.Migration
 
-  def up(%{create_schema: create?, prefix: prefix} = opts) do
+  def up(opts = %{create_schema: create?, prefix: prefix}) do
     %{quoted_prefix: quoted} = opts
 
     if create?, do: execute("CREATE SCHEMA IF NOT EXISTS #{quoted}")
@@ -14,13 +14,13 @@ defmodule TelemetryUI.Adapter.EctoPostres.Migrations.V01 do
       add(:value, :float, null: false, default: 0.0)
       add(:count, :integer, null: false, default: 1)
       add(:tags, :jsonb, null: false, default: "{}")
-      add(:bucket, :string)
+      add(:report_as, :string)
     end
 
-    create_if_not_exists(unique_index(:telemetry_ui_events, [:date, :name, :tags, :bucket], prefix: prefix))
+    create_if_not_exists(unique_index(:telemetry_ui_events, [:date, :name, :tags, :report_as], prefix: prefix))
   end
 
   def down(%{prefix: prefix}) do
-    drop_if_exists(table(:telemetry_events, prefix: prefix))
+    drop_if_exists(table(:telemetry_ui_events, prefix: prefix))
   end
 end

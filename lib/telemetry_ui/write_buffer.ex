@@ -1,4 +1,6 @@
 defmodule TelemetryUI.WriteBuffer do
+  @moduledoc false
+
   use GenServer
   require Logger
 
@@ -8,7 +10,7 @@ defmodule TelemetryUI.WriteBuffer do
 
   def init(opts) do
     Process.flag(:trap_exit, true)
-    timer = Process.send_after(self(), :tick, opts[:flush_interval_ms])
+    timer = Process.send_after(self(), :tick, opts[:backend].flush_interval_ms)
     {:ok, Map.merge(Enum.into(opts, %{}), %{buffer: [], timer: timer})}
   end
 
@@ -22,50 +24,50 @@ defmodule TelemetryUI.WriteBuffer do
     :ok
   end
 
-  def handle_cast({:insert, event}, state = %{buffer: buffer, adapter: adapter}) do
+  def handle_cast({:insert, event}, state = %{buffer: buffer, backend: backend}) do
     new_buffer = [event | buffer]
 
     if length(new_buffer) >= state[:max_buffer_size] do
-      Logger.info("Buffer full, flushing to disk")
+      info_log("Buffer full, flushing to disk")
       Process.cancel_timer(state[:timer])
-      do_flush(new_buffer, adapter)
-      new_timer = Process.send_after(self(), :tick, state[:flush_interval_ms])
+      do_flush(new_buffer, backend)
+      new_timer = Process.send_after(self(), :tick, backend.flush_interval_ms)
       {:noreply, %{state | buffer: [], timer: new_timer}}
     else
       {:noreply, %{state | buffer: new_buffer}}
     end
   end
 
-  def handle_info(:tick, state = %{buffer: buffer, adapter: adapter}) do
-    do_flush(buffer, adapter)
-    timer = Process.send_after(self(), :tick, state[:flush_interval_ms])
+  def handle_info(:tick, state = %{buffer: buffer, backend: backend}) do
+    do_flush(buffer, backend)
+    timer = Process.send_after(self(), :tick, backend.flush_interval_ms)
     {:noreply, %{state | buffer: [], timer: timer}}
   end
 
-  def handle_call(:flush, _from, state = %{buffer: buffer, adapter: adapter}) do
+  def handle_call(:flush, _from, state = %{buffer: buffer, backend: backend}) do
     Process.cancel_timer(state[:timer])
-    do_flush(buffer, adapter)
-    new_timer = Process.send_after(self(), :tick, state[:flush_interval_ms])
+    do_flush(buffer, backend)
+    new_timer = Process.send_after(self(), :tick, backend.flush_interval_ms)
     {:reply, nil, %{state | buffer: [], timer: new_timer}}
   end
 
-  def terminate(_reason, %{buffer: buffer, adapter: adapter}) do
-    Logger.info("Flushing event buffer before shutdown…")
-    do_flush(buffer, adapter)
+  def terminate(_reason, %{buffer: buffer, backend: backend}) do
+    info_log("Flushing event buffer before shutdown…")
+    do_flush(buffer, backend)
   end
 
-  defp do_flush(buffer, adapter) do
+  defp do_flush(buffer, backend) do
     case buffer do
       [] ->
         nil
 
       events ->
-        Logger.info("Flushing #{length(events)} events")
+        info_log("Flushing #{length(events)} events")
 
         events
         |> group_events()
         |> Enum.each(fn {event, {value, count}} ->
-          adapter.insert_event(value, event.time, event.event_name, event.tags, event.bucket, count)
+          TelemetryUI.Backend.insert_event(backend, value, event.time, event.event_name, event.tags, count, event.report_as)
         end)
     end
   end
@@ -78,5 +80,9 @@ defmodule TelemetryUI.WriteBuffer do
       value = Float.round(Enum.reduce(values, 0, &(&1.value + &2)) / count, 3)
       Map.put(acc, event, {value, count})
     end)
+  end
+
+  defp info_log(message) do
+    Logger.info("TelemetryUI - " <> message)
   end
 end

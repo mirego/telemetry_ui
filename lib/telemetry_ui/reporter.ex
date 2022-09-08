@@ -1,4 +1,8 @@
 defmodule TelemetryUI.Reporter do
+  @moduledoc false
+
+  import TelemetryUI.Event
+
   use GenServer
   require Logger
 
@@ -34,46 +38,23 @@ defmodule TelemetryUI.Reporter do
 
   def handle_event(_event_name, measurements, metadata, metrics) do
     for metric <- metrics, keep?(metric, metadata) do
-      event_name = TelemetryUI.Event.cast_event_name(metric)
+      event_name = cast_event_name(metric)
       value = extract_measurement(metric, measurements, metadata)
-      bucket = to_string(extract_bucket(metric, value))
       tags = extract_tags(metric, metadata)
-      time = time_trunc(DateTime.utc_now(), "minute")
+      time = Timex.set(DateTime.truncate(DateTime.utc_now(), :second), second: 0)
 
       TelemetryUI.WriteBuffer.insert(%TelemetryUI.Event{
         value: value,
         time: time,
         event_name: event_name,
-        bucket: bucket,
-        tags: tags
+        tags: tags,
+        report_as: cast_report_as(metric)
       })
     end
   end
 
-  def transform_event_name(%Telemetry.Metrics.Distribution{}, name), do: name <> ".distribution"
-  def transform_event_name(_, name), do: name
-
-  defp time_trunc(time, "hour"), do: Timex.set(DateTime.truncate(time, :second), minute: 0, second: 0)
-  defp time_trunc(time, "minute"), do: Timex.set(DateTime.truncate(time, :second), second: 0)
-  defp time_trunc(time, "second"), do: DateTime.truncate(time, :second)
-
   defp keep?(%{keep: nil}, _metadata), do: true
   defp keep?(metric, metadata), do: metric.keep.(metadata)
-
-  defp extract_bucket(%Telemetry.Metrics.Distribution{reporter_options: options}, value) do
-    buckets = Keyword.get(options, :buckets, [])
-    last_bucket = List.first(Enum.reverse(buckets))
-
-    buckets
-    |> Enum.zip(tl(buckets))
-    |> Enum.find_value(last_bucket, fn {start_range, end_range} ->
-      if value >= start_range && value < end_range do
-        start_range
-      end
-    end)
-  end
-
-  defp extract_bucket(_, _value), do: ""
 
   defp extract_measurement(metric, measurements, metadata) do
     case metric.measurement do

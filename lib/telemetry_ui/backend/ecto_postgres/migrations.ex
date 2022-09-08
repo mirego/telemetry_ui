@@ -1,26 +1,26 @@
-defmodule TelemetryUI.Adapter.EctoPostres.Migrations do
+defmodule TelemetryUI.Backend.EctoPostgres.Migrations do
   @moduledoc """
   Migrations create and modify the database tables TelemetryUI needs to function.
 
   ## Usage
 
   To use migrations in your application you'll need to generate an `Ecto.Migration` that wraps
-  calls to `TelemetryUI.Adapter.EctoPostres.Migrations`:
+  calls to `TelemetryUI.Backend.EctoPostgres.Migrations`:
 
   ```bash
   mix ecto.gen.migration add_telemetry_ui
   ```
 
   Open the generated migration in your editor and call the `up` and `down` functions on
-  `TelemetryUI.Adapter.EctoPostres.Migrations`:
+  `TelemetryUI.Backend.EctoPostgres.Migrations`:
 
   ```elixir
   defmodule MyApp.Repo.Migrations.AddTelemetryUI do
     use Ecto.Migration
 
-    def up, do: TelemetryUI.Adapter.EctoPostres.Migrations.up()
+    def up, do: TelemetryUI.Backend.EctoPostgres.Migrations.up()
 
-    def down, do: TelemetryUI.Adapter.EctoPostres.Migrations.down()
+    def down, do: TelemetryUI.Backend.EctoPostgres.Migrations.down()
   end
   ```
 
@@ -40,15 +40,15 @@ defmodule TelemetryUI.Adapter.EctoPostres.Migrations do
   ```
 
   Open the generated migration in your editor and call the `up` and `down`
-  functions on `TelemetryUI.Adapter.EctoPostres.Migrations`, passing a version number:
+  functions on `TelemetryUI.Backend.EctoPostgres.Migrations`, passing a version number:
 
   ```elixir
   defmodule MyApp.Repo.Migrations.UpgradeTelemetryUIToV11 do
     use Ecto.Migration
 
-    def up, do: TelemetryUI.Adapter.EctoPostres.Migrations.up(version: 11)
+    def up, do: TelemetryUI.Backend.EctoPostgres.Migrations.up(version: 11)
 
-    def down, do: TelemetryUI.Adapter.EctoPostres.Migrations.down(version: 11)
+    def down, do: TelemetryUI.Backend.EctoPostgres.Migrations.down(version: 11)
   end
   ```
 
@@ -64,9 +64,9 @@ defmodule TelemetryUI.Adapter.EctoPostres.Migrations do
   defmodule MyApp.Repo.Migrations.AddPrefixedTelemetryUIJobsTable do
     use Ecto.Migration
 
-    def up, do: TelemetryUI.Adapter.EctoPostres.Migrations.up(prefix: "private")
+    def up, do: TelemetryUI.Backend.EctoPostgres.Migrations.up(prefix: "private")
 
-    def down, do: TelemetryUI.Adapter.EctoPostres.Migrations.down(prefix: "private")
+    def down, do: TelemetryUI.Backend.EctoPostgres.Migrations.down(prefix: "private")
   end
   ```
 
@@ -88,9 +88,9 @@ defmodule TelemetryUI.Adapter.EctoPostres.Migrations do
   defmodule MyApp.Repo.Migrations.AddPrefixedTelemetryUIJobsTable do
     use Ecto.Migration
 
-    def up, do: TelemetryUI.Adapter.EctoPostres.Migrations.up(prefix: "private", create_schema: false)
+    def up, do: TelemetryUI.Backend.EctoPostgres.Migrations.up(prefix: "private", create_schema: false)
 
-    def down, do: TelemetryUI.Adapter.EctoPostres.Migrations.down(prefix: "private")
+    def down, do: TelemetryUI.Backend.EctoPostgres.Migrations.down(prefix: "private")
   end
   ```
   """
@@ -108,19 +108,19 @@ defmodule TelemetryUI.Adapter.EctoPostres.Migrations do
 
   Run all migrations up to the current version:
 
-      TelemetryUI.Adapter.EctoPostres.Migrations.up()
+      TelemetryUI.Backend.EctoPostgres.Migrations.up()
 
   Run migrations up to a specified version:
 
-      TelemetryUI.Adapter.EctoPostres.Migrations.up(version: 2)
+      TelemetryUI.Backend.EctoPostgres.Migrations.up(version: 2)
 
   Run migrations in an alternate prefix:
 
-      TelemetryUI.Adapter.EctoPostres.Migrations.up(prefix: "payments")
+      TelemetryUI.Backend.EctoPostgres.Migrations.up(prefix: "payments")
 
   Run migrations in an alternate prefix but don't try to create the schema:
 
-      TelemetryUI.Adapter.EctoPostres.Migrations.up(prefix: "payments", create_schema: false)
+      TelemetryUI.Backend.EctoPostgres.Migrations.up(prefix: "payments", create_schema: false)
   """
   def up(opts \\ []) when is_list(opts) do
     opts = with_defaults(opts, @current_version)
@@ -145,15 +145,15 @@ defmodule TelemetryUI.Adapter.EctoPostres.Migrations do
 
   Run all migrations from current version down to the first:
 
-      TelemetryUI.Adapter.EctoPostres.Migrations.down()
+      TelemetryUI.Backend.EctoPostgres.Migrations.down()
 
   Run migrations down to and including a specified version:
 
-      TelemetryUI.Adapter.EctoPostres.Migrations.down(version: 5)
+      TelemetryUI.Backend.EctoPostgres.Migrations.down(version: 5)
 
   Run migrations in an alternate prefix:
 
-      TelemetryUI.Adapter.EctoPostres.Migrations.down(prefix: "payments")
+      TelemetryUI.Backend.EctoPostgres.Migrations.down(prefix: "payments")
   """
   def down(opts \\ []) when is_list(opts) do
     opts = with_defaults(opts, @initial_version)
@@ -202,9 +202,12 @@ defmodule TelemetryUI.Adapter.EctoPostres.Migrations do
     for index <- range do
       pad_idx = String.pad_leading(to_string(index), 2, "0")
 
-      [__MODULE__, "V#{pad_idx}"]
-      |> Module.concat()
-      |> apply(direction, [opts])
+      module = Module.concat([__MODULE__, "V#{pad_idx}"])
+
+      case direction do
+        :up -> module.up(opts)
+        :down -> module.down(opts)
+      end
     end
 
     case direction do

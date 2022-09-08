@@ -1,9 +1,44 @@
 defmodule TelemetryUI.Scraper do
+  @moduledoc false
+
+  import TelemetryUI.Event
+
   defmodule Options do
-    defstruct from: nil, to: nil, step_interval: nil, step: nil, event_name: nil, query_aggregate: nil, query_field: nil
+    defstruct from: nil, to: nil, event_name: nil, report_as: nil
+
+    @type t :: %__MODULE__{}
   end
 
-  def metric(section, params, adapter) do
+  def metric(backend, definition, params) do
+    {metric, _options} = definition
+    filters = filter_options(params)
+
+    filters = %{
+      filters
+      | report_as: cast_report_as(metric),
+        event_name: cast_event_name(metric)
+    }
+
+    backend
+    |> TelemetryUI.Backend.metric_data(metric, filters)
+    |> Enum.map(&map_tags/1)
+  end
+
+  defp map_tags(entry) when map_size(entry.tags) === 0 or is_nil(entry.tags) do
+    %{entry | tags: nil}
+  end
+
+  defp map_tags(entry) do
+    update_in(entry, [:tags], fn tags ->
+      if map_size(tags) === 1 do
+        Enum.map_join(tags, ",", fn {_key, value} -> "#{value}" end)
+      else
+        Enum.map_join(tags, ",", fn {key, value} -> "#{key}: #{value}" end)
+      end
+    end)
+  end
+
+  def filter_options(params) do
     duration = params[:frame_duration]
     {time_set, time_duration} = fetch_time_frame(params[:frame_unit], duration)
 
@@ -17,54 +52,8 @@ defmodule TelemetryUI.Scraper do
       |> Timex.set(time_set)
       |> Timex.shift(time_duration)
 
-    step =
-      case DateTime.diff(to, from) do
-        diff when diff <= 8600 -> "minute"
-        diff when diff <= 432_000 -> "hour"
-        diff when diff <= 2_592_000 -> "day"
-        _ -> "month"
-      end
-
-    Enum.reduce(List.wrap(section.metric), [], fn definition, acc ->
-      {metric, options} =
-        case definition do
-          {metric, options} -> {metric, options}
-          {metric} -> {metric, %{}}
-          %{} = metric -> {metric, %{}}
-        end
-
-      {query_aggregate, options} = Map.pop(options, :query_aggregate)
-      {query_field, options} = Map.pop(options, :query_field)
-
-      filter_options = %Options{
-        from: from,
-        to: to,
-        step: step,
-        step_interval: to_interval(step),
-        event_name: TelemetryUI.Event.cast_event_name(metric),
-        query_aggregate: query_aggregate || :average,
-        query_field: query_field || :value
-      }
-
-      metric
-      |> adapter.metric_tags()
-      |> Enum.map(&{&1, adapter.metric_data(metric, &1, filter_options)})
-      |> Enum.reduce(acc, fn
-        {nil, data}, acc ->
-          acc ++ [Map.merge(data, options)]
-
-        {tag, data}, acc ->
-          data = Map.merge(data, %{name: Enum.map_join(tag, ",", fn {key, value} -> "#{key}: #{value}" end)})
-          acc ++ [Map.merge(data, options)]
-      end)
-    end)
+    %Options{from: from, to: to}
   end
-
-  defp to_interval("minute"), do: %Postgrex.Interval{secs: 60}
-  defp to_interval("second"), do: %Postgrex.Interval{secs: 1}
-  defp to_interval("hour"), do: %Postgrex.Interval{secs: 3600}
-  defp to_interval("day"), do: %Postgrex.Interval{days: 1}
-  defp to_interval("month"), do: %Postgrex.Interval{months: 1}
 
   defp fetch_time_frame("second", duration), do: {[second: 0], [seconds: -duration]}
   defp fetch_time_frame("minute", duration), do: {[second: 0], [minutes: -duration]}

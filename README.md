@@ -12,9 +12,9 @@
 
 Your data should not have to be uploaded somewhere else to have insighful metrics.
 
-It comes with a Postgres adapter, powered by Ecto, to quickly (and efficiently) store and query your application events.
+It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to quickly (and efficiently) store and query your application events.
 
-<img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/183487842-095023b1-0fb6-4a53-ae21-4734f581fa43.png">
+<img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/189182735-c8ce1699-cde5-4432-9f4a-c8cdeddcf4f5.png">
 
 ## Usage
 
@@ -39,20 +39,20 @@ After the packages are installed you must create a database migration to add the
 mix ecto.gen.migration add_telemetry_ui_events_table
 ```
 
-Open the generated migration in your editor and call the up and down functions on `TelemetryUI.Adapter.EctoPostres.Migrations`:
+Open the generated migration in your editor and call the up and down functions on `TelemetryUI.Adapter.EctoPostgres.Migrations`:
 
 ```elixir
 defmodule MyApp.Repo.Migrations.AddTelemetryUIEventsTable do
   use Ecto.Migration
 
   def up do
-    TelemetryUI.Adapter.EctoPostres.Migrations.up(version: 1)
+    TelemetryUI.Backend.EctoPostgres.Migrations.up(version: 1)
   end
 
   # We specify `version: 1` in `down`, ensuring that we'll roll all the way back down if
   # necessary, regardless of which version we've migrated `up` to.
   def down do
-    TelemetryUI.Adapter.EctoPostres.Migrations.down(version: 1)
+    TelemetryUI.Backend.EctoPostgres.Migrations.down(version: 1)
   end
 end
 ```
@@ -63,13 +63,6 @@ Now, run the migration to create the table:
 
 ```sh
 mix ecto.migrate
-```
-
-Before you can run a TelemetryUI instance you must provide some configuration. Set some base configuration within config.exs:
-
-```elixir
-# config/config.exs
-config :my_app, TelemetryUI.Adapter.EctoPostres, repo: MyApp.Repo
 ```
 
 TelemetryUI instances are isolated supervision trees and must be included in your application's supervisor to run. Use the application configuration you've just set and include TelemetryUI in the list of supervised children:
@@ -93,9 +86,13 @@ defp telemetry_config do
       counter("phoenix.router_dispatch.stop.duration", description: "Number of requests", unit: {:native, :millisecond}),
       summary("vm.memory.total", unit: {:byte, :megabyte}),
     ],
-    adapter: TelemetryUI.Adapter.EctoPostgres,
-    pruner: [threshold: [months: -1], interval: 84_000],
-    write_buffer: [max_buffer_size: 10_000, flush_interval_ms: 5_000]
+    backend: %TelemetryUI.Backend.EctoPostgres{
+      repo: MyApp.Repo,
+      pruner_threshold: [months: -1],
+      pruner_interval: 84_000,
+      max_buffer_size: 10_000,
+      flush_interval_ms: 10_000
+    }
   ]
 end
 ```
@@ -111,10 +108,10 @@ get("/metrics", TelemetryUI.Web, [])
 
 #### Security
 
-But since it may contain sensitive data, TelemetryUI require a special assign to render the page.
+But since it may contain sensitive data, `TelemetryUI` requires a special assign to render the page.
 
-`:telemetry_ui_allowed` must be set to true in the `conn` struct before it enters the `TelemetryUI.Web` module.
-The easiest way to do that in a Phoenix router is to use a pipeline with a private function
+`:telemetry_ui_allowed` must be set to `true` in the `conn` struct before it enters the `TelemetryUI.Web` module.
+The easiest way to do that in a Phoenix router is to use a pipeline with a private function:
 
 ```elixir
 pipeline :telemetry_ui do
@@ -129,7 +126,7 @@ end
 defp allow(conn, _), do: assign(conn, :telemetry_ui_allowed, true)
 ```
 
-By using a special assign to control access, you can integrate `TelemetryUI` page with you existing authorization. We can imagine an admin protected section that also gives you access to the `TelemetryUI` page:
+By using a special assign to control access, you can integrate `TelemetryUI.Web` page with you existing authorization. We can imagine an admin protected section that also gives you access to the `TelemetryUI.Web` page:
 
 ```elixir
 pipeline :admin_protected do

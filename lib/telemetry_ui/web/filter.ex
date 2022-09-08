@@ -1,4 +1,6 @@
 defmodule TelemetryUI.Web.Filter do
+  @moduledoc false
+
   use Ecto.Schema
 
   @frame_options [

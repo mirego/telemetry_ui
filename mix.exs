@@ -38,8 +38,7 @@ defmodule TelemetryUI.Mixfile do
   defp deps do
     [
       {:phoenix, "~> 1.4"},
-      {:phoenix_html, "~> 3.0"},
-      {:phoenix_live_view, "~> 0.17"},
+      {:phoenix_ecto, "~> 4.4"},
       {:jason, "~> 1.0"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
@@ -48,6 +47,11 @@ defmodule TelemetryUI.Mixfile do
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:timex, "~> 3.7"},
+
+      # Frontend
+      {:vega_lite, "~> 0.1"},
+      {:phoenix_html, "~> 3.0"},
+      {:phoenix_live_view, "~> 0.17"},
       {:tailwind, "~> 0.1", only: :dev},
       {:esbuild, "~> 0.5", only: :dev},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
@@ -55,16 +59,20 @@ defmodule TelemetryUI.Mixfile do
       # Linting
       {:credo, "~> 1.1", only: [:dev, :test]},
       {:credo_envvar, "~> 0.1", only: [:dev, :test], runtime: false},
-      {:credo_naming, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:credo_naming, "~> 2.0", only: [:dev, :test], runtime: false},
 
       # Docs
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+
+      # Test
+      {:factori, ">= 0.0.0", only: :test}
     ]
   end
 
   defp aliases do
     [
-      "assets.compile": ["esbuild default", "tailwind default"]
+      "assets.compile": ["esbuild default", "tailwind default"],
+      test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 

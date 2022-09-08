@@ -1,20 +1,18 @@
 {
-  "name": "accent",
+  "name": "telemetry_ui",
   "version": "0.0.1",
   "private": true,
   "engine-strict": true,
   "engines": {
-    "node": "^14.15",
-    "npm": "^6.14"
+    "node": "^16.15",
+    "npm": "^8.11"
   },
   "devDependencies": {
-    "@types/phoenix_live_view": "0.15.1",
-    "phoenix": "file:../deps/phoenix",
-    "phoenix_html": "file:../deps/phoenix_html",
-    "phoenix_live_view": "file:../deps/phoenix_live_view",
     "prettier": "2.7.1"
   },
   "dependencies": {
-    "plotly.js-dist": "2.13.3"
+    "vega": "^5.22",
+    "vega-embed": "^6.21",
+    "vega-lite": "^5.5"
   }
 }
