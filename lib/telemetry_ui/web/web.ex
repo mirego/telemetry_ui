@@ -5,6 +5,8 @@ defmodule TelemetryUI.Web do
 
   plug(:ensure_allowed)
   plug(:fetch_query_params)
+  plug(:fetch_pages)
+  plug(:fetch_current_page)
   plug(:index)
 
   def index(conn = %{params: %{"vega-lite-source" => id}}, _) do
@@ -29,7 +31,6 @@ defmodule TelemetryUI.Web do
 
     conn = assign(conn, :filter, Changeset.change(filter))
     conn = assign(conn, :params, params)
-    conn = assign(conn, :sections, TelemetryUI.sections())
     conn = assign(conn, :theme, TelemetryUI.theme())
     conn = assign(conn, :filter_options, TelemetryUI.Scraper.filter_options(params))
 
@@ -46,6 +47,20 @@ defmodule TelemetryUI.Web do
     else
       halt(send_resp(conn, 404, "Not found"))
     end
+  end
+
+  defp fetch_current_page(conn, _) do
+    with page_id when not is_nil(page_id) <- conn.params["page"],
+         page when not is_nil(page) <- TelemetryUI.page_by_id(page_id) do
+      assign(conn, :current_page, page)
+    else
+      _ ->
+        assign(conn, :current_page, hd(conn.assigns.pages))
+    end
+  end
+
+  defp fetch_pages(conn, _) do
+    assign(conn, :pages, TelemetryUI.pages())
   end
 
   defp fetch_filter_params(filter, params) do

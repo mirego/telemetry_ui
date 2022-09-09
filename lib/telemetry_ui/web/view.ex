@@ -31,7 +31,7 @@ defmodule TelemetryUI.Web.View do
 
       <body class="bg-zinc-50 dark:bg-zinc-800">
         <div class="bg-white dark:bg-zinc-900 shadow-sm">
-          <header class="lg:w-1/2 max-w-4xl mx-auto flex justify-between p-2 mb-4 lg:px-0" style={theme_color_style(@theme)}>
+          <header class="lg:w-1/2 max-w-4xl mx-auto flex justify-between p-2 mb-4 lg:pr-2 pr-[40px]" style={theme_color_style(@theme)}>
             <h1 class="text-base font-light font-mono flex items-center gap-3"><%= {:safe, @theme.logo} %><%= @theme.title %></h1>
 
             <.form let={f} for={@filter} telemetry-component="Form" method="get" class="flex align-items-center">
@@ -54,8 +54,29 @@ defmodule TelemetryUI.Web.View do
           </header>
         </div>
 
+        <%= if length(@pages) > 1 do %>
+          <div class="lg:w-1/2 max-w-4xl mx-auto flex flex-wrap gap-3 mb-4">
+            <%= for page <- @pages do %>
+              <%= if page.id === @current_page.id do %>
+                <a
+                  href={"?page=" <> page.id}
+                  style={theme_color_style(@theme)}
+                  class="px-4 py-1 shadow-sm bg-white dark:bg-zinc-900 font-bold text-sm dark:text-gray-50">
+                  <%= page.title %>
+                </a>
+              <% else %>
+                <a
+                  href={"?page=" <> page.id}
+                  class="px-4 py-1 bg-white dark:bg-zinc-900 font-bold text-sm dark:text-gray-50 hover:opacity-50">
+                  <%= page.title %>
+                </a>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+
         <div class="lg:w-1/2 max-w-4xl mx-auto md:grid grid-cols-1 gap-4">
-          <%= for section <- @sections do %>
+          <%= for section <- @current_page.sections do %>
             <%= TelemetryUI.Web.Component.draw(
               section.component,
               %TelemetryUI.Web.Component.Assigns{filters: @filter_options, section: section, conn: @conn, theme: @theme}
@@ -63,7 +84,7 @@ defmodule TelemetryUI.Web.View do
           <% end %>
         </div>
 
-        <footer class="p-5 text-center opacity-25 text-xs">
+        <footer class="p-5 text-center opacity-25 text-xs dark:text-gray-300">
           Built with ♥ by the team @ <a href="https://www.mirego.com">Mirego</a>.
         </footer>
       </body>
@@ -73,7 +94,7 @@ defmodule TelemetryUI.Web.View do
     """
   end
 
-  defp theme_color_style(theme), do: ~s(color: #{theme.header_color})
+  defp theme_color_style(theme), do: ~s(color: #{theme.header_color};)
 
   defp frame_options do
     for {value, _} <- TelemetryUI.Web.Filter.frame_options() do

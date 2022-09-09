@@ -46,6 +46,19 @@ defmodule TelemetryUI do
     defp default_component(_), do: :not_supported
   end
 
+  defmodule Page do
+    defstruct id: nil, title: nil, sections: []
+
+    def cast_all(pages = [{_, _} | _]), do: Enum.map(pages, &cast/1)
+    def cast_all(sections), do: cast({"", sections})
+
+    defp cast({title, sections}), do: %__MODULE__{id: cast_id(title), title: title, sections: Enum.map(sections, &Section.cast/1)}
+
+    defp cast_id(title) do
+      Base.url_encode64(title, padding: false)
+    end
+  end
+
   defmodule Theme do
     @logo """
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-symmetry-vertical" viewBox="0 0 16 16">
@@ -66,10 +79,11 @@ defmodule TelemetryUI do
     opts[:metrics] || raise ArgumentError, "the :metrics option is required by #{inspect(__MODULE__)}"
     opts[:backend] || raise ArgumentError, "the :backend option is required by #{inspect(__MODULE__)}"
 
-    sections = Enum.map(opts[:metrics], &Section.cast/1)
+    pages = Page.cast_all(opts[:metrics])
 
     metrics =
-      sections
+      pages
+      |> Enum.flat_map(& &1.sections)
       |> Enum.flat_map(
         &Enum.map(List.wrap(&1.definition), fn
           {metric} -> metric
@@ -82,7 +96,7 @@ defmodule TelemetryUI do
     State.persist(%{
       backend: opts[:backend],
       theme: struct!(TelemetryUI.Theme, opts[:theme] || %{}),
-      sections: sections
+      pages: pages
     })
 
     children = [
@@ -98,7 +112,14 @@ defmodule TelemetryUI do
     TelemetryUI.Scraper.metric(State.get(:backend), metric, filters)
   end
 
-  def section_by_id(id), do: Enum.find(sections(), &(&1.id === id))
+  def page_by_id(id), do: Enum.find(pages(), &(&1.id === id))
+  def pages, do: State.get(:pages)
+
   def theme, do: State.get(:theme)
-  def sections, do: State.get(:sections)
+
+  def section_by_id(id) do
+    pages()
+    |> Enum.flat_map(& &1.sections)
+    |> Enum.find(&(&1.id === id))
+  end
 end
