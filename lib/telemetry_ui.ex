@@ -50,7 +50,7 @@ defmodule TelemetryUI do
     defstruct id: nil, title: nil, sections: []
 
     def cast_all(pages = [{_, _} | _]), do: Enum.map(pages, &cast/1)
-    def cast_all(sections), do: cast({"", sections})
+    def cast_all(sections), do: [cast({"", sections})]
 
     defp cast({title, sections}), do: %__MODULE__{id: cast_id(title), title: title, sections: Enum.map(sections, &Section.cast/1)}
 
