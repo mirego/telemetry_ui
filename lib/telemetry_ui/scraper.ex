@@ -9,8 +9,7 @@ defmodule TelemetryUI.Scraper do
     @type t :: %__MODULE__{}
   end
 
-  def metric(backend, definition, params) do
-    {metric, _options} = definition
+  def metric(backend, metric, params) do
     filters = filter_options(params)
 
     filters = %{

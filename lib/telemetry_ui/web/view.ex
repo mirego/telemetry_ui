@@ -35,6 +35,7 @@ defmodule TelemetryUI.Web.View do
             <h1 class="text-base font-light font-mono flex items-center gap-3"><%= {:safe, @theme.logo} %><%= @theme.title %></h1>
 
             <.form let={f} for={@filter} telemetry-component="Form" method="get" class="flex align-items-center">
+              <%= hidden_input(f, :page, value: @current_page.id) %>
               <%= select(f, :frame, frame_options(), class: "p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8") %>
 
               <button telemetry-component="ThemeSwitch" class="right-3 absolute top-4">
@@ -58,28 +59,24 @@ defmodule TelemetryUI.Web.View do
           <div class="lg:w-1/2 max-w-4xl mx-auto flex flex-wrap gap-3 mb-4">
             <%= for page <- @pages do %>
               <%= if page.id === @current_page.id do %>
-                <a
-                  href={"?page=" <> page.id}
+                <.page_link page={page} params={@params}
                   style={theme_color_style(@theme)}
-                  class="px-4 py-1 shadow-sm bg-white dark:bg-zinc-900 font-bold text-sm dark:text-gray-50">
-                  <%= page.title %>
-                </a>
+                  class="px-4 py-1 shadow-sm bg-white dark:bg-zinc-900 font-bold text-primary text-sm dark:text-gray-50"
+                />
               <% else %>
-                <a
-                  href={"?page=" <> page.id}
-                  class="px-4 py-1 bg-white dark:bg-zinc-900 font-bold text-sm dark:text-gray-50 hover:opacity-50">
-                  <%= page.title %>
-                </a>
+                <.page_link page={page} params={@params}
+                  class="px-4 py-1 bg-white dark:bg-zinc-900 font-bold text-sm dark:text-gray-50 hover:opacity-50"
+                />
               <% end %>
             <% end %>
           </div>
         <% end %>
 
         <div class="lg:w-1/2 max-w-4xl mx-auto md:grid grid-cols-1 gap-4">
-          <%= for section <- @current_page.sections do %>
+          <%= for metric <- @current_page.metrics do %>
             <%= TelemetryUI.Web.Component.draw(
-              section.component,
-              %TelemetryUI.Web.Component.Assigns{filters: @filter_options, section: section, conn: @conn, theme: @theme}
+              metric.web_component,
+              %TelemetryUI.Web.Component.Assigns{filters: @filter_options, metric: metric, conn: @conn, theme: @theme}
             ) %>
           <% end %>
         </div>
@@ -92,6 +89,18 @@ defmodule TelemetryUI.Web.View do
       <script type="text/javascript"><%= raw(render("app.js")) %></script>
     </html>
     """
+  end
+
+  defp page_link(assigns) do
+    ~H"""
+    <a href={page_href(@page.id, @params)} class={@class} style={Map.get(assigns, :style)}>
+      <%= @page.title %>
+    </a>
+    """
+  end
+
+  defp page_href(page_id, params) do
+    "?filter[page]=#{page_id}&filter[frame]=#{params.frame}"
   end
 
   defp theme_color_style(theme), do: ~s(color: #{theme.header_color};)

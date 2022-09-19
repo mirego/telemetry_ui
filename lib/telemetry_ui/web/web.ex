@@ -11,11 +11,11 @@ defmodule TelemetryUI.Web do
 
   def index(conn = %{params: %{"vega-lite-source" => id}}, _) do
     data =
-      case TelemetryUI.section_by_id(id) do
-        section when is_struct(section, TelemetryUI.Section) ->
+      case TelemetryUI.metric_by_id(id) do
+        metric when is_struct(metric, TelemetryUI.Metrics) ->
           {_filter, params} = fetch_filter_params(%TelemetryUI.Web.Filter{}, conn.params["filter"])
 
-          TelemetryUI.metric_data(section.definition, params)
+          TelemetryUI.metric_data(metric, params)
 
         _ ->
           []
@@ -50,7 +50,7 @@ defmodule TelemetryUI.Web do
   end
 
   defp fetch_current_page(conn, _) do
-    with page_id when not is_nil(page_id) <- conn.params["page"],
+    with %{"page" => page_id} when not is_nil(page_id) <- conn.params["filter"],
          page when not is_nil(page) <- TelemetryUI.page_by_id(page_id) do
       assign(conn, :current_page, page)
     else

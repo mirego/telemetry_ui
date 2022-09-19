@@ -15,6 +15,7 @@ defmodule TelemetryUI.Web.Filter do
 
   @primary_key false
   embedded_schema do
+    field(:page, :string)
     field(:frame_duration, :integer, default: 30)
     field(:frame_unit, :string, default: "minute")
     field(:frame, Ecto.Enum, values: Enum.map(@frame_options, &elem(&1, 0)), default: :last_30_minutes)

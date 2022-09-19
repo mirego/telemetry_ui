@@ -14,45 +14,13 @@ defmodule TelemetryUI do
     defp key(name), do: {:telemetry_ui, name}
   end
 
-  defmodule Section do
-    alias TelemetryUI.Web.Component.VegaLite
-
-    defstruct id: nil, title: nil, definition: nil, component: nil
-
-    def cast(section) when is_struct(section, __MODULE__), do: section
-
-    def cast({metric, options}) do
-      {component, options} = Keyword.pop_lazy(options, :component, fn -> default_component(metric) end)
-      title = metric.description || Event.cast_event_name(metric)
-
-      %__MODULE__{
-        id: TelemetryUI.Metric.id(metric),
-        title: title,
-        component: component,
-        definition: {metric, options}
-      }
-    end
-
-    def cast(metric) when is_struct(metric), do: cast({metric, [{:component, %VegaLite{metric: metric}}]})
-
-    def cast(metric) do
-      raise ArgumentError, "metric defintion can either be a %Telemetry.Metrics{} or a 2 elements tuple {%Telemetry.Metrics{}, []}. Got: #{inspect(metric)}"
-    end
-
-    defp default_component(metric = %Telemetry.Metrics.Counter{}), do: %VegaLite{metric: metric}
-    defp default_component(metric = %Telemetry.Metrics.Sum{}), do: %VegaLite{metric: metric}
-    defp default_component(metric = %Telemetry.Metrics.Summary{}), do: %VegaLite{metric: metric}
-    defp default_component(metric = %Telemetry.Metrics.LastValue{}), do: %VegaLite{metric: metric}
-    defp default_component(_), do: :not_supported
-  end
-
   defmodule Page do
-    defstruct id: nil, title: nil, sections: []
+    defstruct id: nil, title: nil, metrics: []
 
     def cast_all(pages = [{_, _} | _]), do: Enum.map(pages, &cast/1)
-    def cast_all(sections), do: [cast({"", sections})]
+    def cast_all(metrics), do: [cast({"", metrics})]
 
-    defp cast({title, sections}), do: %__MODULE__{id: cast_id(title), title: title, sections: Enum.map(sections, &Section.cast/1)}
+    defp cast({title, metrics}), do: %__MODULE__{id: cast_id(title), title: title, metrics: metrics}
 
     defp cast_id(title) do
       Base.url_encode64(title, padding: false)
@@ -83,14 +51,8 @@ defmodule TelemetryUI do
 
     metrics =
       pages
-      |> Enum.flat_map(& &1.sections)
-      |> Enum.flat_map(
-        &Enum.map(List.wrap(&1.definition), fn
-          {metric} -> metric
-          {metric, _} -> metric
-          %{} = metric -> metric
-        end)
-      )
+      |> Enum.flat_map(& &1.metrics)
+      |> Enum.map(& &1.telemetry_metric)
       |> Enum.uniq_by(&{&1.event_name, &1.tags, Event.cast_report_as(&1)})
 
     State.persist(%{
@@ -109,7 +71,7 @@ defmodule TelemetryUI do
   end
 
   def metric_data(metric, filters) do
-    TelemetryUI.Scraper.metric(State.get(:backend), metric, filters)
+    TelemetryUI.Scraper.metric(State.get(:backend), metric.telemetry_metric, filters)
   end
 
   def page_by_id(id), do: Enum.find(pages(), &(&1.id === id))
@@ -117,9 +79,9 @@ defmodule TelemetryUI do
 
   def theme, do: State.get(:theme)
 
-  def section_by_id(id) do
+  def metric_by_id(id) do
     pages()
-    |> Enum.flat_map(& &1.sections)
+    |> Enum.flat_map(& &1.metrics)
     |> Enum.find(&(&1.id === id))
   end
 end
