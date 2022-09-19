@@ -79,7 +79,7 @@ def start(_type, _args) do
 end
 
 defp telemetry_config do
-  import Telemetry.Metrics
+  import TelemetryUI.Metrics
 
   [
     metrics: [
