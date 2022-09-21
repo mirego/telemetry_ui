@@ -17,6 +17,7 @@ defmodule TelemetryUI.Web.Component.VegaLite do
           <.title metric={@metric} />
           <.empty_view metric={@metric} />
           <.container metric={@metric} />
+          <.legend metric={@metric} />
         </div>
 
         <.script spec={spec} metric={@metric} />
@@ -45,6 +46,12 @@ defmodule TelemetryUI.Web.Component.VegaLite do
     defp container(assigns) do
       ~H"""
       <div id={@metric.id} class="hidden grow w-full"></div>
+      """
+    end
+
+    defp legend(assigns) do
+      ~H"""
+      <div id={@metric.id <> "-legend"} class="hidden grow w-full ml-2 mt-2 flex flex-wrap gap-2 text-xs font-mono text-zinc-900 dark:text-zinc-50"></div>
       """
     end
 

@@ -51,7 +51,9 @@ defmodule TelemetryUI.Mixfile do
       # Frontend
       {:vega_lite, "~> 0.1"},
       {:phoenix_html, "~> 3.0"},
-      {:phoenix_live_view, "~> 0.17"},
+      {:phoenix_live_view, "~> 0.18"},
+
+      # Asset
       {:tailwind, "~> 0.1", only: :dev},
       {:esbuild, "~> 0.5", only: :dev},
       {:phoenix_live_reload, "~> 1.0", only: :dev},

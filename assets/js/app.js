@@ -12,14 +12,35 @@ if (
 
 window.drawChart = (id, spec) =>
   vegaEmbed(id, spec, {actions: false}).then(({view}) => {
-    if (view.data('source').length === 0) {
+    const chart = document.querySelector(id);
+    const source = view.data('source');
+
+    if (source.length === 0) {
       const element = document.querySelector(id + '-empty');
-      const chart = document.querySelector(id);
       element.classList.remove('hidden');
       chart.remove();
     } else {
-      const element = document.querySelector(id);
-      element.classList.remove('hidden');
+      chart.classList.remove('hidden');
+      const legend = document.querySelector(id + '-legend');
+
+      if (legend && view._runtime.scales.color) {
+        legend.classList.remove('hidden');
+        const colors = view.scale('color').range();
+        const categories = view.scale('color').domain();
+
+        legend.innerHTML = categories
+          .map((category, i) => {
+            const colorIndex =
+              i - colors.length * Math.floor(i / colors.length);
+            const color = colors[colorIndex];
+
+            return `<span class="shrink-0 px-2 py-1 inline-block rounded-sm border-[1px] border-zinc-300 dark:border-zinc-800">
+            <span class="inline-block rounded-full h-[10px] w-[10px]" style="background: ${color};"></span>
+            ${category}
+          </span>`;
+          })
+          .join('\n');
+      }
     }
   });
 

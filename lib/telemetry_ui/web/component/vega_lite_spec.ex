@@ -184,7 +184,7 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
   defp fetch_time_unit(from, to) do
     case DateTime.diff(to, from) do
       diff when diff <= 43_200 -> "yearmonthdatehoursminutes"
-      diff when diff <= 86_400 -> "yearmonthdatehours"
+      diff when diff <= 144_400 -> "yearmonthdatehours"
       _ -> "yearmonthdate"
     end
   end

@@ -1,9 +1,10 @@
 defmodule TelemetryUI.Web.View do
   @moduledoc false
 
-  use Phoenix.HTML
-
-  import Phoenix.LiveView.Helpers
+  import Phoenix.Component, only: [sigil_H: 2, form: 1]
+  import Phoenix.HTML, only: [raw: 1]
+  import Phoenix.HTML.Form, only: [hidden_input: 3, select: 4]
+  import Phoenix.HTML.Tag, except: [attributes_escape: 1]
 
   js_path = Path.join(__DIR__, "../../../dist/app.js")
   css_path = Path.join(__DIR__, "../../../dist/app.css")

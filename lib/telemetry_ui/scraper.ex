@@ -57,7 +57,7 @@ defmodule TelemetryUI.Scraper do
   defp fetch_time_frame("second", duration), do: {[second: 0], [seconds: -duration]}
   defp fetch_time_frame("minute", duration), do: {[second: 0], [minutes: -duration]}
   defp fetch_time_frame("hour", duration), do: {[second: 0, minute: 0], [hours: -duration]}
-  defp fetch_time_frame("day", duration), do: {[second: 0, minute: 0, hour: 0], [days: -duration]}
+  defp fetch_time_frame("day", duration), do: {[second: 0, minute: 0], [days: -duration]}
 
   defp fetch_time_frame("week", duration),
     do: {[second: 0, minute: 0, hour: 0], [weeks: -duration]}
