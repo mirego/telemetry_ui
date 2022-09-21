@@ -15,7 +15,7 @@ defmodule TelemetryUI.Metrics do
   for metric_name <- @telemetry_metrics do
     def unquote(metric_name)(event_name, options) do
       {ui_options, options} = Keyword.pop(options, :ui_options, [])
-      metric = Metrics.summary(event_name, options)
+      metric = apply(Metrics, unquote(metric_name), [event_name, options])
       web_component = Keyword.get_lazy(ui_options, :web_component, fn -> %VegaLite{metric: metric} end)
 
       %__MODULE__{
