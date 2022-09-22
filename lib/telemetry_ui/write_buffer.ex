@@ -28,7 +28,7 @@ defmodule TelemetryUI.WriteBuffer do
     new_buffer = [event | buffer]
 
     if length(new_buffer) >= state[:max_buffer_size] do
-      info_log("Buffer full, flushing to disk")
+      info_log(backend, "Buffer full, flushing to disk")
       Process.cancel_timer(state[:timer])
       do_flush(new_buffer, backend)
       new_timer = Process.send_after(self(), :tick, backend.flush_interval_ms)
@@ -52,7 +52,7 @@ defmodule TelemetryUI.WriteBuffer do
   end
 
   def terminate(_reason, %{buffer: buffer, backend: backend}) do
-    info_log("Flushing event buffer before shutdown…")
+    info_log(backend, "Flushing event buffer before shutdown…")
     do_flush(buffer, backend)
   end
 
@@ -62,7 +62,7 @@ defmodule TelemetryUI.WriteBuffer do
         nil
 
       events ->
-        info_log("Flushing #{length(events)} events")
+        info_log(backend, "Flushing #{length(events)} events")
 
         events
         |> group_events()
@@ -82,7 +82,14 @@ defmodule TelemetryUI.WriteBuffer do
     end)
   end
 
-  defp info_log(message) do
-    Logger.info("TelemetryUI - " <> message)
+  defp info_log(backend, message) do
+    message = "TelemetryUI - " <> message
+
+    cond do
+      is_nil(backend.verbose) -> nil
+      backend.verbose === false -> nil
+      backend.verbose === true -> Logger.debug(message)
+      is_atom(backend.verbose) -> Logger.log(backend.verbose, message)
+    end
   end
 end

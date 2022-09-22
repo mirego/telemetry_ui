@@ -1,16 +1,19 @@
 defmodule TelemetryUI.Web.Component.VegaLite do
-  @enforce_keys ~w(metric)a
-  defstruct spec: nil, metric: nil
+  defstruct spec: nil
 
   defimpl TelemetryUI.Web.Component do
     use Phoenix.HTML
     use Phoenix.Component
 
-    alias TelemetryUI.Web.Component.VegaLiteSpec, as: Spec
+    alias TelemetryUI.Web.Component.VegaLite.Spec
 
-    def draw(component, assigns = %TelemetryUI.Web.Component.Assigns{}) do
+    def metric_data(_, metric, params) do
+      {:async, fn -> TelemetryUI.metric_data(metric, params) end}
+    end
+
+    def draw(_component, assigns = %TelemetryUI.Web.Component.Assigns{}) do
       ~H"""
-      <% spec = to_spec(component, assigns) %>
+      <% spec = to_spec(assigns) %>
 
       <%= if is_struct(spec, VegaLite) do %>
         <div class="flex flex-col bg-white dark:bg-zinc-900 text-slate dark:text-white p-3 pt-2 shadow min-h-[170px]">
@@ -38,7 +41,9 @@ defmodule TelemetryUI.Web.Component.VegaLite do
     defp title(assigns) do
       ~H"""
       <%= if @metric.title do %>
-        <h2 class="flex align-items-center text-base opacity-80 mb-2"><%= @metric.title %></h2>
+        <h2 class="flex items-baseline gap-2 text-base opacity-80 mb-2">
+          <%= @metric.title %>
+        </h2>
       <% end %>
       """
     end
@@ -68,17 +73,17 @@ defmodule TelemetryUI.Web.Component.VegaLite do
       """
     end
 
-    defp to_spec(component, assigns) do
+    defp to_spec(assigns) do
       uri = URI.parse(assigns.conn.request_path <> "?" <> assigns.conn.query_string)
 
-      source_query = Map.put(URI.decode_query(uri.query), "vega-lite-source", assigns.metric.id)
+      source_query = Map.put(URI.decode_query(uri.query), "metric-data", assigns.metric.id)
       source_uri = %{uri | query: URI.encode_query(source_query)}
 
       data = %{
         source: URI.to_string(source_uri)
       }
 
-      Spec.build(component.metric, data, assigns)
+      Spec.build(assigns.metric, data, assigns)
     end
   end
 end

@@ -1,6 +1,12 @@
 defmodule TelemetryUI.Backend.EctoPostgres do
   @enforce_keys ~w(repo)a
-  defstruct repo: nil, pruner_threshold: [months: -1], pruner_interval: 84_000, max_buffer_size: 10_000, flush_interval_ms: 10_000
+  defstruct repo: nil,
+            pruner_threshold: [months: -1],
+            pruner_interval: 84_000,
+            max_buffer_size: 10_000,
+            flush_interval_ms: 10_000,
+            verbose: false,
+            telemetry_prefix: [:telemetry_ui, :repo]
 
   import Ecto.Query
 
@@ -25,12 +31,18 @@ defmodule TelemetryUI.Backend.EctoPostgres do
         INSERT INTO telemetry_ui_events (value, date, name, tags, count, report_as) VALUES($1, date_trunc('minute'::text, $2::timestamp), $3, $4, $5, $6)
         ON CONFLICT (date, name, tags, report_as) DO UPDATE SET value = (telemetry_ui_events.value + $1) / 2, count = telemetry_ui_events.count + $5
         """,
-        [value, date, event_name, tags, count, report_as]
+        [value, date, event_name, tags, count, report_as],
+        log: backend.verbose,
+        telemetry_prefix: backend.telemetry_prefix
       )
     end
 
     def prune_events!(backend, date) do
-      backend.repo.delete_all(from(entries in Entry, where: entries.date <= ^date))
+      backend.repo.delete_all(
+        from(entries in Entry, where: entries.date <= ^date),
+        log: backend.verbose,
+        telemetry_prefix: backend.telemetry_prefix
+      )
     end
 
     def metric_data(backend, metric, options = %TelemetryUI.Scraper.Options{}) do

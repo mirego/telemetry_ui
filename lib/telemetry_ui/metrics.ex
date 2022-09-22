@@ -3,27 +3,41 @@ defmodule TelemetryUI.Metrics do
   alias TelemetryUI.Event
   alias TelemetryUI.Web.Component.VegaLite
 
-  defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil
+  defmodule Summary do
+    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil
+  end
 
-  @telemetry_metrics ~w(
-    summary
-    counter
-    sum
-    last_value
-  )a
+  defmodule Counter do
+    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil
+  end
 
-  for metric_name <- @telemetry_metrics do
+  defmodule Sum do
+    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil
+  end
+
+  defmodule LastValue do
+    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil
+  end
+
+  @telemetry_metrics [
+    {:summary, Summary},
+    {:counter, Counter},
+    {:sum, Sum},
+    {:last_value, LastValue}
+  ]
+
+  for {metric_name, metric_struct} <- @telemetry_metrics do
     def unquote(metric_name)(event_name, options) do
       {ui_options, options} = Keyword.pop(options, :ui_options, [])
       metric = apply(Metrics, unquote(metric_name), [event_name, options])
-      web_component = Keyword.get_lazy(ui_options, :web_component, fn -> %VegaLite{metric: metric} end)
+      web_component = Keyword.get_lazy(ui_options, :web_component, fn -> %VegaLite{} end)
 
-      %__MODULE__{
+      struct!(unquote(metric_struct),
         id: id(metric),
         title: metric.description || Event.cast_event_name(metric),
         web_component: web_component,
         telemetry_metric: metric
-      }
+      )
     end
   end
 

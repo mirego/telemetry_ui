@@ -53,6 +53,7 @@ defmodule TelemetryUI do
       pages
       |> Enum.flat_map(& &1.metrics)
       |> Enum.map(& &1.telemetry_metric)
+      |> Enum.reject(&is_nil/1)
       |> Enum.uniq_by(&{&1.event_name, &1.tags, Event.cast_report_as(&1)})
 
     State.persist(%{

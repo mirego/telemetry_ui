@@ -9,13 +9,14 @@ defmodule TelemetryUI.Web do
   plug(:fetch_current_page)
   plug(:index)
 
-  def index(conn = %{params: %{"vega-lite-source" => id}}, _) do
+  def index(conn = %{params: %{"metric-data" => id}}, _) do
     data =
       case TelemetryUI.metric_by_id(id) do
-        metric when is_struct(metric, TelemetryUI.Metrics) ->
-          {_filter, params} = fetch_filter_params(%TelemetryUI.Web.Filter{}, conn.params["filter"])
-
-          TelemetryUI.metric_data(metric, params)
+        metric when is_struct(metric) ->
+          case fetch_web_component_metric_data(metric, conn.params) do
+            {:ok, data} -> data
+            {:async, async} -> async.()
+          end
 
         _ ->
           []
@@ -52,6 +53,7 @@ defmodule TelemetryUI.Web do
   defp fetch_current_page(conn, _) do
     with %{"page" => page_id} when not is_nil(page_id) <- conn.params["filter"],
          page when not is_nil(page) <- TelemetryUI.page_by_id(page_id) do
+      page = fetch_metric_data(conn, page)
       assign(conn, :current_page, page)
     else
       _ ->
@@ -60,7 +62,25 @@ defmodule TelemetryUI.Web do
   end
 
   defp fetch_pages(conn, _) do
-    assign(conn, :pages, TelemetryUI.pages())
+    pages = TelemetryUI.pages()
+    assign(conn, :pages, pages)
+  end
+
+  defp fetch_metric_data(conn, page) do
+    metrics =
+      Enum.map(page.metrics, fn metric ->
+        case fetch_web_component_metric_data(metric, conn.params) do
+          {:ok, data} -> %{metric | data: data}
+          {:async, _} -> metric
+        end
+      end)
+
+    %{page | metrics: metrics}
+  end
+
+  defp fetch_web_component_metric_data(metric, params) do
+    {_filter, params} = fetch_filter_params(%TelemetryUI.Web.Filter{}, params["filter"])
+    TelemetryUI.Web.Component.metric_data(metric.web_component, metric, params)
   end
 
   defp fetch_filter_params(filter, params) do

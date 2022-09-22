@@ -1,14 +1,15 @@
-defmodule TelemetryUI.Web.Component.VegaLiteSpec do
+defmodule TelemetryUI.Web.Component.VegaLite.Spec do
   @moduledoc false
 
+  alias TelemetryUI.Metrics
   alias VegaLite, as: Vl
 
-  def build(metric = %Telemetry.Metrics.Summary{}, data, assigns) do
+  def build(metric = %Metrics.Summary{}, data, assigns) do
     domain = [assigns.filters.from, assigns.filters.to]
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
 
-    value_field = Keyword.get(metric.reporter_options, :value_field, "value")
-    value_label = Phoenix.Naming.camelize(value_field)
+    value_field = Keyword.get(metric.telemetry_metric.reporter_options, :value_field, "value")
+    value_label = value_field_to_title(value_field, metric.telemetry_metric)
     aggregate = if value_field === "value", do: "average", else: "sum"
     format = if value_field === "value", do: ".2f", else: ""
 
@@ -17,8 +18,8 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
       [field: value_field, type: :quantitative, title: value_label, aggregate: aggregate, format: format]
     ]
 
-    tooltip = if metric.tags === [], do: tooltip, else: tooltip ++ [[field: "tags", title: "Tags"]]
-    mark = if metric.tags === [], do: :bar, else: :line
+    tooltip = if metric.telemetry_metric.tags === [], do: tooltip, else: tooltip ++ [[field: "tags", title: "Tags"]]
+    mark = if metric.telemetry_metric.tags === [], do: :bar, else: :line
 
     spec =
       assigns
@@ -28,20 +29,22 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
     Vl.layers(spec, [
       Vl.new()
       |> Vl.mark(mark, point: true, tooltip: true, color: hd(assigns.theme.scale))
-      |> encode_tags_color(metric)
+      |> encode_tags_color(metric.telemetry_metric)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
       |> Vl.encode_field(:y, value_field, type: :quantitative, title: nil, aggregate: aggregate)
       |> Vl.encode(:tooltip, tooltip)
     ])
   end
 
-  def build(%Telemetry.Metrics.Sum{tags: []}, data, assigns) do
+  def build(metric = %Metrics.Sum{telemetry_metric: %{tags: []}}, data, assigns) do
     domain = [assigns.filters.from, assigns.filters.to]
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
+    value_field = Keyword.get(metric.telemetry_metric.reporter_options, :value_field, "value")
+    value_label = value_field_to_title(value_field, metric.telemetry_metric)
 
     tooltip = [
       [field: "date", type: :temporal, title: "Date", time_unit: time_unit],
-      [field: "value", type: :quantitative, title: "Value", aggregate: "sum", format: ".2f"]
+      [field: value_field, type: :quantitative, title: value_label, aggregate: "sum", format: ".2f"]
     ]
 
     spec =
@@ -66,7 +69,7 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
     ])
   end
 
-  def build(%Telemetry.Metrics.Counter{tags: []}, data, assigns) do
+  def build(%Metrics.Counter{telemetry_metric: %{tags: []}}, data, assigns) do
     domain = [assigns.filters.from, assigns.filters.to]
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
 
@@ -97,13 +100,15 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
     ])
   end
 
-  def build(%Telemetry.Metrics.LastValue{tags: []}, data, assigns) do
+  def build(metric = %Metrics.LastValue{telemetry_metric: %{tags: []}}, data, assigns) do
     domain = [assigns.filters.from, assigns.filters.to]
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
+    value_field = Keyword.get(metric.telemetry_metric.reporter_options, :value_field, "value")
+    value_label = value_field_to_title(value_field, metric.telemetry_metric)
 
     tooltip = [
       [field: "date", type: :temporal, title: "Date", time_unit: time_unit],
-      [field: "value", type: :quantitative, title: "Value", format: ".2f", aggregate: "average"]
+      [field: value_field, type: :quantitative, title: value_label, aggregate: "average", format: ".2f"]
     ]
 
     spec =
@@ -128,7 +133,7 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
     ])
   end
 
-  def build(%Telemetry.Metrics.Sum{}, data, assigns) do
+  def build(%Metrics.Sum{}, data, assigns) do
     spec =
       assigns
       |> base_spec()
@@ -145,7 +150,7 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
     ])
   end
 
-  def build(%Telemetry.Metrics.Counter{}, data, assigns) do
+  def build(%Metrics.Counter{}, data, assigns) do
     spec =
       assigns
       |> base_spec()
@@ -162,7 +167,7 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
     ])
   end
 
-  def build(%Telemetry.Metrics.LastValue{}, data, assigns) do
+  def build(%Metrics.LastValue{}, data, assigns) do
     spec =
       assigns
       |> base_spec()
@@ -180,6 +185,13 @@ defmodule TelemetryUI.Web.Component.VegaLiteSpec do
   end
 
   def build(_, _, _), do: :not_supported
+
+  defp value_field_to_title("value", metric), do: "Value (#{to_unit(metric.unit)})"
+  defp value_field_to_title(label, _), do: Phoenix.Naming.camelize(label)
+
+  defp to_unit(:millisecond), do: "ms"
+  defp to_unit(:megabyte), do: "mb"
+  defp to_unit(unit), do: unit
 
   defp fetch_time_unit(from, to) do
     case DateTime.diff(to, from) do
