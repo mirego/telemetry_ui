@@ -14,9 +14,11 @@ defmodule TelemetryUI.Web.View do
 
   @app_js if File.exists?(js_path), do: File.read!(js_path), else: ""
   @app_css if File.exists?(css_path), do: File.read!(css_path), else: ""
+  @app_js_digest "sha512-#{Base.encode64(:crypto.hash(:sha512, @app_js))}"
 
   def render("app.js"), do: @app_js
   def render("app.css"), do: @app_css
+  def app_js_integrity, do: @app_js_digest
 
   def render("index.html", assigns) do
     ~H"""
@@ -87,7 +89,7 @@ defmodule TelemetryUI.Web.View do
         </footer>
       </body>
 
-      <script type="text/javascript"><%= raw(render("app.js")) %></script>
+      <script type="text/javascript" integrity={app_js_integrity()}><%= raw(render("app.js")) %></script>
     </html>
     """
   end

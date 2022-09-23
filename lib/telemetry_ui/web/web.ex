@@ -72,6 +72,7 @@ defmodule TelemetryUI.Web do
         case fetch_web_component_metric_data(metric, conn.params) do
           {:ok, data} -> %{metric | data: data}
           {:async, _} -> metric
+          _ -> metric
         end
       end)
 

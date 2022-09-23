@@ -20,7 +20,7 @@ defmodule TelemetryUI do
     def cast_all(pages = [{_, _} | _]), do: Enum.map(pages, &cast/1)
     def cast_all(metrics), do: [cast({"", metrics})]
 
-    defp cast({title, metrics}), do: %__MODULE__{id: cast_id(title), title: title, metrics: metrics}
+    defp cast({title, metrics}), do: %__MODULE__{id: cast_id(title), title: title, metrics: List.wrap(metrics)}
 
     defp cast_id(title) do
       Base.url_encode64(title, padding: false)
@@ -49,10 +49,12 @@ defmodule TelemetryUI do
 
     pages = Page.cast_all(opts[:metrics])
 
+    validate_metrics!(pages)
+
     metrics =
       pages
       |> Enum.flat_map(& &1.metrics)
-      |> Enum.map(& &1.telemetry_metric)
+      |> Enum.map(&Map.get(&1, :telemetry_metric))
       |> Enum.reject(&is_nil/1)
       |> Enum.uniq_by(&{&1.event_name, &1.tags, Event.cast_report_as(&1)})
 
@@ -71,6 +73,21 @@ defmodule TelemetryUI do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
+  defp validate_metrics!(pages) do
+    pages
+    |> Enum.map(& &1.metrics)
+    |> List.flatten()
+    |> Enum.each(fn metric ->
+      if Map.has_key?(metric, :web_component) do
+        unless TelemetryUI.Web.Component.impl_for(metric.web_component) do
+          raise TelemetryUI.InvalidMetricWebComponent.exception({metric})
+        end
+      else
+        raise TelemetryUI.InvalidMetric.exception({metric})
+      end
+    end)
+  end
+
   def metric_data(metric, filters) do
     TelemetryUI.Scraper.metric(State.get(:backend), metric.telemetry_metric, filters)
   end
@@ -83,6 +100,7 @@ defmodule TelemetryUI do
   def metric_by_id(id) do
     pages()
     |> Enum.flat_map(& &1.metrics)
+    |> Enum.reject(&is_nil(Map.get(&1, :id)))
     |> Enum.find(&(&1.id === id))
   end
 end
