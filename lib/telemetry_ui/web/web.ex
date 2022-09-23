@@ -39,6 +39,7 @@ defmodule TelemetryUI.Web do
 
     conn
     |> put_resp_header("content-type", "text/html")
+    |> delete_resp_header("content-security-policy")
     |> send_resp(200, content)
   end
 
