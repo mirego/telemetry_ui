@@ -103,30 +103,18 @@ To see the rendered metrics, you need to add a route to your router.
 
 ```elixir
 # lib/my_app_web/router.ex
-get("/metrics", TelemetryUI.Web, [])
+scope "/" do
+  get("/metrics", TelemetryUI.Web, [], [assigns: %{telemetry_ui_allowed: true}])
+end
 ```
 
 #### Security
 
-But since it may contain sensitive data, `TelemetryUI` requires a special assign to render the page.
+Since it may contain sensitive data, `TelemetryUI` requires a special assign to render the page.
 
 `:telemetry_ui_allowed` must be set to `true` in the `conn` struct before it enters the `TelemetryUI.Web` module.
-The easiest way to do that in a Phoenix router is to use a pipeline with a private function:
 
-```elixir
-pipeline :telemetry_ui do
-  plug(:allow)
-end
-
-scope "/" do
-  pipe_through(:telemetry_ui)
-  get("/metrics", TelemetryUI.Web, [])
-end
-
-defp allow(conn, _), do: assign(conn, :telemetry_ui_allowed, true)
-```
-
-By using a special assign to control access, you can integrate `TelemetryUI.Web` page with you existing authorization. We can imagine an admin protected section that also gives you access to the `TelemetryUI.Web` page:
+By using a special assign to control access, you can integrate `TelemetryUI.Web` page with your existing authorization. We can imagine an admin protected section that also gives you access to the `TelemetryUI.Web` page:
 
 ```elixir
 pipeline :admin_protected do

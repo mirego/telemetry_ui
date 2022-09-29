@@ -62,9 +62,9 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             datetime_add(compare_entries.date, 1, ^compare_unit) == entries.date and
               compare_entries.name == entries.name and compare_entries.tags == entries.tags,
           select: %{
-            compare_value: compare_entries.value,
             compare_date: compare_entries.date,
             compare_count: compare_entries.count,
+            compare_value: compare_entries.value,
             value: entries.value,
             count: entries.count,
             date: entries.date,

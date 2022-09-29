@@ -4,19 +4,19 @@ defmodule TelemetryUI.Metrics do
   alias TelemetryUI.Web.Component.VegaLite
 
   defmodule Summary do
-    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil
+    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil, unit: nil
   end
 
   defmodule Counter do
-    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil
+    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil, unit: nil
   end
 
   defmodule Sum do
-    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil
+    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil, unit: nil
   end
 
   defmodule LastValue do
-    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil
+    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil, unit: nil
   end
 
   @telemetry_metrics [
@@ -32,9 +32,16 @@ defmodule TelemetryUI.Metrics do
       metric = apply(Metrics, unquote(metric_name), [event_name, options])
       web_component = Keyword.get_lazy(ui_options, :web_component, fn -> %VegaLite{} end)
 
+      unit =
+        case Keyword.get(ui_options, :unit, metric.unit) do
+          {_, unit} -> unit
+          unit -> unit
+        end
+
       struct!(unquote(metric_struct),
         id: id(metric),
         title: metric.description || Event.cast_event_name(metric),
+        unit: unit,
         web_component: web_component,
         telemetry_metric: metric
       )

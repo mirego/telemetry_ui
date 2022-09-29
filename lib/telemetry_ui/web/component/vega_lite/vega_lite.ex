@@ -68,7 +68,6 @@ defmodule TelemetryUI.Web.Component.VegaLite do
         </svg>
 
         <span class="opacity-90 text-sm font-bold text-center">No data</span>
-        <span class="opacity-40 text-sm text-center">Try to change the time filter</span>
       </div>
       """
     end
