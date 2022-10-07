@@ -24,7 +24,7 @@ defmodule TelemetryUI.Web.Filter do
   def frame_options(:custom), do: @frame_options
   def frame_options(_frame), do: Enum.reject(@frame_options, fn {option, _, _} -> option === :custom end)
 
-  def cast(%{"frame" => "custom"} = params) do
+  def cast(params = %{"frame" => "custom"}) do
     to =
       with to when not is_nil(to) <- params["to"],
            {:ok, datetime, _} <- DateTime.from_iso8601(to) do

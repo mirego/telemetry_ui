@@ -9,7 +9,7 @@ defmodule TelemetryUI.Pruner do
 
   @impl true
   def init(backend) do
-    Process.send_after(self(), :tick, backend.pruner_interval)
+    Process.send_after(self(), :tick, backend.pruner_interval_ms)
 
     {:ok, backend}
   end
@@ -19,7 +19,7 @@ defmodule TelemetryUI.Pruner do
     date_limit = Timex.shift(DateTime.utc_now(), backend.pruner_threshold)
     TelemetryUI.Backend.prune_events!(backend, date_limit)
 
-    Process.send_after(self(), :tick, backend.pruner_interval)
+    Process.send_after(self(), :tick, backend.pruner_interval_ms)
 
     {:noreply, backend}
   end

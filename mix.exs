@@ -54,8 +54,8 @@ defmodule TelemetryUI.Mixfile do
       {:phoenix_live_view, "~> 0.18"},
 
       # Asset
-      {:tailwind, "~> 0.1", only: :dev},
-      {:esbuild, "~> 0.5", only: :dev},
+      {:tailwind, "~> 0.1", only: [:dev, :test]},
+      {:esbuild, "~> 0.5", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
 
       # Linting

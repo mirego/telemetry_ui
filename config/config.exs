@@ -6,7 +6,7 @@ config :phoenix, :stacktrace_depth, 20
 config :logger, level: :warn
 config :logger, :console, format: "[$level] $message\n"
 
-if config_env() === :dev do
+if config_env() in [:dev, :test] do
   config :tailwind,
     version: "3.1.6",
     default: [
@@ -32,7 +32,7 @@ config :telemetry_ui, TelemetryUI.Test.Repo,
   name: TelemetryUI.Test.Repo,
   priv: "test/support/",
   pool: Ecto.Adapters.SQL.Sandbox,
-  url: "postgres://postgres:development@localhost/telemetry_ui_test"
+  url: System.get_env("DATABASE_URL", "postgres://postgres:development@localhost/telemetry_ui_test")
 
 config :telemetry_ui,
   ecto_repos: [TelemetryUI.Test.Repo]

@@ -41,6 +41,7 @@ targets:
 prepare:
 	mix deps.get
 	npm ci --prefix assets
+	mix assets.compile
 
 # Development targets
 # -------------------
@@ -57,13 +58,9 @@ dependencies: ## Install dependencies
 # Check, lint and format targets
 # ------------------------------
 
-.PHONY: check-code-coverage
-check-code-coverage:
-	mix coveralls
-
-.PHONY: check-code-security
-check-code-security:
-	mix sobelow --config
+.PHONY: check-test
+check-test:
+	mix test
 
 .PHONY: check-format
 check-format:
@@ -73,6 +70,9 @@ check-format:
 .PHONY: check-unused-dependencies
 check-unused-dependencies:
 	mix deps.unlock --check-unused
+
+.PHONY: check-github
+check-github: check-format check-unused-dependencies check-test ## Run various checks on project files and report as GitHub comment
 
 .PHONY: format
 format: ## Format project files
