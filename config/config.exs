@@ -6,7 +6,7 @@ config :phoenix, :stacktrace_depth, 20
 config :logger, level: :warn
 config :logger, :console, format: "[$level] $message\n"
 
-if config_env() === :dev do
+if config_env() in [:dev, :test] do
   config :tailwind,
     version: "3.1.6",
     default: [
