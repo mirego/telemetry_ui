@@ -2,7 +2,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
   @enforce_keys ~w(repo)a
   defstruct repo: nil,
             pruner_threshold: [months: -1],
-            pruner_interval: 84_000,
+            pruner_interval_ms: 84_000,
             max_buffer_size: 10_000,
             flush_interval_ms: 10_000,
             verbose: false,
@@ -61,6 +61,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
           on:
             datetime_add(compare_entries.date, 1, ^compare_unit) == entries.date and
               compare_entries.name == entries.name and compare_entries.tags == entries.tags,
+          order_by: [asc: :date],
           select: %{
             compare_date: compare_entries.date,
             compare_count: compare_entries.count,

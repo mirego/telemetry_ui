@@ -1,36 +1,27 @@
 defmodule TelemetryUI.Metrics do
   alias Telemetry.Metrics
   alias TelemetryUI.Event
-  alias TelemetryUI.Web.Component.VegaLite
-
-  defmodule Summary do
-    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil, unit: nil
-  end
-
-  defmodule Counter do
-    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil, unit: nil
-  end
-
-  defmodule Sum do
-    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil, unit: nil
-  end
-
-  defmodule LastValue do
-    defstruct id: nil, title: nil, telemetry_metric: nil, web_component: nil, data: nil, unit: nil
-  end
+  alias TelemetryUI.Metrics, as: UIMetrics
 
   @telemetry_metrics [
-    {:summary, Summary},
-    {:counter, Counter},
-    {:sum, Sum},
-    {:last_value, LastValue}
+    {:count_over_time, UIMetrics.CountOverTime},
+    {:value_over_time, UIMetrics.ValueOverTime},
+    {:summary, UIMetrics.Summary},
+    {:counter, UIMetrics.Counter},
+    {:sum, UIMetrics.Sum},
+    {:last_value, UIMetrics.LastValue}
   ]
+
+  defmacro __using__(_) do
+    quote do
+      defstruct id: nil, title: nil, telemetry_metric: nil, data: nil, unit: nil
+    end
+  end
 
   for {metric_name, metric_struct} <- @telemetry_metrics do
     def unquote(metric_name)(event_name, options) do
       {ui_options, options} = Keyword.pop(options, :ui_options, [])
-      metric = apply(Metrics, unquote(metric_name), [event_name, options])
-      web_component = Keyword.get_lazy(ui_options, :web_component, fn -> %VegaLite{} end)
+      metric = Metrics.summary(event_name, options)
 
       unit =
         case Keyword.get(ui_options, :unit, metric.unit) do
@@ -42,7 +33,6 @@ defmodule TelemetryUI.Metrics do
         id: id(metric),
         title: metric.description || Event.cast_event_name(metric),
         unit: unit,
-        web_component: web_component,
         telemetry_metric: metric
       )
     end

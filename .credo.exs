@@ -48,7 +48,7 @@ common_checks = [
   {CredoEnvvar.Check.Warning.EnvironmentVariablesAtCompileTime},
   {CredoNaming.Check.Warning.AvoidSpecificTermsInModuleNames, terms: ["Manager", "Fetcher", "Builder", "Persister", "Serializer", ~r/^Helpers?$/i, ~r/^Utils?$/i]},
   {CredoNaming.Check.Consistency.ModuleFilename,
-   excluded_paths: ["config", "mix.exs", "priv", "test/support"], acronyms: [{"ShopcastGraphQL", "shopcast_graphql"}, {"GraphQL", "graphql"}]}
+   excluded_paths: ["config", "mix.exs", "priv", "test/support", "lib/telemetry_ui/exceptions.ex"], acronyms: [{"ShopcastGraphQL", "shopcast_graphql"}, {"GraphQL", "graphql"}]}
 ]
 
 %{

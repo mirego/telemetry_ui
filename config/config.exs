@@ -32,7 +32,7 @@ config :telemetry_ui, TelemetryUI.Test.Repo,
   name: TelemetryUI.Test.Repo,
   priv: "test/support/",
   pool: Ecto.Adapters.SQL.Sandbox,
-  url: "postgres://postgres:development@localhost/telemetry_ui_test"
+  url: System.get_env("DATABASE_URL", "postgres://postgres:development@localhost/telemetry_ui_test")
 
 config :telemetry_ui,
   ecto_repos: [TelemetryUI.Test.Repo]

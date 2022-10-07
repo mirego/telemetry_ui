@@ -137,12 +137,8 @@ defmodule TelemetryUI do
     |> Enum.map(& &1.metrics)
     |> List.flatten()
     |> Enum.each(fn metric ->
-      if Map.has_key?(metric, :web_component) do
-        unless TelemetryUI.Web.Component.impl_for(metric.web_component) do
-          raise TelemetryUI.InvalidMetricWebComponent.exception({metric})
-        end
-      else
-        raise TelemetryUI.InvalidMetric.exception({metric})
+      unless TelemetryUI.Web.Component.impl_for(metric) do
+        raise TelemetryUI.InvalidMetricWebComponent.exception({metric})
       end
     end)
   end

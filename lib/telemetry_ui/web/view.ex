@@ -6,6 +6,8 @@ defmodule TelemetryUI.Web.View do
   import Phoenix.HTML.Form, only: [hidden_input: 3, select: 4]
   import Phoenix.HTML.Tag, except: [attributes_escape: 1]
 
+  alias TelemetryUI.Web.Component
+
   js_path = Path.join(__DIR__, "../../../dist/app.js")
   css_path = Path.join(__DIR__, "../../../dist/app.css")
 
@@ -100,10 +102,7 @@ defmodule TelemetryUI.Web.View do
 
         <div class="lg:w-1/2 max-w-4xl mx-auto md:grid grid-cols-1 gap-4">
           <%= for metric <- @current_page.metrics do %>
-            <%= TelemetryUI.Web.Component.draw(
-              metric.web_component,
-              %TelemetryUI.Web.Component.Assigns{filters: @filters, metric: metric, conn: @conn, theme: @theme}
-            ) %>
+            <.component metric={metric} filters={@filters} conn={@conn} theme={@theme} />
           <% end %>
         </div>
 
@@ -114,6 +113,12 @@ defmodule TelemetryUI.Web.View do
 
       <script type="text/javascript" integrity={app_js_integrity()}><%= raw(render("app.js")) %></script>
     </html>
+    """
+  end
+
+  defp component(assigns) do
+    ~H"""
+    <%= Component.render(@metric, %Component.Assigns{filters: @filters, conn: @conn, theme: @theme}) %>
     """
   end
 

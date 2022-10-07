@@ -83,13 +83,14 @@ defp telemetry_config do
 
   [
     metrics: [
+      last_value("my_app.users.total_count", description: "Number of users"),
       counter("phoenix.router_dispatch.stop.duration", description: "Number of requests", unit: {:native, :millisecond}),
-      summary("vm.memory.total", unit: {:byte, :megabyte}),
+      value_over_time("vm.memory.total", unit: {:byte, :megabyte}),
     ],
     backend: %TelemetryUI.Backend.EctoPostgres{
       repo: MyApp.Repo,
       pruner_threshold: [months: -1],
-      pruner_interval: 84_000,
+      pruner_interval_ms: 84_000,
       max_buffer_size: 10_000,
       flush_interval_ms: 10_000
     }

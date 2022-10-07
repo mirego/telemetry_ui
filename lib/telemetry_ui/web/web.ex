@@ -28,7 +28,7 @@ defmodule TelemetryUI.Web do
   defp send_metric_data(conn, id) do
     data =
       with metric when is_struct(metric) <- TelemetryUI.metric_by_id(id),
-           {:async, async} <- fetch_web_component_metric_data(metric, conn.assigns.filters) do
+           {:async, async} <- fetch_component_metric_data(metric, conn.assigns.filters) do
         async.()
       else
         {:ok, data} -> data
@@ -122,7 +122,7 @@ defmodule TelemetryUI.Web do
   defp fetch_metric_data(conn, page) do
     metrics =
       Enum.map(page.metrics, fn metric ->
-        case fetch_web_component_metric_data(metric, conn.assigns.filters) do
+        case fetch_component_metric_data(metric, conn.assigns.filters) do
           {:ok, data} -> %{metric | data: data}
           {:async, _} -> metric
           _ -> metric
@@ -132,8 +132,8 @@ defmodule TelemetryUI.Web do
     %{page | metrics: metrics}
   end
 
-  defp fetch_web_component_metric_data(metric, filters) do
-    TelemetryUI.Web.Component.metric_data(metric.web_component, metric, filters)
+  defp fetch_component_metric_data(metric, filters) do
+    TelemetryUI.Web.Component.metric_data(metric, filters)
   end
 
   defp fetch_filters(params) do
@@ -154,5 +154,5 @@ defmodule TelemetryUI.Web do
     Plug.Crypto.encrypt(secret_key(), "telemetry_ui", %{filters | frame: :custom})
   end
 
-  defp secret_key(), do: "0b2e0buejobcsobjqsbowobqckbjcsqbjcsbjacs"
+  defp secret_key, do: "0b2e0buejobcsobjqsbowobqckbjcsqbjcsbjacs"
 end
