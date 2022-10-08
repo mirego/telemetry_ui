@@ -11,7 +11,7 @@ defmodule TelemetryUI.Web.Components.Stat do
 
     tooltip = [
       [field: "date", type: :temporal, title: "Date", time_unit: time_unit],
-      [field: options.field, type: :quantitative, title: options.field_label, aggregate: options.summary_aggregate || options.aggregate]
+      [field: options.field, type: :quantitative, title: options.field_label, aggregate: options.summary_aggregate || options.aggregate, format: options.format]
     ]
 
     assigns
