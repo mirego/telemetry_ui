@@ -4,56 +4,60 @@ defmodule TelemetryUI.WriteBuffer do
   use GenServer
   require Logger
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  defmodule State do
+    @enforce_keys ~w(backend buffer timer)a
+    defstruct backend: nil, buffer: [], timer: nil
   end
 
+  def start_link(opts) do
+    name = Keyword.get(opts, :name, __MODULE__)
+    GenServer.start_link(__MODULE__, opts, name: name)
+  end
+
+  @impl GenServer
   def init(opts) do
     Process.flag(:trap_exit, true)
     timer = Process.send_after(self(), :tick, opts[:backend].flush_interval_ms)
-    {:ok, Map.merge(Enum.into(opts, %{}), %{buffer: [], timer: timer})}
+
+    {:ok,
+     %State{
+       backend: opts[:backend],
+       buffer: [],
+       timer: timer
+     }}
   end
 
-  def insert(event) do
-    GenServer.cast(__MODULE__, {:insert, event})
+  @impl GenServer
+  def terminate(_reason, state = %State{}) do
+    info_log(state.backend, "Flushing event buffer before shutdown…")
+    do_flush(state.buffer, state.backend)
+  end
+
+  def insert(event, pid \\ __MODULE__) do
+    GenServer.cast(pid, {:insert, event})
     {:ok, event}
   end
 
-  def flush do
-    GenServer.call(__MODULE__, :flush, :infinity)
-    :ok
-  end
+  @impl GenServer
+  def handle_cast({:insert, event}, state = %State{}) do
+    new_buffer = [event | state.buffer]
 
-  def handle_cast({:insert, event}, state = %{buffer: buffer, backend: backend}) do
-    new_buffer = [event | buffer]
-
-    if length(new_buffer) >= state[:max_buffer_size] do
-      info_log(backend, "Buffer full, flushing to disk")
-      Process.cancel_timer(state[:timer])
-      do_flush(new_buffer, backend)
-      new_timer = Process.send_after(self(), :tick, backend.flush_interval_ms)
+    if length(new_buffer) >= state.backend.max_buffer_size do
+      info_log(state.backend, "Buffer full, flushing to disk")
+      state.timer && Process.cancel_timer(state.timer)
+      do_flush(new_buffer, state.backend)
+      new_timer = Process.send_after(self(), :tick, state.backend.flush_interval_ms)
       {:noreply, %{state | buffer: [], timer: new_timer}}
     else
       {:noreply, %{state | buffer: new_buffer}}
     end
   end
 
-  def handle_info(:tick, state = %{buffer: buffer, backend: backend}) do
-    do_flush(buffer, backend)
-    timer = Process.send_after(self(), :tick, backend.flush_interval_ms)
+  @impl GenServer
+  def handle_info(:tick, state = %State{}) do
+    do_flush(state.buffer, state.backend)
+    timer = Process.send_after(self(), :tick, state.backend.flush_interval_ms)
     {:noreply, %{state | buffer: [], timer: timer}}
-  end
-
-  def handle_call(:flush, _from, state = %{buffer: buffer, backend: backend}) do
-    Process.cancel_timer(state[:timer])
-    do_flush(buffer, backend)
-    new_timer = Process.send_after(self(), :tick, backend.flush_interval_ms)
-    {:reply, nil, %{state | buffer: [], timer: new_timer}}
-  end
-
-  def terminate(_reason, %{buffer: buffer, backend: backend}) do
-    info_log(backend, "Flushing event buffer before shutdown…")
-    do_flush(buffer, backend)
   end
 
   defp do_flush(buffer, backend) do
@@ -65,21 +69,31 @@ defmodule TelemetryUI.WriteBuffer do
         info_log(backend, "Flushing #{length(events)} events")
 
         events
-        |> group_events()
+        |> group_events(backend)
         |> Enum.each(fn {event, {value, count}} ->
           TelemetryUI.Backend.insert_event(backend, value, event.time, event.event_name, event.tags, count, event.report_as)
         end)
     end
   end
 
-  defp group_events(events) do
+  defp group_events(events, backend) do
     events
+    |> Enum.map(&%{&1 | time: truncate_time(&1.time, backend)})
     |> Enum.group_by(fn event -> %{event | value: 0} end)
     |> Enum.reduce(%{}, fn {event, values}, acc ->
       count = length(values)
       value = Float.round(Enum.reduce(values, 0, &(&1.value + &2)) / count, 3)
       Map.put(acc, event, {value, count})
     end)
+  end
+
+  defp truncate_time(time, backend) do
+    time = DateTime.truncate(time, :second)
+
+    case backend.insert_date_trunc do
+      "minute" -> Timex.set(time, second: 0)
+      "second" -> time
+    end
   end
 
   defp info_log(backend, message) do

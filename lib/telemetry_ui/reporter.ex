@@ -41,11 +41,10 @@ defmodule TelemetryUI.Reporter do
       event_name = cast_event_name(metric)
       value = extract_measurement(metric, measurements, metadata)
       tags = extract_tags(metric, metadata)
-      time = Timex.set(DateTime.truncate(DateTime.utc_now(), :second), second: 0)
 
       TelemetryUI.WriteBuffer.insert(%TelemetryUI.Event{
         value: value,
-        time: time,
+        time: DateTime.utc_now(),
         event_name: event_name,
         tags: tags,
         report_as: cast_report_as(metric)

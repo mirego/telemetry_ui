@@ -10,6 +10,7 @@ defmodule TelemetryUI.Mixfile do
       elixir: "~> 1.13",
       package: package(),
       elixirc_paths: elixirc_paths(Mix.env()),
+      consolidate_protocols: Mix.env() !== :test,
       compilers: Mix.compilers(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,

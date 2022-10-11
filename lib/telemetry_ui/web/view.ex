@@ -34,13 +34,26 @@ defmodule TelemetryUI.Web.View do
         <%= csrf_meta_tag() %>
       </head>
 
-      <body class="bg-zinc-50 dark:bg-zinc-800">
+      <body class="flex flex-col justify-between min-h-screen bg-zinc-50 dark:bg-zinc-800">
+        <div>
         <%= if @shared do %>
           <header class="lg:w-1/2 max-w-4xl mx-auto flex justify-between pl-2 py-8" style={theme_color_style(@theme)}>
             <h1 class="text-base font-light font-mono flex items-center justify-center gap-3 pe-none">
               <%= {:safe, @theme.logo} %>
               <%= @theme.title %>
             </h1>
+
+            <div class="flex items-center text-sm text-gray-400 gap-5">
+              <div class="flex flex-col">
+                <span class="text-xs text-gray-300">From:</span>
+                <time telemetry-component="LocalTime" title={@filters.from}><%= filter_datetime_format(@filters.from) %></time>
+              </div>
+
+              <div class="flex flex-col">
+                <span class="text-xs text-gray-300">To:</span>
+                <time telemetry-component="LocalTime" title={@filters.to}><%= filter_datetime_format(@filters.to) %></time>
+              </div>
+            </div>
           </header>
         <% else %>
           <div class="bg-white dark:bg-zinc-900 shadow-sm">
@@ -93,7 +106,7 @@ defmodule TelemetryUI.Web.View do
                 />
               <% else %>
                 <.page_link page={page} filters={@filters}
-                  class="px-4 py-1 bg-white dark:bg-zinc-900 font-bold text-sm dark:text-gray-50 hover:opacity-50"
+                  class="transition px-4 py-1 bg-white dark:bg-zinc-900 font-bold text-sm dark:text-gray-50 hover:opacity-50"
                 />
               <% end %>
             <% end %>
@@ -105,6 +118,7 @@ defmodule TelemetryUI.Web.View do
             <.component metric={metric} filters={@filters} conn={@conn} theme={@theme} />
           <% end %>
         </div>
+        </div>
 
         <footer class="p-5 text-center opacity-25 text-xs dark:text-gray-300">
           Built with ♥ by the team @ <a href="https://www.mirego.com">Mirego</a>.
@@ -114,6 +128,10 @@ defmodule TelemetryUI.Web.View do
       <script type="text/javascript" integrity={app_js_integrity()}><%= raw(render("app.js")) %></script>
     </html>
     """
+  end
+
+  defp filter_datetime_format(datetime) do
+    Calendar.strftime(datetime, "%Y-%m-%d %H:%M")
   end
 
   defp component(assigns) do

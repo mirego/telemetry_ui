@@ -29,6 +29,7 @@ window.drawChart = (id, spec) =>
         const categories = view.scale('color').domain();
 
         legend.innerHTML = categories
+          .sort((a, b) => (parseInt(a) || a) - (parseInt(b) || b))
           .map((category, i) => {
             const colorIndex =
               i - colors.length * Math.floor(i / colors.length);
@@ -59,6 +60,20 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.theme = 'dark';
         }
       });
+    });
+
+  document
+    .querySelectorAll('[telemetry-component="LocalTime"]')
+    .forEach((time) => {
+      const OPTIONS = {
+        dateStyle: 'long',
+        timeStyle: 'short'
+      };
+      const dateTimeFormat = new Intl.DateTimeFormat('en-US', OPTIONS);
+      const title = time.getAttribute('title');
+      if (!title) return;
+
+      time.innerHTML = dateTimeFormat.format(new Date(title));
     });
 
   document.querySelectorAll('[telemetry-component="Form"]').forEach((form) => {
