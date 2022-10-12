@@ -18,6 +18,8 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     schema "telemetry_ui_events" do
       field(:name, :string, load_in_query: false)
       field(:value, :float)
+      field(:min_value, :float)
+      field(:max_value, :float)
       field(:count, :integer)
       field(:date, :utc_datetime)
       field(:tags, :map)
@@ -29,8 +31,13 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1, report_as \\ "") do
       backend.repo.query!(
         """
-        INSERT INTO telemetry_ui_events (value, date, name, tags, count, report_as) VALUES($1, date_trunc($7::text, $2::timestamp), $3, $4, $5, $6)
-        ON CONFLICT (date, name, tags, report_as) DO UPDATE SET value = (telemetry_ui_events.value + $1) / 2, count = telemetry_ui_events.count + $5
+        INSERT INTO telemetry_ui_events (value, min_value, max_value, date, name, tags, count, report_as) VALUES($1, $1, $1, date_trunc($7::text, $2::timestamp), $3, $4, $5, $6)
+        ON CONFLICT (date, name, tags, report_as)
+        DO UPDATE SET
+          max_value = GREATEST(telemetry_ui_events.value, $1),
+          min_value = LEAST(telemetry_ui_events.value, $1),
+          value = (telemetry_ui_events.value + $1) / 2,
+          count = telemetry_ui_events.count + $5
         """,
         [value, date, event_name, tags, count, report_as, backend.insert_date_trunc],
         log: backend.verbose,
@@ -56,6 +63,8 @@ defmodule TelemetryUI.Backend.EctoPostgres do
               entries.date <= ^options.to,
           order_by: [asc: :date],
           select: %{
+            min_value: entries.min_value,
+            max_value: entries.max_value,
             value: entries.value,
             count: entries.count,
             date: entries.date,

@@ -20,7 +20,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     |> Vl.layers([
       Vl.new()
       |> Vl.transform(aggregate: [[op: options.aggregate, field: options.aggregate_field || options.field, as: "aggregate_value"]])
-      |> Vl.transform(calculate: "format(datum.aggregate_value#{options.aggregate_value_suffix}, '#{options.format}') + ' #{unit}'", as: "formatted_aggregate_value")
+      |> Vl.transform(calculate: "format(datum.aggregate_value#{options.aggregate_value_suffix}, '#{options.format}') + '#{unit}'", as: "formatted_aggregate_value")
       |> Vl.mark(:text, font_size: 50, font_weight: "bold", color: hd(assigns.theme.scale), x: 0, y: 0)
       |> Vl.encode(:text, type: :nominal, field: "formatted_aggregate_value"),
       Vl.new()

@@ -46,7 +46,7 @@ defmodule MyApp.Repo.Migrations.AddTelemetryUIEventsTable do
   use Ecto.Migration
 
   def up do
-    TelemetryUI.Backend.EctoPostgres.Migrations.up(version: 1)
+    TelemetryUI.Backend.EctoPostgres.Migrations.up()
   end
 
   # We specify `version: 1` in `down`, ensuring that we'll roll all the way back down if
@@ -86,6 +86,7 @@ defp telemetry_config do
       last_value("my_app.users.total_count", description: "Number of users"),
       counter("phoenix.router_dispatch.stop.duration", description: "Number of requests", unit: {:native, :millisecond}),
       value_over_time("vm.memory.total", unit: {:byte, :megabyte}),
+      distribution("phoenix.router_dispatch.stop.duration", description: "Requests duration", unit: {:native, :millisecond}, reporter_options: [buckets: [0, 100, 500, 2000]]),
     ],
     backend: %TelemetryUI.Backend.EctoPostgres{
       repo: MyApp.Repo,

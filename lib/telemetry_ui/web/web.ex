@@ -2,10 +2,11 @@ defmodule TelemetryUI.Web do
   use Plug.Builder
 
   alias Ecto.Changeset
+  alias TelemetryUI.Web.Filter
 
   plug(:fetch_query_params)
-  plug(:fetch_shared)
   plug(:assign_default_web_options)
+  plug(:fetch_shared)
   plug(:assign_filters)
   plug(:assign_share)
   plug(:assign_theme)
@@ -62,21 +63,27 @@ defmodule TelemetryUI.Web do
   defp assign_share(conn = %{assigns: %{shared: true}}, _), do: conn
 
   defp assign_share(conn, _) do
-    share = generate_share_param(conn.assigns.filters)
-    assign(conn, :share, share)
+    case Keyword.get(conn.assigns.web_options, :share_key) do
+      nil ->
+        conn
+
+      secret_key ->
+        share = Filter.encrypt(conn.assigns.filters, secret_key)
+        assign(conn, :share, share)
+    end
   end
 
   defp fetch_shared(conn, _) do
-    case conn.params["share"] do
-      nil ->
+    with share when not is_nil(share) <- conn.params["share"],
+         secret_key when not is_nil(secret_key) <- Keyword.get(conn.assigns.web_options, :share_key),
+         %{} = filters <- Filter.decrypt(share, secret_key) do
+      conn = assign(conn, :filters, filters)
+      conn = assign(conn, :filter_form, Changeset.change(%Filter{frame: :custom}))
+
+      assign(conn, :shared, true)
+    else
+      _ ->
         assign(conn, :shared, false)
-
-      share ->
-        {:ok, filters} = Plug.Crypto.decrypt(secret_key(), "telemetry_ui", share)
-        conn = assign(conn, :filters, filters)
-        conn = assign(conn, :filter_form, Changeset.change(%TelemetryUI.Web.Filter{frame: filters.frame}))
-
-        assign(conn, :shared, true)
     end
   end
 
@@ -138,21 +145,15 @@ defmodule TelemetryUI.Web do
 
   defp fetch_filters(params) do
     filter_form =
-      %TelemetryUI.Web.Filter{}
+      %Filter{}
       |> Changeset.cast(params || %{}, ~w(frame)a)
       |> Changeset.apply_changes()
 
     filters =
       params
-      |> TelemetryUI.Web.Filter.cast()
+      |> Filter.cast()
       |> Map.from_struct()
 
     {filter_form, filters}
   end
-
-  defp generate_share_param(filters) do
-    Plug.Crypto.encrypt(secret_key(), "telemetry_ui", %{filters | frame: :custom})
-  end
-
-  defp secret_key, do: "0b2e0buejobcsobjqsbowobqckbjcsqbjcsbjacs"
 end

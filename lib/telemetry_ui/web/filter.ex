@@ -3,6 +3,8 @@ defmodule TelemetryUI.Web.Filter do
 
   use Ecto.Schema
 
+  alias TelemetryUI.Web.Crypto
+
   @frame_options [
     {:last_30_minutes, 30, :minute},
     {:last_2_hours, 120, :minute},
@@ -61,6 +63,28 @@ defmodule TelemetryUI.Web.Filter do
       |> Timex.shift(time_duration)
 
     %__MODULE__{from: from, to: to, frame: option, page: params["page"]}
+  end
+
+  def encrypt(filters, key) do
+    {filters.page, DateTime.to_iso8601(filters.from), DateTime.to_iso8601(filters.to)}
+    |> :erlang.term_to_binary()
+    |> Crypto.encrypt(key)
+    |> Base.url_encode64(padding: false)
+  end
+
+  def decrypt(data, key) do
+    with data when is_binary(data) <- Crypto.decrypt(Base.url_decode64!(data, padding: false), key),
+         {page, from, to} <- :erlang.binary_to_term(data),
+         {:ok, from, _} <- DateTime.from_iso8601(from),
+         {:ok, to, _} <- DateTime.from_iso8601(to) do
+      %{
+        page: page,
+        from: from,
+        to: to
+      }
+    else
+      _ -> nil
+    end
   end
 
   defp fetch_time_frame(:second, duration), do: {[second: 0], [seconds: -duration]}

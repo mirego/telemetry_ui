@@ -61,6 +61,20 @@ defmodule TelemetryUI.EctoPostgresTest do
       assert event.date === ~U[2022-02-10T00:00:00Z]
     end
 
+    test "conflict min/max", %{backend: backend} do
+      Backend.insert_event(backend, 10.0, ~N[2022-02-10T00:00:32], "test", %{}, 2)
+      Backend.insert_event(backend, 20.0, ~N[2022-02-10T00:00:33], "test", %{}, 4)
+
+      [event] = backend.repo.all(Entry)
+
+      assert event.value === 15.0
+      assert event.min_value === 10.0
+      assert event.max_value === 20.0
+      assert event.tags === %{}
+      assert event.count === 6
+      assert event.date === ~U[2022-02-10T00:00:00Z]
+    end
+
     test "conflict tags", %{backend: backend} do
       Backend.insert_event(backend, 10.0, ~N[2022-02-10T00:00:32], "test", %{}, 2)
       Backend.insert_event(backend, 20.0, ~N[2022-02-10T00:00:33], "test", %{"foo" => "bar"}, 4)
