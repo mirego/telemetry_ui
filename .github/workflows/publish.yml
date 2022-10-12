@@ -16,6 +16,9 @@ jobs:
         with:
           otp-version: 25.x
           elixir-version: 1.14.x
-      - run: mix deps.get
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.13
+      - run: make prepare
       - run: mix compile --docs
       - run: mix hex.publish --yes

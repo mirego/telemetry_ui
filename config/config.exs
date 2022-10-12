@@ -28,11 +28,13 @@ if config_env() in [:dev, :test] do
     ]
 end
 
-config :telemetry_ui, TelemetryUI.Test.Repo,
-  name: TelemetryUI.Test.Repo,
-  priv: "test/support/",
-  pool: Ecto.Adapters.SQL.Sandbox,
-  url: System.get_env("DATABASE_URL", "postgres://postgres:development@localhost/telemetry_ui_test")
+if config_env() in [:test] do
+  config :telemetry_ui, TelemetryUI.Test.Repo,
+    name: TelemetryUI.Test.Repo,
+    priv: "test/support/",
+    pool: Ecto.Adapters.SQL.Sandbox,
+    url: System.get_env("DATABASE_URL", "postgres://postgres:development@localhost/telemetry_ui_test")
+end
 
 config :telemetry_ui,
   ecto_repos: [TelemetryUI.Test.Repo]
