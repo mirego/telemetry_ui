@@ -5,11 +5,12 @@ defmodule TelemetryUI.Metrics do
 
   @telemetry_metrics [
     {:count_over_time, UIMetrics.CountOverTime},
-    {:value_over_time, UIMetrics.ValueOverTime},
-    {:summary, UIMetrics.Summary},
     {:counter, UIMetrics.Counter},
+    {:distribution, UIMetrics.Distribution},
+    {:last_value, UIMetrics.LastValue},
+    {:summary, UIMetrics.Summary},
     {:sum, UIMetrics.Sum},
-    {:last_value, UIMetrics.LastValue}
+    {:value_over_time, UIMetrics.ValueOverTime}
   ]
 
   defmacro __using__(_) do

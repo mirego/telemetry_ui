@@ -1,5 +1,5 @@
 defmodule TelemetryUI.EctoPostgresTest do
-  use TelemetryUI.Test.DataCase
+  use TelemetryUI.Test.DataCase, async: true
 
   import Telemetry.Metrics
 
@@ -127,6 +127,20 @@ defmodule TelemetryUI.EctoPostgresTest do
       assert data.compare_count === 2
       assert data.value === 90.0
       assert data.count === 1
+    end
+
+    test "with buckets", %{backend: backend} do
+      metric = distribution("some.app.event", reporter_options: [buckets: [0, 200, 1000, 5000]])
+      event = insert_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T01:00:00])
+
+      options = default_options(event, seconds: -7200)
+      options = %{options | event_name: "some.app.event"}
+
+      [data] = Backend.metric_data(backend, metric, options)
+
+      assert data.bucket_start === 0
+      assert data.bucket_end === 200
+      assert data.value === 90.0
     end
   end
 end

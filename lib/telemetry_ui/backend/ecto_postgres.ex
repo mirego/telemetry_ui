@@ -5,6 +5,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             pruner_interval_ms: 84_000,
             max_buffer_size: 10_000,
             flush_interval_ms: 10_000,
+            insert_date_trunc: "minute",
             verbose: false,
             telemetry_prefix: [:telemetry_ui, :repo]
 
@@ -28,10 +29,10 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1, report_as \\ "") do
       backend.repo.query!(
         """
-        INSERT INTO telemetry_ui_events (value, date, name, tags, count, report_as) VALUES($1, date_trunc('minute'::text, $2::timestamp), $3, $4, $5, $6)
+        INSERT INTO telemetry_ui_events (value, date, name, tags, count, report_as) VALUES($1, date_trunc($7::text, $2::timestamp), $3, $4, $5, $6)
         ON CONFLICT (date, name, tags, report_as) DO UPDATE SET value = (telemetry_ui_events.value + $1) / 2, count = telemetry_ui_events.count + $5
         """,
-        [value, date, event_name, tags, count, report_as],
+        [value, date, event_name, tags, count, report_as, backend.insert_date_trunc],
         log: backend.verbose,
         telemetry_prefix: backend.telemetry_prefix
       )
@@ -46,55 +47,79 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     end
 
     def metric_data(backend, metric, options = %TelemetryUI.Scraper.Options{}) do
-      compare_unit = fetch_compare_unit(options.from, options.to)
-
-      backend.repo.all(
+      query =
         from(
           entries in Entry,
           where:
             entries.name == ^options.event_name and
               entries.date >= ^options.from and
               entries.date <= ^options.to,
-          where: ^filter_tags(metric),
-          where: ^filter_report_as(options.report_as),
-          left_join: compare_entries in Entry,
-          on:
-            datetime_add(compare_entries.date, 1, ^compare_unit) == entries.date and
-              compare_entries.name == entries.name and compare_entries.tags == entries.tags,
           order_by: [asc: :date],
           select: %{
-            compare_date: compare_entries.date,
-            compare_count: compare_entries.count,
-            compare_value: compare_entries.value,
             value: entries.value,
             count: entries.count,
             date: entries.date,
             tags: entries.tags
           }
         )
+
+      query = select_compare_values(query, options)
+      query = filter_tags(query, metric)
+      query = filter_report_as(query, options.report_as)
+      query = select_buckets(query, metric)
+
+      backend.repo.all(query)
+    end
+
+    defp select_compare_values(queryable, options) do
+      compare_unit =
+        case DateTime.diff(options.to, options.from) do
+          diff when diff <= 43_200 -> "hour"
+          diff when diff <= 86_400 -> "day"
+          _ -> "month"
+        end
+
+      from(entries in queryable,
+        left_join: compare_entries in Entry,
+        on:
+          datetime_add(compare_entries.date, 1, ^compare_unit) == entries.date and
+            compare_entries.name == entries.name and compare_entries.tags == entries.tags,
+        select_merge: %{
+          compare_date: compare_entries.date,
+          compare_count: compare_entries.count,
+          compare_value: compare_entries.value
+        }
       )
     end
 
-    defp fetch_compare_unit(from, to) do
-      case DateTime.diff(to, from) do
-        diff when diff <= 43_200 -> "hour"
-        diff when diff <= 86_400 -> "day"
-        _ -> "month"
+    defp select_buckets(queryable, metric) do
+      if Keyword.has_key?(metric.reporter_options, :buckets) do
+        buckets = Keyword.fetch!(metric.reporter_options, :buckets)
+
+        from(query in queryable,
+          left_lateral_join: buckets in fragment("SELECT ?::int[] as values", ^buckets),
+          select_merge: %{
+            bucket_start: fragment("?[width_bucket(?,  ?)]", buckets.values, query.value, buckets.values),
+            bucket_end: fragment("?[width_bucket(?,  ?) + 1]", buckets.values, query.value, buckets.values)
+          }
+        )
+      else
+        queryable
       end
     end
 
-    defp filter_report_as(nil), do: true
+    defp filter_report_as(queryable, nil), do: queryable
 
-    defp filter_report_as(report_as) do
-      dynamic([entries], entries.report_as == ^report_as)
+    defp filter_report_as(queryable, report_as) do
+      from(entries in queryable, where: entries.report_as == ^report_as)
     end
 
-    defp filter_tags(metric) do
+    defp filter_tags(queryable, metric) do
       if Enum.any?(metric.tags) do
         tags = Enum.map(metric.tags, &to_string/1)
-        dynamic([entries], fragment("ARRAY(SELECT jsonb_object_keys(?))", entries.tags) == ^tags)
+        from(entries in queryable, where: fragment("ARRAY(SELECT jsonb_object_keys(?))", entries.tags) == ^tags)
       else
-        dynamic([entries], entries.tags == ^%{})
+        from(entries in queryable, where: entries.tags == ^%{})
       end
     end
   end
