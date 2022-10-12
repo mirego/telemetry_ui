@@ -36,7 +36,7 @@ defmodule TelemetryUI.Web.Filter do
 
     from =
       with from when not is_nil(from) <- params["from"],
-           {:ok, datetime, _} <- dbg(DateTime.from_iso8601(from)) do
+           {:ok, datetime, _} <- DateTime.from_iso8601(from) do
         datetime
       else
         _ ->
