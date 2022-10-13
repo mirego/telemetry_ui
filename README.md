@@ -83,8 +83,8 @@ defp telemetry_config do
 
   [
     metrics: [
-      last_value("my_app.users.total_count", description: "Number of users"),
-      counter("phoenix.router_dispatch.stop.duration", description: "Number of requests", unit: {:native, :millisecond}),
+      last_value("my_app.users.total_count", description: "Number of users", ui_options: [unit: " users"]),
+      counter("phoenix.router_dispatch.stop.duration", description: "Number of requests", unit: {:native, :millisecond}, ui_options: [unit: " requests"]),
       value_over_time("vm.memory.total", unit: {:byte, :megabyte}),
       distribution("phoenix.router_dispatch.stop.duration", description: "Requests duration", unit: {:native, :millisecond}, reporter_options: [buckets: [0, 100, 500, 2000]]),
     ],

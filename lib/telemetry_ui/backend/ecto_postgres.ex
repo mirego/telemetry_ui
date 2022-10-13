@@ -106,10 +106,10 @@ defmodule TelemetryUI.Backend.EctoPostgres do
         buckets = Keyword.fetch!(metric.reporter_options, :buckets)
 
         from(query in queryable,
-          left_lateral_join: buckets in fragment("SELECT ?::int[] as values", ^buckets),
+          left_lateral_join: buckets in fragment("SELECT ?::double precision[] as values", ^buckets),
           select_merge: %{
-            bucket_start: fragment("?[width_bucket(?,  ?)]", buckets.values, query.value, buckets.values),
-            bucket_end: fragment("?[width_bucket(?,  ?) + 1]", buckets.values, query.value, buckets.values)
+            bucket_start: fragment("?[width_bucket(?::double precision,  ?)]", buckets.values, query.value, buckets.values),
+            bucket_end: fragment("?[width_bucket(?::double precision,  ?) + 1]", buckets.values, query.value, buckets.values)
           }
         )
       else

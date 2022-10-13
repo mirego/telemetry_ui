@@ -12,7 +12,7 @@ jobs:
 
     services:
       db:
-        image: postgres:14
+        image: postgres:10
         env:
           POSTGRES_DB: telemetry_ui_test
           POSTGRES_PASSWORD: pass1234

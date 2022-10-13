@@ -65,7 +65,7 @@ defmodule TelemetryUI.Web do
   defp assign_share(conn, _) do
     case Keyword.get(conn.assigns.web_options, :share_key) do
       nil ->
-        conn
+        assign(conn, :share, nil)
 
       secret_key ->
         share = Filter.encrypt(conn.assigns.filters, secret_key)

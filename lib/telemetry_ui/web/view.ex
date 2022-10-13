@@ -65,7 +65,7 @@ defmodule TelemetryUI.Web.View do
                 <%= select(f, :frame, frame_options(@filters.frame), class: "p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8") %>
 
                 <div class="right-3 absolute top-4 flex items-center gap-3">
-                  <%= unless web_option?(@web_options, :disable_share_url, true) do %>
+                  <%= if @share && not web_option?(@web_options, :disable_share_url, true) do %>
                     <a href={"?share=#{@share}"} target="_blank">
                       <span class="dark:text-zinc-500 text-zinc-200">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
