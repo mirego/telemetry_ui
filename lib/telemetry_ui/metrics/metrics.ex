@@ -40,7 +40,7 @@ defmodule TelemetryUI.Metrics do
   end
 
   defp id(metric) do
-    reporter_options = Enum.map_join(Enum.into(metric.reporter_options, %{}), "|", fn {key, value} -> "#{key}:#{value}" end)
+    reporter_options = Jason.encode!(Enum.into(metric.reporter_options || [], %{}))
 
     [
       metric.description,
@@ -50,7 +50,7 @@ defmodule TelemetryUI.Metrics do
     ]
     |> List.flatten()
     |> Enum.reject(&(&1 in [nil, ""]))
-    |> Enum.join("-")
+    |> Enum.join()
     |> Base.url_encode64(padding: false)
   end
 end

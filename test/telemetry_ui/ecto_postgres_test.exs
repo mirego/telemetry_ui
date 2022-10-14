@@ -152,8 +152,8 @@ defmodule TelemetryUI.EctoPostgresTest do
 
       [data] = Backend.metric_data(backend, metric, options)
 
-      assert data.bucket_start === 0
-      assert data.bucket_end === 200
+      assert data.bucket_start === 0.0
+      assert data.bucket_end === 200.0
       assert data.value === 90.0
     end
   end

@@ -35,11 +35,14 @@ window.drawChart = (id, spec) =>
               i - colors.length * Math.floor(i / colors.length);
             const color = colors[colorIndex];
 
+            if (!category) return;
+
             return `<span class="shrink-0 px-2 py-1 inline-block rounded-sm border-[1px] border-zinc-300 dark:border-zinc-800">
             <span class="inline-block rounded-full h-[10px] w-[10px]" style="background: ${color};"></span>
             ${category}
           </span>`;
           })
+          .filter(Boolean)
           .join('\n');
       }
     }

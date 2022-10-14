@@ -72,12 +72,13 @@ defmodule TelemetryUI.Backend.EctoPostgres do
           }
         )
 
-      query = select_compare_values(query, options)
-      query = filter_tags(query, metric)
-      query = filter_report_as(query, options.report_as)
-      query = select_buckets(query, metric)
-
-      backend.repo.all(query)
+      query
+      |> select_compare_values(options)
+      |> filter_tags(metric)
+      |> filter_report_as(options.report_as)
+      |> select_buckets(metric)
+      |> backend.repo.all()
+      |> fill_buckets(metric)
     end
 
     defp select_compare_values(queryable, options) do
@@ -101,9 +102,43 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       )
     end
 
+    defp fill_buckets(events, metric) do
+      if Keyword.has_key?(metric.reporter_options, :buckets) do
+        all_buckets =
+          metric
+          |> fetch_buckets()
+          |> then(&Enum.zip(&1, tl(&1) ++ [nil]))
+
+        present_buckets =
+          events
+          |> Enum.uniq_by(&{&1.bucket_start, &1.bucket_end})
+          |> Enum.map(&{&1.bucket_start, &1.bucket_end})
+
+        to_fill_buckets = all_buckets -- present_buckets
+
+        fill_events =
+          Enum.map(to_fill_buckets, fn {bucket_start, bucket_end} ->
+            %{
+              min_value: 0.0,
+              max_value: 0.0,
+              value: 0.0,
+              count: 0,
+              date: DateTime.utc_now(),
+              tags: %{},
+              bucket_start: bucket_start,
+              bucket_end: bucket_end
+            }
+          end)
+
+        events ++ fill_events
+      else
+        events
+      end
+    end
+
     defp select_buckets(queryable, metric) do
       if Keyword.has_key?(metric.reporter_options, :buckets) do
-        buckets = Keyword.fetch!(metric.reporter_options, :buckets)
+        buckets = fetch_buckets(metric)
 
         from(query in queryable,
           left_lateral_join: buckets in fragment("SELECT ?::double precision[] as values", ^buckets),
@@ -115,6 +150,12 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       else
         queryable
       end
+    end
+
+    defp fetch_buckets(metric) do
+      metric.reporter_options
+      |> Keyword.fetch!(:buckets)
+      |> Enum.map(&(&1 * 1.0))
     end
 
     defp filter_report_as(queryable, nil), do: queryable
