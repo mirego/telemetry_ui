@@ -4,6 +4,8 @@ defmodule TelemetryUI.Scraper do
   import TelemetryUI.Event
 
   defmodule Options do
+    @moduledoc false
+
     defstruct from: nil, to: nil, event_name: nil, report_as: nil
 
     @type t :: %__MODULE__{}

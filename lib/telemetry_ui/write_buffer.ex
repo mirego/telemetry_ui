@@ -5,13 +5,14 @@ defmodule TelemetryUI.WriteBuffer do
   require Logger
 
   defmodule State do
+    @moduledoc false
+
     @enforce_keys ~w(backend buffer timer)a
     defstruct backend: nil, buffer: [], timer: nil
   end
 
-  def start_link(opts) do
-    name = Keyword.get(opts, :name, __MODULE__)
-    GenServer.start_link(__MODULE__, opts, name: name)
+  def start_link(initial_state) do
+    GenServer.start_link(__MODULE__, initial_state, name: initial_state[:name])
   end
 
   @impl GenServer
@@ -33,7 +34,7 @@ defmodule TelemetryUI.WriteBuffer do
     do_flush(state.buffer, state.backend)
   end
 
-  def insert(event, pid \\ __MODULE__) do
+  def insert(pid, event) do
     GenServer.cast(pid, {:insert, event})
     {:ok, event}
   end

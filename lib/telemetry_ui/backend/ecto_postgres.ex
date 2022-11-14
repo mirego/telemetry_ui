@@ -12,6 +12,8 @@ defmodule TelemetryUI.Backend.EctoPostgres do
   import Ecto.Query
 
   defmodule Entry do
+    @moduledoc false
+
     use Ecto.Schema
 
     @primary_key false
@@ -28,6 +30,12 @@ defmodule TelemetryUI.Backend.EctoPostgres do
   end
 
   defimpl TelemetryUI.Backend do
+    defmacro date_trunc(left, right) do
+      quote do
+        fragment("date_trunc(?::text, ?::timestamp)", unquote(left), unquote(right))
+      end
+    end
+
     def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1, report_as \\ "") do
       backend.repo.query!(
         """
@@ -54,52 +62,56 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     end
 
     def metric_data(backend, metric, options = %TelemetryUI.Scraper.Options{}) do
-      query =
-        from(
-          entries in Entry,
-          where:
-            entries.name == ^options.event_name and
-              entries.date >= ^options.from and
-              entries.date <= ^options.to,
-          order_by: [asc: :date],
-          select: %{
-            min_value: entries.min_value,
-            max_value: entries.max_value,
-            value: entries.value,
-            count: entries.count,
-            date: entries.date,
-            tags: entries.tags
-          }
-        )
-
-      query
-      |> select_compare_values(options)
+      Entry
+      |> aggregated_query(options)
+      |> group_by_date(options)
       |> filter_tags(metric)
       |> filter_report_as(options.report_as)
       |> select_buckets(metric)
       |> backend.repo.all()
       |> fill_buckets(metric)
+      |> cast_date()
     end
 
-    defp select_compare_values(queryable, options) do
-      compare_unit =
-        case DateTime.diff(options.to, options.from) do
-          diff when diff <= 43_200 -> "hour"
-          diff when diff <= 86_400 -> "day"
-          _ -> "month"
-        end
+    defp cast_date(records) do
+      update_in(records, [Access.all(), :date], &DateTime.from_naive!(&1, "Etc/UTC"))
+    end
 
-      from(entries in queryable,
-        left_join: compare_entries in Entry,
-        on:
-          datetime_add(compare_entries.date, 1, ^compare_unit) == entries.date and
-            compare_entries.name == entries.name and compare_entries.tags == entries.tags,
+    defp group_by_date(queryable, options) do
+      interval = fetch_time_unit(options.from, options.to)
+
+      from(
+        entries in queryable,
+        group_by: [fragment("group_date"), entries.tags],
+        order_by: fragment("group_date ASC"),
         select_merge: %{
-          compare_date: compare_entries.date,
-          compare_count: compare_entries.count,
-          compare_value: compare_entries.value
+          date: fragment("? as group_date", date_trunc(^interval, entries.date))
         }
       )
+    end
+
+    defp aggregated_query(queryable, options) do
+      from(
+        entries in queryable,
+        where:
+          entries.name == ^options.event_name and
+            entries.date >= ^options.from and
+            entries.date <= ^options.to,
+        select: %{
+          value: fragment("avg(?)", entries.value),
+          count: fragment("sum(?)", entries.count),
+          tags: entries.tags
+        }
+      )
+    end
+
+    def fetch_time_unit(from, to) do
+      case DateTime.diff(to, from) do
+        diff when diff <= 18_000 -> "second"
+        diff when diff <= 43_200 -> "minute"
+        diff when diff <= 691_200 -> "hour"
+        _ -> "day"
+      end
     end
 
     defp fill_buckets(events, metric) do
@@ -140,11 +152,11 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       if Keyword.has_key?(metric.reporter_options, :buckets) do
         buckets = fetch_buckets(metric)
 
-        from(query in queryable,
+        from(entries in queryable,
           left_lateral_join: buckets in fragment("SELECT ?::double precision[] as values", ^buckets),
           select_merge: %{
-            bucket_start: fragment("?[width_bucket(?::double precision,  ?)]", buckets.values, query.value, buckets.values),
-            bucket_end: fragment("?[width_bucket(?::double precision,  ?) + 1]", buckets.values, query.value, buckets.values)
+            bucket_start: fragment("min(?)", fragment("?[width_bucket(?::double precision,  ?)]", buckets.values, entries.value, buckets.values)),
+            bucket_end: fragment("min(?)", fragment("?[width_bucket(?::double precision,  ?) + 1]", buckets.values, entries.value, buckets.values))
           }
         )
       else

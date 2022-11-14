@@ -38,7 +38,7 @@ defmodule TelemetryUI.WriteBufferTest do
         report_as: nil
       }
 
-      WriteBuffer.insert(event, write_buffer)
+      WriteBuffer.insert(write_buffer, event)
 
       assert_receive {1.0, _, "test", %{}, 1, nil}, 1000
     end

@@ -3,18 +3,18 @@ defmodule TelemetryUI.Pruner do
 
   use GenServer
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts[:backend], name: __MODULE__)
+  def start_link(initial_state) do
+    GenServer.start_link(__MODULE__, initial_state[:backend])
   end
 
-  @impl true
+  @impl GenServer
   def init(backend) do
     Process.send_after(self(), :tick, backend.pruner_interval_ms)
 
     {:ok, backend}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:tick, backend) do
     date_limit = Timex.shift(DateTime.utc_now(), backend.pruner_threshold)
     TelemetryUI.Backend.prune_events!(backend, date_limit)

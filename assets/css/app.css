@@ -17,3 +17,35 @@ header select {
 .dark header select {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fafafa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
+
+#vg-tooltip-element {
+  border-radius: 7px;
+  box-shadow: 0 2px 11px rgba(0, 0, 0, 0.15);
+  background-color: #fff;
+  border: 0;
+  color: black;
+}
+
+.dark #vg-tooltip-element {
+  box-shadow: 0 2px 11px rgba(0, 0, 0, 0.55);
+  background-color: rgb(24, 24, 27);
+  color: white;
+}
+
+.animation-loading {
+  animation: loading 1s linear infinite;
+}
+
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

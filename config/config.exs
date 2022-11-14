@@ -22,7 +22,7 @@ if config_env() in [:dev, :test] do
   config :esbuild,
     version: "0.14.41",
     default: [
-      args: ~w(js/app.js --bundle --target=es2020 --outdir=../dist --minify),
+      args: ~w(js/app.ts --bundle --target=es2020 --outdir=../dist --minify --tree-shaking=true --bundle),
       cd: Path.expand("../assets", __DIR__),
       env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
     ]
@@ -30,10 +30,13 @@ end
 
 if config_env() in [:test] do
   config :telemetry_ui, TelemetryUI.Test.Repo,
-    name: TelemetryUI.Test.Repo,
     priv: "test/support/",
     pool: Ecto.Adapters.SQL.Sandbox,
     url: System.get_env("DATABASE_URL", "postgres://postgres:development@localhost/telemetry_ui_test")
+
+  config :telemetry_ui, TelemetryUI.Test.Endpoint,
+    secret_key_base: "Hu4qQN3iKzTV4fJxhorPQlA/osH9fAMtbtjVS58PFgfw3ja5Z18Q/WSNR9wP4OfW",
+    render_errors: [view: TelemetryUI.Test.ErrorView]
 end
 
 config :telemetry_ui,

@@ -1,4 +1,6 @@
 defmodule TelemetryUI.Metrics.Sum do
+  @moduledoc false
+
   use TelemetryUI.Metrics
 
   defimpl TelemetryUI.Web.Component do
@@ -13,11 +15,9 @@ defmodule TelemetryUI.Metrics.Sum do
     }
 
     def render(metric, assigns) do
-      Components.Stat.render(metric, assigns, @options)
-    end
-
-    def metric_data(metric, params) do
-      {:async, fn -> TelemetryUI.metric_data(metric, params) end}
+      metric
+      |> Components.Stat.spec(assigns, @options)
+      |> TelemetryUI.Web.VegaLite.draw(metric)
     end
   end
 end

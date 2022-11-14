@@ -1,4 +1,6 @@
 defmodule TelemetryUI.Metrics.Distribution do
+  @moduledoc false
+
   use TelemetryUI.Metrics
 
   defimpl TelemetryUI.Web.Component do
@@ -14,11 +16,9 @@ defmodule TelemetryUI.Metrics.Distribution do
     }
 
     def render(metric, assigns) do
-      Components.Buckets.render(metric, assigns, @options)
-    end
-
-    def metric_data(metric, params) do
-      {:async, fn -> TelemetryUI.metric_data(metric, params) end}
+      metric
+      |> Components.Buckets.spec(assigns, @options)
+      |> TelemetryUI.Web.VegaLite.draw(metric)
     end
   end
 end

@@ -1,10 +1,11 @@
 defmodule TelemetryUI.Web.Components.TimeSeries do
+  @moduledoc false
+
   import TelemetryUI.Web.VegaLite.Spec
 
   alias VegaLite, as: Vl
 
-  def render(metric = %{telemetry_metric: %{tags: []}}, assigns, options) do
-    source = source(metric, assigns)
+  def spec(metric = %{tags: []}, assigns, options) do
     domain = [assigns.filters.from, assigns.filters.to]
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
     unit = to_unit(metric.unit)
@@ -17,7 +18,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
     spec =
       assigns
       |> base_spec()
-      |> Vl.data_from_url(source, name: "source")
+      |> data_from_metric(metric, assigns)
 
     summary_chart =
       Vl.new()
@@ -30,18 +31,14 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         color: hd(assigns.theme.scale),
         corner_radius_end: 2
       )
-      |> encode_tags_color(metric.telemetry_metric)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate)
       |> Vl.encode(:tooltip, tooltip)
 
-    spec
-    |> Vl.layers([aggregate_text_spec(options, unit), summary_chart])
-    |> TelemetryUI.Web.VegaLite.draw(metric)
+    Vl.layers(spec, [aggregate_text_spec(options, unit), summary_chart])
   end
 
-  def render(metric, assigns, options) do
-    source = source(metric, assigns)
+  def spec(metric, assigns, options) do
     domain = [assigns.filters.from, assigns.filters.to]
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
     unit = to_unit(metric.unit)
@@ -55,7 +52,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
     spec =
       assigns
       |> base_spec()
-      |> Vl.data_from_url(source, name: "source")
+      |> data_from_metric(metric, assigns)
 
     summary_chart =
       Vl.new()
@@ -68,14 +65,14 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         fill_opacity: 0.3,
         color: hd(assigns.theme.scale)
       )
-      |> encode_tags_color(metric.telemetry_metric)
+      |> encode_tags_color(metric.tags)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
-      |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate)
+      |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, stack: nil)
+      |> Vl.param("tags", select: [fields: ["tags"], type: :point], bind: "legend")
+      |> Vl.encode(:opacity, value: 0.2, condition: [param: "tags", value: 1, empty: true])
       |> Vl.encode(:tooltip, tooltip)
 
-    spec
-    |> Vl.layers([aggregate_text_spec(options, unit), summary_chart])
-    |> TelemetryUI.Web.VegaLite.draw(metric)
+    Vl.layers(spec, [aggregate_text_spec(options, unit), summary_chart])
   end
 
   defp aggregate_text_spec(options, unit) do
@@ -87,7 +84,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
       align: "right",
       color: "#666",
       x: "width",
-      y: -30
+      y: -20
     )
     |> Vl.transform(
       aggregate: [

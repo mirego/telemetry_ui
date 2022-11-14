@@ -8,6 +8,7 @@
     "npm": "^8.11"
   },
   "devDependencies": {
+    "@types/vega": "3.2.0",
     "prettier": "2.7.1"
   },
   "dependencies": {

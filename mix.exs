@@ -20,7 +20,24 @@ defmodule TelemetryUI.Mixfile do
       source_url: "https://github.com/mirego/telemetry_ui",
       homepage_url: "https://github.com/mirego/telemetry_ui",
       docs: [
-        extras: ["README.md"],
+        extras: ["README.md", "guides/application-data.md", "guides/custom-ui.md", "guides/multi-metrics-endpoints.md"],
+        extra_section: "GUIDES",
+        groups_for_modules: [
+          TelemetryUI: [
+            TelemetryUI,
+            TelemetryUI.Metrics,
+            TelemetryUI.Theme
+          ],
+          Backend: [
+            TelemetryUI.Backend,
+            TelemetryUI.Backend.EctoPostgres,
+            TelemetryUI.Backend.EctoPostgres.Migrations
+          ],
+          Web: [
+            TelemetryUI.Web,
+            TelemetryUI.Web.Component
+          ]
+        ],
         main: "readme",
         source_ref: "v#{@version}",
         source_url: "https://github.com/mirego/telemetry_ui"

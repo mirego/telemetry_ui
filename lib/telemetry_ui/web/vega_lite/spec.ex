@@ -4,6 +4,8 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
   alias VegaLite, as: Vl
 
   defmodule Options do
+    @moduledoc false
+
     defstruct field: "value",
               field_label: "Value",
               aggregate: "average",
@@ -34,6 +36,7 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
 
     Vl.config(
       Vl.new(config),
+      autosize: [type: "fit-x"],
       axis_y: [domain_color: label_color, label_color: label_color, tick_color: label_color, grid_color: grid_color],
       axis_x: [domain_color: label_color, label_color: label_color, tick_color: label_color, grid_color: grid_color],
       view: [stroke: nil],
@@ -41,20 +44,23 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
     )
   end
 
-  def encode_tags_color(spec, metric) do
-    if Enum.any?(metric.tags) do
-      Vl.encode_field(spec, :color, "tags", title: nil, legend: nil)
-    else
-      spec
-    end
+  def encode_tags_color(spec, nil), do: spec
+  def encode_tags_color(spec, []), do: spec
+
+  def encode_tags_color(spec, _tags) do
+    Vl.encode_field(spec, :color, "tags", title: nil, legend: nil)
   end
 
-  def source(metric, assigns) do
-    uri = URI.parse(assigns.conn.request_path <> "?" <> assigns.conn.query_string)
+  def data_from_metric(spec, metric, assigns) do
+    if metric.data do
+      Vl.data_from_values(spec, metric.data, name: :source)
+    else
+      uri = URI.parse(assigns.conn.request_path <> "?" <> assigns.conn.query_string)
 
-    source_query = Map.put(URI.decode_query(uri.query), "metric-data", metric.id)
-    source_uri = %{uri | query: URI.encode_query(source_query)}
+      source_query = Map.put(URI.decode_query(uri.query), "metric-data", metric.id)
+      source_uri = %{uri | query: URI.encode_query(source_query)}
 
-    URI.to_string(source_uri)
+      Vl.data_from_url(spec, URI.to_string(source_uri), name: :source)
+    end
   end
 end

@@ -1,4 +1,6 @@
 defmodule TelemetryUI.Web.Crypto do
+  @moduledoc false
+
   # Use AES 128 Bit Keys for Encryption.
   @block_size 16
 
@@ -8,8 +10,6 @@ defmodule TelemetryUI.Web.Crypto do
     encrypted_text = :crypto.crypto_one_time(:aes_128_cbc, key, iv, plaintext, true)
     encrypted_text = iv <> encrypted_text
     :base64.encode(encrypted_text)
-  catch
-    _, _ -> nil
   end
 
   def decrypt(ciphertext, key) do

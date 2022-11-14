@@ -1,10 +1,11 @@
 defmodule TelemetryUI.Web.Components.Stat do
+  @moduledoc false
+
   import TelemetryUI.Web.VegaLite.Spec
 
   alias VegaLite, as: Vl
 
-  def render(metric = %{telemetry_metric: %{tags: []}}, assigns, options) do
-    source = source(metric, assigns)
+  def spec(metric = %{tags: []}, assigns, options) do
     domain = [assigns.filters.from, assigns.filters.to]
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
     unit = to_unit(metric.unit)
@@ -16,7 +17,7 @@ defmodule TelemetryUI.Web.Components.Stat do
 
     assigns
     |> base_spec(height: 40)
-    |> Vl.data_from_url(source, name: "source")
+    |> data_from_metric(metric, assigns)
     |> Vl.layers([
       Vl.new()
       |> Vl.transform(aggregate: [[op: options.aggregate, field: options.aggregate_field || options.field, as: "aggregate_value"]])
@@ -33,24 +34,22 @@ defmodule TelemetryUI.Web.Components.Stat do
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit], scale: [domain: domain])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate)
     ])
-    |> TelemetryUI.Web.VegaLite.draw(metric)
   end
 
-  def render(metric, assigns, options) do
-    source = source(metric, assigns)
-
+  def spec(metric, assigns, options) do
     assigns
     |> base_spec()
-    |> Vl.data_from_url(source, name: "source")
+    |> data_from_metric(metric, assigns)
     |> Vl.transform(aggregate: [[op: options.aggregate, field: options.field, as: "aggregate_value"]], groupby: ["tags"])
     |> Vl.encode_field(:x, "tags", type: :nominal, title: nil, axis: [label_angle: -30])
     |> Vl.encode_field(:color, "tags", title: nil, legend: nil)
+    |> Vl.param("tags", select: [fields: ["tags"], type: :point], bind: "legend")
+    |> Vl.encode(:opacity, value: 0.2, condition: [param: "tags", value: 1, empty: true])
     |> Vl.encode_field(:y, "aggregate_value#{options.aggregate_value_suffix}", type: :quantitative, title: nil)
     |> Vl.layers([
       Vl.new()
       |> Vl.mark(:bar, width: [band: 0.6], corner_radius_end: 2)
       |> Vl.encode(:tooltip, [[field: "aggregate_value#{options.aggregate_value_suffix}", type: :quantitative, title: options.field_label, aggregate: options.aggregate]])
     ])
-    |> TelemetryUI.Web.VegaLite.draw(metric)
   end
 end

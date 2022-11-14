@@ -1,10 +1,11 @@
 defmodule TelemetryUI.Web.Components.Buckets do
+  @moduledoc false
+
   import TelemetryUI.Web.VegaLite.Spec
 
   alias VegaLite, as: Vl
 
-  def render(metric, assigns, options) do
-    source = source(metric, assigns)
+  def spec(metric, assigns, options) do
     unit = to_unit(metric.unit)
 
     tooltip = [
@@ -12,20 +13,19 @@ defmodule TelemetryUI.Web.Components.Buckets do
       [field: options.field, type: :quantitative, title: options.field_label, aggregate: options.summary_aggregate || options.aggregate, format: options.format]
     ]
 
-    tooltip = if Enum.any?(metric.telemetry_metric.tags), do: tooltip ++ [[field: "tags", title: "Tags"]], else: tooltip
+    tooltip = if Enum.any?(metric.tags), do: tooltip ++ [[field: "tags", title: "Tags"]], else: tooltip
 
     assigns
     |> base_spec()
-    |> Vl.data_from_url(source, name: "source")
+    |> data_from_metric(metric, assigns)
     |> Vl.transform(calculate: "datum.bucket_start + '#{unit}' + (datum.bucket_end ? ' - ' + datum.bucket_end + '#{unit}' : ' +')", as: "bucket_label")
-    |> encode_offset_tags_color(metric.telemetry_metric, assigns)
+    |> encode_offset_tags_color(metric.tags, assigns)
     |> Vl.encode(:tooltip, tooltip)
     |> Vl.encode_field(:x, "bucket_label", type: :nominal, title: nil, axis: [label_angle: 0], sort: [field: "bucket_start"])
     |> Vl.encode_field(:y, options.field, aggregate: options.aggregate, type: :quantitative, title: nil, sort: [field: "bucket_start"])
-    |> TelemetryUI.Web.VegaLite.draw(metric)
   end
 
-  def encode_offset_tags_color(spec, metric, assigns) do
+  def encode_offset_tags_color(spec, tags, assigns) do
     bar_options = [
       align: "center",
       baseline: "line-bottom",
@@ -35,11 +35,13 @@ defmodule TelemetryUI.Web.Components.Buckets do
       corner_radius_end: 2
     ]
 
-    if Enum.any?(metric.tags) do
+    if Enum.any?(tags) do
       spec
       |> Vl.mark(:bar, bar_options)
       |> Vl.encode_field(:color, "tags", title: nil, legend: nil)
       |> Vl.encode_field(:x_offset, "tags")
+      |> Vl.param("tags", select: [fields: ["tags"], type: :point], bind: "legend")
+      |> Vl.encode(:opacity, value: 0.2, condition: [param: "tags", value: 1, empty: true])
     else
       Vl.mark(spec, :bar, bar_options ++ [color: hd(assigns.theme.scale)])
     end

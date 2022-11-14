@@ -5,28 +5,18 @@ defmodule TelemetryUI.Web.Filter do
 
   alias TelemetryUI.Web.Crypto
 
-  @frame_options [
-    {:last_30_minutes, 30, :minute},
-    {:last_2_hours, 120, :minute},
-    {:last_1_day, 1, :day},
-    {:last_7_days, 7, :day},
-    {:last_1_month, 1, :month},
-    {:custom, 0, nil}
-  ]
-
   @primary_key false
   embedded_schema do
     field(:page, :string)
     field(:from, :utc_datetime)
     field(:to, :utc_datetime)
-
-    field(:frame, Ecto.Enum, values: Enum.map(@frame_options, &elem(&1, 0)), default: :last_30_minutes)
+    field(:frame, :any, virtual: true)
   end
 
-  def frame_options(:custom), do: @frame_options
-  def frame_options(_frame), do: Enum.reject(@frame_options, fn {option, _, _} -> option === :custom end)
+  def frame_options(:custom, theme), do: theme.frame_options
+  def frame_options(_frame, theme), do: Enum.reject(theme.frame_options, fn {option, _, _} -> option === :custom end)
 
-  def cast(params = %{"frame" => "custom"}) do
+  def cast(params = %{"frame" => "custom"}, _) do
     to =
       with to when not is_nil(to) <- params["to"],
            {:ok, datetime, _} <- DateTime.from_iso8601(to) do
@@ -48,8 +38,8 @@ defmodule TelemetryUI.Web.Filter do
     %__MODULE__{from: from, to: to, frame: :custom, page: params["page"]}
   end
 
-  def cast(params) do
-    {option, duration, unit} = Enum.find(@frame_options, fn {name, _, _} -> to_string(name) === params["frame"] end) || Enum.at(@frame_options, 1)
+  def cast(params, options) do
+    {option, duration, unit} = Enum.find(options, fn {name, _, _} -> to_string(name) === params["frame"] end) || Enum.at(options, 1)
     {time_set, time_duration} = fetch_time_frame(unit, duration)
 
     to =
@@ -69,7 +59,10 @@ defmodule TelemetryUI.Web.Filter do
     {filters.page, DateTime.to_iso8601(filters.from), DateTime.to_iso8601(filters.to)}
     |> :erlang.term_to_binary()
     |> Crypto.encrypt(key)
-    |> Base.url_encode64(padding: false)
+    |> case do
+      nil -> nil
+      data -> Base.url_encode64(data, padding: false)
+    end
   end
 
   def decrypt(data, key) do
@@ -97,6 +90,9 @@ defmodule TelemetryUI.Web.Filter do
 
   defp fetch_time_frame(:month, duration),
     do: {[second: 0, minute: 0, hour: 0], [months: -duration]}
+
+  defp fetch_time_frame(:year, duration),
+    do: {[second: 0, minute: 0, hour: 0], [years: -duration]}
 
   defp fetch_time_frame(_, duration), do: fetch_time_frame(:hour, duration)
 end

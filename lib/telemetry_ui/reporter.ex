@@ -6,49 +6,46 @@ defmodule TelemetryUI.Reporter do
   use GenServer
   require Logger
 
-  def start_link(opts) do
-    server_opts = Keyword.take(opts, [:name])
-
-    metrics =
-      opts[:metrics] ||
-        raise ArgumentError, "the :metrics option is required by #{inspect(__MODULE__)}"
-
-    GenServer.start_link(__MODULE__, metrics, server_opts)
+  def start_link(initial_state) do
+    GenServer.start_link(__MODULE__, {initial_state[:write_buffer], initial_state[:metrics]})
   end
 
-  @impl true
-  def init(metrics) do
+  @impl GenServer
+  def init({writer_buffer, metrics}) do
     Process.flag(:trap_exit, true)
     groups = Enum.group_by(metrics, &{&1.event_name, &1.reporter_options})
 
     for {{event, _} = a, metrics} <- groups do
       id = {__MODULE__, a, self()}
-      :telemetry.attach(id, event, &TelemetryUI.Reporter.handle_event/4, metrics)
+      :telemetry.attach(id, event, &TelemetryUI.Reporter.handle_event/4, {writer_buffer, metrics})
     end
 
     {:ok, Map.keys(groups)}
   end
 
-  @impl true
+  @impl GenServer
   def terminate(_, events) do
     for event <- events, do: :telemetry.detach({__MODULE__, event, self()})
 
     :ok
   end
 
-  def handle_event(_event_name, measurements, metadata, metrics) do
+  def handle_event(_event_name, measurements, metadata, {writer_buffer, metrics}) do
     for metric <- metrics, keep?(metric, metadata) do
       event_name = cast_event_name(metric)
       value = extract_measurement(metric, measurements, metadata)
       tags = extract_tags(metric, metadata)
 
-      TelemetryUI.WriteBuffer.insert(%TelemetryUI.Event{
-        value: value,
-        time: DateTime.utc_now(),
-        event_name: event_name,
-        tags: tags,
-        report_as: cast_report_as(metric)
-      })
+      TelemetryUI.insert_metric_data(
+        writer_buffer,
+        %TelemetryUI.Event{
+          value: value,
+          time: DateTime.utc_now(),
+          event_name: event_name,
+          tags: tags,
+          report_as: cast_report_as(metric)
+        }
+      )
     end
   end
 

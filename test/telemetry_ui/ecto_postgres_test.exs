@@ -7,7 +7,7 @@ defmodule TelemetryUI.EctoPostgresTest do
   alias TelemetryUI.Backend.EctoPostgres.Entry
   alias TelemetryUI.Scraper.Options, as: Options
 
-  def insert_event(metric, attributes \\ []) do
+  def factory_event(metric, attributes \\ []) do
     attributes = Keyword.put_new(attributes, :name, Enum.join(metric.name, "."))
     attributes = Keyword.put_new(attributes, :report_as, "")
     Factory.insert("telemetry_ui_events", attributes)
@@ -102,7 +102,7 @@ defmodule TelemetryUI.EctoPostgresTest do
 
     test "with event", %{backend: backend} do
       metric = summary("some.app.event")
-      event = insert_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30])
+      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30])
 
       options = default_options(event)
       options = %{options | event_name: "some.app.event"}
@@ -112,11 +112,28 @@ defmodule TelemetryUI.EctoPostgresTest do
       assert data.value === 90.0
     end
 
+    test "with aggregated event", %{backend: backend} do
+      metric = summary("some.app.event")
+      event = factory_event(metric, value: 100.0, count: 1, date: ~N[2022-02-10T12:00:30])
+      factory_event(metric, value: 80.0, count: 2, date: ~N[2022-02-10T11:00:30])
+      factory_event(metric, value: 80.0, count: 2, date: ~N[2022-02-10T11:00:30], tags: %{route: "/"})
+      factory_event(metric, value: 10.0, count: 3, date: ~N[2024-02-10T11:00:30])
+
+      options = default_options(event, years: -2)
+      options = %{options | event_name: "some.app.event"}
+
+      [data] = Backend.metric_data(backend, metric, options)
+
+      assert data.value === 90.0
+      assert data.count === 3
+      assert data.date === ~N[2022-02-10 00:00:00.000000]
+    end
+
     test "with tags", %{backend: backend} do
       metric = summary("some.app.event", tags: [:foo])
-      _event = insert_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{})
-      _event = insert_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{"foo" => "bar", "other" => "bar"})
-      event = insert_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{"foo" => "bar"})
+      _event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{})
+      _event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{"foo" => "bar", "other" => "bar"})
+      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{"foo" => "bar"})
 
       options = default_options(event)
       options = %{options | event_name: "some.app.event"}
@@ -127,31 +144,16 @@ defmodule TelemetryUI.EctoPostgresTest do
       assert data.tags === %{"foo" => "bar"}
     end
 
-    test "with compare", %{backend: backend} do
-      metric = summary("some.app.event")
-      _compare_event = insert_event(metric, value: 20.0, count: 2, date: ~N[2022-02-10T00:00:00])
-      event = insert_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T01:00:00])
-
-      options = default_options(event, seconds: -7200)
-      options = %{options | event_name: "some.app.event"}
-
-      [_compare, data] = Backend.metric_data(backend, metric, options)
-
-      assert data.compare_value === 20.0
-      assert data.compare_count === 2
-      assert data.value === 90.0
-      assert data.count === 1
-    end
-
     test "with buckets", %{backend: backend} do
       metric = distribution("some.app.event", reporter_options: [buckets: [0, 200, 1000, 5000]])
-      event = insert_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T01:00:00])
+      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T01:00:00])
 
       options = default_options(event, seconds: -7200)
       options = %{options | event_name: "some.app.event"}
 
-      [data] = Backend.metric_data(backend, metric, options)
+      [data | rest] = Backend.metric_data(backend, metric, options)
 
+      assert Enum.sort(Enum.map(rest, & &1.bucket_start)) === [200.0, 1000.0, 5000.0]
       assert data.bucket_start === 0.0
       assert data.bucket_end === 200.0
       assert data.value === 90.0
