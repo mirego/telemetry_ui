@@ -126,7 +126,7 @@ defmodule TelemetryUI.EctoPostgresTest do
 
       assert data.value === 90.0
       assert data.count === 3
-      assert data.date === ~N[2022-02-10 00:00:00.000000]
+      assert data.date === ~U[2022-02-10 00:00:00.000000Z]
     end
 
     test "with tags", %{backend: backend} do
