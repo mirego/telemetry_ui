@@ -1,4 +1,4 @@
-defmodule TelemetryUI.Metrics.ValueOverTime do
+defmodule TelemetryUI.Metrics.AverageOverTime do
   @moduledoc false
 
   use TelemetryUI.Metrics

@@ -8,7 +8,7 @@ defmodule TelemetryUI.Web.VegaLite do
     assigns = %{spec: spec, metric: metric}
 
     ~H"""
-    <div class="relative flex flex-col bg-white dark:bg-black/40 text-slate dark:text-white p-3 pt-2 shadow min-h-[170px] h-full">
+    <div class="relative flex flex-col bg-white dark:bg-black/40 text-slate dark:text-white p-3 pt-2 shadow min-h-[200px] h-full">
       <.title title={@metric.title} />
       <.container id={@metric.id} />
       <.legend id={@metric.id} />
@@ -39,7 +39,6 @@ defmodule TelemetryUI.Web.VegaLite do
     ~H"""
     <script>
       document.addEventListener("DOMContentLoaded", function() {
-        vegaComponentsLoaded++
         window.drawChart('#<%= @id %>', <%= raw VegaLite.Export.to_json(@spec) %>)
       })
     </script>

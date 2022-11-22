@@ -31,11 +31,14 @@ defmodule TelemetryUI do
     pages = Page.cast_all(opts[:metrics])
 
     name = Keyword.get(opts, :name, :default)
+    theme = struct!(TelemetryUI.Theme, opts[:theme] || %{})
+    scale = Enum.uniq([theme.primary_color] ++ theme.scale)
+    theme = %{theme | scale: scale}
 
     state = %{
       name: name,
       backend: opts[:backend],
-      theme: struct!(TelemetryUI.Theme, opts[:theme] || %{}),
+      theme: theme,
       pages: pages
     }
 

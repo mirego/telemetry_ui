@@ -1,36 +1,41 @@
+import {View} from 'vega';
 import vegaEmbed from 'vega-embed';
 
 declare global {
   var drawChart: (id: string, spec: string) => void;
-  var vegaComponentsLoaded: number;
+}
+
+interface ViewInternal {
+  _runtime: any;
+  _signals: any;
 }
 
 const viewsById = {};
 const heightsById = {};
 
-const putLegendSelect = (view, value, legendItems) => {
+const putLegendSelect = (view: View, value, legendItems: HTMLElement[]) => {
   legendItems.forEach((item) => item.classList.add('opacity-50'));
   view.signal('tags_tags_legend', value).run();
 };
 
-const resetLegendSelect = (view, legendItems) => {
+const resetLegendSelect = (view: View, legendItems: HTMLElement[]) => {
   legendItems.forEach((item) => item.classList.remove('opacity-50'));
   view.signal('tags_tags_legend', null).run();
 };
 
-const bindLegend = (id, view) => {
-  const container = document.querySelector(id);
+const bindLegend = (element: HTMLElement, id: string, viewUnknown: unknown) => {
   const legend = document.querySelector(id + '-legend');
-  if (!legend || !view._runtime.scales.color || !view._signals.tags_tags_legend)
-    return;
+  const runtime = (viewUnknown as ViewInternal)._runtime;
+  const signals = (viewUnknown as ViewInternal)._signals;
+  const view = viewUnknown as View;
+
+  if (!legend || !runtime.scales.color || !signals.tags_tags_legend) return;
 
   const legendItems = Array.from(
     legend.querySelectorAll('[telemetry-component="LegendItem"]')
   ) as HTMLElement[];
 
-  container.addEventListener('click', () =>
-    resetLegendSelect(view, legendItems)
-  );
+  element.addEventListener('click', () => resetLegendSelect(view, legendItems));
   legend.addEventListener('click', () => resetLegendSelect(view, legendItems));
 
   legendItems.forEach((item) => {
@@ -43,9 +48,12 @@ const bindLegend = (id, view) => {
   });
 };
 
-const renderLegend = (id, view) => {
+const renderLegend = (id: string, viewUnknown: unknown) => {
+  const runtime = (viewUnknown as ViewInternal)._runtime;
+  const view = viewUnknown as View;
+
   const legend = document.querySelector(id + '-legend');
-  if (!legend || !view._runtime.scales.color) return;
+  if (!legend || !runtime.scales.color) return;
 
   legend.classList.remove('hidden');
   const colors = view.scale('color').range();
@@ -53,8 +61,9 @@ const renderLegend = (id, view) => {
 
   const content = categories
     .sort((a, b) => (parseInt(a) || a) - (parseInt(b) || b))
-    .map((category, i) => {
-      const colorIndex = i - colors.length * Math.floor(i / colors.length);
+    .map((category: string, index: number) => {
+      const colorIndex =
+        index - colors.length * Math.floor(index / colors.length);
       const color = colors[colorIndex];
 
       if (!category) return;
@@ -111,42 +120,33 @@ const toggleFullscreen = (parentElement, id) => {
     parentElement.classList.add(...fixedStyle);
     parentElement.classList.remove('relative');
     parentElement.classList.remove('dark:bg-black/40');
+
+    heightsById[id] = viewsById[id].signal('height');
     viewsById[id].signal('height', window.innerHeight - 130);
   }
 
   window.dispatchEvent(new Event('resize'));
 };
 
-window.drawChart = (id, spec) =>
-  vegaEmbed(id, spec, {renderer: 'svg', actions: false}).then((result) => {
-    const view = result.view;
-    viewsById[id] = view;
-    const source = view.data('source');
-    vegaComponentsLoaded--;
+window.drawChart = async (id, spec) => {
+  const {view} = await vegaEmbed(id, spec, {renderer: 'svg', actions: false});
+  const element = document.querySelector(id) as HTMLElement;
 
-    if (vegaComponentsLoaded <= 0) {
-      for (const viewId in viewsById) {
-        const element = document.querySelector(viewId) as HTMLElement;
-        heightsById[viewId] = element.clientHeight;
-        viewsById[viewId].signal('height', element.clientHeight);
-      }
-      window.dispatchEvent(new Event('resize'));
-    }
+  if (emptySource(view.data('source'))) {
+    const empty = document.querySelector(id + '-empty') as HTMLElement;
+    empty.classList.remove('hidden');
+    element.classList.add('hidden');
+    element.classList.remove('vega-embed');
+  } else {
+    renderLegend(id, view);
+    bindLegend(element, id, view);
+  }
 
-    const loading = document.querySelector(id + '-loading') as HTMLElement;
-    loading.classList.add('hidden');
+  const loading = document.querySelector(id + '-loading') as HTMLElement;
+  loading.classList.add('hidden');
 
-    if (emptySource(source)) {
-      const element = document.querySelector(id) as HTMLElement;
-      const empty = document.querySelector(id + '-empty') as HTMLElement;
-      empty.classList.remove('hidden');
-      element.classList.add('hidden');
-      element.classList.remove('vega-embed');
-    } else {
-      renderLegend(id, view);
-      bindLegend(id, view);
-    }
-  });
+  viewsById[id] = view;
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   document

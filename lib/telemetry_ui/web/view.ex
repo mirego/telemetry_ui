@@ -27,6 +27,7 @@ defmodule TelemetryUI.Web.View do
       |> String.trim()
       |> String.replace("<", "%3C")
       |> String.replace(">", "%3E")
+      |> String.replace("#", "%23")
       |> String.replace(~s("), "'")
 
     {:safe, "data:image/svg+xml,#{logo}"}
@@ -60,30 +61,31 @@ defmodule TelemetryUI.Web.View do
           })();
         </script>
 
-        <script type="text/javascript">
-          window.vegaComponentsLoaded = 0
-        </script>
-
         <div>
           <%= if @shared do %>
-            <header class="max-w-6xl mx-auto flex justify-between pl-2 py-8" style={theme_color_style(@theme)}>
-              <h1 class="text-base font-light font-mono flex items-center justify-center gap-3 pe-none">
+            <header class="max-w-6xl mx-auto flex justify-between flex-col md:flex-row px-2 py-8 gap-4" style={theme_color_style(@theme)}>
+              <h1 class="text-base font-light font-mono flex items-center gap-3 pe-none">
                 <%= {:safe, @theme.logo} %>
                 <%= @theme.title %>
+                <span class="text-gray-400 dark:text-gray-50">| <%= @current_page.title %></span>
               </h1>
 
               <div class="flex items-center text-sm text-gray-400 gap-5">
                 <div class="flex flex-col">
-                  <span class="text-xs text-gray-300">From:</span>
+                  <span class="text-xs text-gray-300 dark:text-gray-500">From:</span>
                   <time telemetry-component="LocalTime" title={@filters.from}><%= filter_datetime_format(@filters.from) %></time>
                 </div>
 
                 <div class="flex flex-col">
-                  <span class="text-xs text-gray-300">To:</span>
+                  <span class="text-xs text-gray-300 dark:text-gray-500">To:</span>
                   <time telemetry-component="LocalTime" title={@filters.to}><%= filter_datetime_format(@filters.to) %></time>
                 </div>
               </div>
             </header>
+
+            <div class="absolute top-2 right-2">
+              <.theme_switch />
+            </div>
           <% else %>
             <div class="bg-white dark:bg-black shadow-sm">
               <header class="max-w-6xl mx-auto flex justify-between p-2 mb-4 lg:pr-2 pr-[40px]" style={theme_color_style(@theme)}>
@@ -112,27 +114,7 @@ defmodule TelemetryUI.Web.View do
                       </a>
                     <% end %>
 
-                    <button telemetry-component="ThemeSwitch">
-                      <span class="dark:block hidden text-neutral-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-                          />
-                        </svg>
-                      </span>
-
-                      <span class="dark:hidden block text-neutral-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
-                          />
-                        </svg>
-                      </span>
-                    </button>
+                    <.theme_switch />
                   </div>
                 </.form>
               </header>
@@ -150,7 +132,7 @@ defmodule TelemetryUI.Web.View do
                     class="px-4 py-1 shadow-sm bg-white dark:bg-black font-bold text-primary text-sm dark:text-gray-50"
                   />
                 <% else %>
-                  <.page_link page={page} filters={@filters} class="transition px-4 py-1 bg-white dark:bg-black font-bold text-sm dark:text-gray-50 hover:opacity-50" />
+                  <.page_link page={page} filters={@filters} class="transition px-4 py-1 font-bold text-sm dark:text-gray-50 hover:opacity-50" />
                 <% end %>
               <% end %>
             </div>
@@ -184,6 +166,32 @@ defmodule TelemetryUI.Web.View do
   defp component(assigns) do
     ~H"""
     <%= Component.render(@metric, %Component.Assigns{filters: @filters, conn: @conn, theme: @theme}) %>
+    """
+  end
+
+  defp theme_switch(assigns) do
+    ~H"""
+    <button telemetry-component="ThemeSwitch">
+      <span class="dark:block hidden text-neutral-500">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+          />
+        </svg>
+      </span>
+
+      <span class="dark:hidden block text-neutral-200">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+          />
+        </svg>
+      </span>
+    </button>
     """
   end
 

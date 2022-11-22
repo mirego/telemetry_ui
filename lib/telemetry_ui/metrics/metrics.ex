@@ -4,13 +4,17 @@ defmodule TelemetryUI.Metrics do
   alias TelemetryUI.Metrics, as: UIMetrics
 
   @telemetry_metrics [
+    {:average, UIMetrics.Average},
+    {:average_over_time, UIMetrics.AverageOverTime},
     {:count_over_time, UIMetrics.CountOverTime},
     {:counter, UIMetrics.Counter},
     {:distribution, UIMetrics.Distribution},
     {:last_value, UIMetrics.LastValue},
+    {:median, UIMetrics.Median},
+    {:median_over_time, UIMetrics.MedianOverTime},
     {:summary, UIMetrics.Summary},
     {:sum, UIMetrics.Sum},
-    {:value_over_time, UIMetrics.ValueOverTime}
+    {:value_over_time, UIMetrics.AverageOverTime}
   ]
 
   defmacro __using__(_) do

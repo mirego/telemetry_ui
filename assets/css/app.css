@@ -36,6 +36,10 @@ header select {
   animation: loading 1s linear infinite;
 }
 
+svg.marks {
+  height: 100%;
+}
+
 @keyframes loading {
   0% {
     transform: rotate(0deg);

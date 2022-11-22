@@ -65,6 +65,7 @@ defmodule TelemetryUI.Theme do
     )
 
   defstruct header_color: hd(@color_palette),
+            primary_color: hd(@color_palette),
             title: "/metrics",
             logo: @logo,
             scale: @color_palette,
