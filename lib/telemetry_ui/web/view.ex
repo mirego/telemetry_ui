@@ -150,11 +150,11 @@ defmodule TelemetryUI.Web.View do
         <footer class="p-5 text-center opacity-25 text-xs dark:text-gray-300">
           Built with ♥ by the team @ <a href="https://www.mirego.com">Mirego</a>.
         </footer>
-      </body>
 
-      <script type="text/javascript" integrity={app_js_integrity()}>
-        <%= raw(render("app.js")) %>
-      </script>
+        <script type="text/javascript" integrity={app_js_integrity()}>
+          <%= raw(render("app.js")) %>
+        </script>
+      </body>
     </html>
     """
   end
