@@ -63,7 +63,7 @@ defmodule TelemetryUI.Web.VegaLite do
 
   defp legend(assigns) do
     ~H"""
-    <div id={@id <> "-legend"} class="hidden grow w-full ml-2 mt-2 flex flex-wrap gap-2 text-xs font-mono text-neutral-900 dark:text-neutral-50"></div>
+    <div id={@id <> "-legend"} class="hidden grow w-full mt-2 flex flex-wrap gap-2 text-xs font-mono text-neutral-900 dark:text-neutral-50"></div>
     """
   end
 

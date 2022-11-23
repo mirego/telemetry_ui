@@ -1,4 +1,4 @@
-import {View} from 'vega';
+import {Item, View} from 'vega';
 import vegaEmbed from 'vega-embed';
 
 declare global {
@@ -13,13 +13,39 @@ interface ViewInternal {
 const viewsById = {};
 const heightsById = {};
 
-const putLegendSelect = (view: View, value, legendItems: HTMLElement[]) => {
-  legendItems.forEach((item) => item.classList.add('opacity-50'));
-  view.signal('tags_tags_legend', value).run();
+const putLegendSelect = (
+  view: View,
+  value: string,
+  legendItems: HTMLElement[]
+) => {
+  legendItems.forEach((item) => {
+    item.classList.add('opacity-50');
+    item.classList.add('truncate');
+  });
+  view.signal('tags_tags_legend', atob(value)).run();
+};
+
+const onSelectTag = (
+  view: View,
+  item: HTMLElement,
+  legendItems: HTMLElement[]
+) => {
+  if (item.dataset.selected) {
+    resetLegendSelect(view, legendItems);
+  } else {
+    putLegendSelect(view, item.dataset.value as string, legendItems);
+    item.dataset.selected = 'true';
+    item.classList.remove('opacity-50');
+    item.classList.remove('truncate');
+  }
 };
 
 const resetLegendSelect = (view: View, legendItems: HTMLElement[]) => {
-  legendItems.forEach((item) => item.classList.remove('opacity-50'));
+  legendItems.forEach((item) => {
+    item.removeAttribute('data-selected');
+    item.classList.remove('opacity-50');
+    item.classList.add('truncate');
+  });
   view.signal('tags_tags_legend', null).run();
 };
 
@@ -35,17 +61,35 @@ const bindLegend = (element: HTMLElement, id: string, viewUnknown: unknown) => {
     legend.querySelectorAll('[telemetry-component="LegendItem"]')
   ) as HTMLElement[];
 
-  element.addEventListener('click', () => resetLegendSelect(view, legendItems));
-  legend.addEventListener('click', () => resetLegendSelect(view, legendItems));
-
   legendItems.forEach((item) => {
+    if (!item.dataset.value) return;
+
     item.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      putLegendSelect(view, item.dataset.value, legendItems);
-      item.classList.remove('opacity-50');
+      onSelectTag(view, item, legendItems);
     });
   });
+
+  view.addEventListener(
+    'click',
+    (event: Event, selectedItem: Item<any> | null | undefined) => {
+      if (!selectedItem || !selectedItem.datum || !selectedItem.datum['tags'])
+        return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const item = legendItems.find(
+        (item) => item.dataset.value === btoa(selectedItem.datum['tags'])
+      );
+      if (!item) return;
+      onSelectTag(view, item, legendItems);
+    }
+  );
+
+  element.addEventListener('click', () => resetLegendSelect(view, legendItems));
+  legend.addEventListener('click', () => resetLegendSelect(view, legendItems));
 };
 
 const renderLegend = (id: string, viewUnknown: unknown) => {
@@ -70,8 +114,8 @@ const renderLegend = (id: string, viewUnknown: unknown) => {
 
       return `<span
             telemetry-component="LegendItem"
-            data-value="${category}"
-            class="cursor-pointer hover:bg-neutral-50 hover:dark:bg-neutral-800 shrink-0 px-2 py-1 inline-block rounded-sm border-[1px] border-neutral-200 dark:border-neutral-800"
+            data-value="${btoa(category)}"
+            class="truncate max-w-full cursor-pointer hover:bg-neutral-50 hover:dark:bg-neutral-800 shrink-0 px-2 py-1 inline-block rounded-sm border-[1px] border-neutral-200 dark:border-neutral-800"
           >
             <span class="inline-block rounded-full h-[10px] w-[10px]" style="background: ${color};"></span>
             ${category}

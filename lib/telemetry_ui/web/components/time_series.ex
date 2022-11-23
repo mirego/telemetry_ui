@@ -32,7 +32,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         corner_radius_end: 2
       )
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
-      |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate)
+      |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, format: options.format)
       |> Vl.encode(:tooltip, tooltip)
 
     Vl.layers(spec, [aggregate_text_spec(options, unit), summary_chart])
@@ -67,7 +67,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
       )
       |> encode_tags_color(metric.tags)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
-      |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, stack: nil)
+      |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, stack: nil, format: options.format)
       |> Vl.param("tags", select: [fields: ["tags"], type: :point], bind: "legend")
       |> Vl.encode(:opacity, value: 0.2, condition: [param: "tags", value: 1, empty: true])
       |> Vl.encode(:tooltip, tooltip)
