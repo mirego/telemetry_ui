@@ -72,7 +72,15 @@ defmodule TelemetryUI.WriteBuffer do
         events
         |> group_events(backend)
         |> Enum.each(fn {event, {value, count}} ->
-          TelemetryUI.Backend.insert_event(backend, value, event.time, event.event_name, event.tags, count, event.report_as)
+          TelemetryUI.Backend.insert_event(
+            backend,
+            value,
+            event.time,
+            event.event_name,
+            event.tags,
+            count,
+            event.report_as
+          )
         end)
     end
   end
@@ -81,11 +89,29 @@ defmodule TelemetryUI.WriteBuffer do
     events
     |> Enum.map(&%{&1 | time: truncate_time(&1.time, backend)})
     |> Enum.group_by(fn event -> %{event | value: 0} end)
-    |> Enum.reduce(%{}, fn {event, values}, acc ->
-      count = length(values)
-      value = Float.round(Enum.reduce(values, 0, &(&1.value + &2)) / count, 3)
-      Map.put(acc, event, {value, count})
+    |> Enum.reduce(%{}, fn {event, events}, acc ->
+      case Enum.reduce(events, {0, 0}, &cast_value/2) do
+        {_, 0} ->
+          acc
+
+        {total_value, count} ->
+          value = Float.round(total_value / count, 3)
+          Map.put(acc, event, {value, count})
+      end
     end)
+  end
+
+  defp cast_value(event, {total_value, total_count}) do
+    value =
+      if is_function(event.cast_value, 1),
+        do: event.cast_value.(event.value),
+        else: event.value
+
+    {value + total_value, total_count + 1}
+  rescue
+    error ->
+      Logger.error("TelemetryUI - #{inspect(error)} Could not process event: #{inspect(event)}")
+      {total_value, total_count}
   end
 
   defp truncate_time(time, backend) do

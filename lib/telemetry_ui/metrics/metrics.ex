@@ -63,7 +63,8 @@ defmodule TelemetryUI.Metrics do
   end
 
   defp id(metric) do
-    reporter_options = Jason.encode!(Enum.into(Map.get(metric, :reporter_options) || [], %{}))
+    reporter_options = Enum.reject(List.wrap(Map.get(metric, :reporter_options)), fn {_, value} -> is_function(value) end)
+    reporter_options = Jason.encode!(Map.new(reporter_options))
 
     [
       metric.description,
