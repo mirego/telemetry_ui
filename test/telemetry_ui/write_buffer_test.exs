@@ -28,7 +28,7 @@ defmodule TelemetryUI.WriteBufferTest do
   describe "insert/1 " do
     test "insert with flush" do
       backend = %FakeBackend{self: self(), max_buffer_size: 100, flush_interval_ms: 400}
-      {:ok, write_buffer} = WriteBuffer.start_link(name: :buffer_test, backend: backend)
+      {:ok, write_buffer} = WriteBuffer.start_link(name: :flush_test, backend: backend)
 
       event = %TelemetryUI.Event{
         value: 1,
@@ -61,9 +61,73 @@ defmodule TelemetryUI.WriteBufferTest do
       assert_receive {1.0, _, "test", %{}, 1, nil}
     end
 
+    test "resilient to invalid event" do
+      backend = %FakeBackend{max_buffer_size: 3, self: self()}
+      {:ok, _write_buffer} = WriteBuffer.start_link(name: :resilient_test, backend: backend)
+
+      buffer = [
+        %TelemetryUI.Event{
+          value: "invalid",
+          time: ~U[2020-01-01T00:00:30Z],
+          event_name: "test",
+          tags: %{},
+          report_as: nil
+        },
+        %TelemetryUI.Event{
+          value: 1,
+          time: ~U[2020-01-01T00:14:12Z],
+          event_name: "test_2",
+          tags: %{},
+          report_as: nil
+        }
+      ]
+
+      state = %WriteBuffer.State{buffer: buffer, backend: backend, timer: nil}
+
+      WriteBuffer.handle_info(:tick, state)
+
+      refute_receive {2.0, ~U[2020-01-01T00:00:00Z], "test", %{}, nil, nil}
+      assert_receive {1.0, ~U[2020-01-01T00:14:00Z], "test_2", %{}, 1, nil}
+    end
+
+    test "cast_value event" do
+      backend = %FakeBackend{max_buffer_size: 3, self: self()}
+      {:ok, _write_buffer} = WriteBuffer.start_link(name: :cast_value_test, backend: backend)
+
+      cast_value = fn
+        "invalid" -> 0
+        value -> value
+      end
+
+      buffer = [
+        %TelemetryUI.Event{
+          value: "invalid",
+          time: ~U[2020-01-01T00:00:30Z],
+          event_name: "test",
+          tags: %{},
+          report_as: nil,
+          cast_value: cast_value
+        },
+        %TelemetryUI.Event{
+          value: 2,
+          time: ~U[2020-01-01T00:00:30Z],
+          event_name: "test",
+          tags: %{},
+          report_as: nil,
+          cast_value: cast_value
+        }
+      ]
+
+      state = %WriteBuffer.State{buffer: buffer, backend: backend, timer: nil}
+
+      WriteBuffer.handle_info(:tick, state)
+
+      assert_receive {1.0, ~U[2020-01-01T00:00:00Z], "test", %{}, 2, nil}
+    end
+
     test "group buffer with time" do
       backend = %FakeBackend{max_buffer_size: 3, self: self()}
-      {:ok, _write_buffer} = WriteBuffer.start_link(name: :buffer_test, backend: backend)
+      {:ok, _write_buffer} = WriteBuffer.start_link(name: :group_buffer_test, backend: backend)
 
       buffer = [
         %TelemetryUI.Event{
@@ -100,7 +164,7 @@ defmodule TelemetryUI.WriteBufferTest do
 
     test "group buffer with names" do
       backend = %FakeBackend{max_buffer_size: 3, self: self()}
-      {:ok, _write_buffer} = WriteBuffer.start_link(name: :buffer_test, backend: backend)
+      {:ok, _write_buffer} = WriteBuffer.start_link(name: :group_buffer_name_test, backend: backend)
       now = DateTime.utc_now()
 
       buffer = [
