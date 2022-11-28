@@ -29,6 +29,7 @@ defmodule TelemetryUI.Test.DataCase do
     end
 
     TelemetryUI.Test.Factory.bootstrap()
+    Process.sleep(1000)
     :ok
   end
 end

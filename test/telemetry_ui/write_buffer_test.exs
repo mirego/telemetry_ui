@@ -28,7 +28,7 @@ defmodule TelemetryUI.WriteBufferTest do
   describe "insert/1 " do
     test "insert with flush" do
       backend = %FakeBackend{self: self(), max_buffer_size: 100, flush_interval_ms: 400}
-      {:ok, write_buffer} = WriteBuffer.start_link(name: :buffer_test, backend: backend)
+      {:ok, write_buffer} = WriteBuffer.start_link(name: :flush_test, backend: backend)
 
       event = %TelemetryUI.Event{
         value: 1,
@@ -63,7 +63,7 @@ defmodule TelemetryUI.WriteBufferTest do
 
     test "resilient to invalid event" do
       backend = %FakeBackend{max_buffer_size: 3, self: self()}
-      {:ok, _write_buffer} = WriteBuffer.start_link(name: :buffer_test, backend: backend)
+      {:ok, _write_buffer} = WriteBuffer.start_link(name: :resilient_test, backend: backend)
 
       buffer = [
         %TelemetryUI.Event{
@@ -92,7 +92,7 @@ defmodule TelemetryUI.WriteBufferTest do
 
     test "cast_value event" do
       backend = %FakeBackend{max_buffer_size: 3, self: self()}
-      {:ok, _write_buffer} = WriteBuffer.start_link(name: :buffer_test, backend: backend)
+      {:ok, _write_buffer} = WriteBuffer.start_link(name: :cast_value_test, backend: backend)
 
       cast_value = fn
         "invalid" -> 0
@@ -127,7 +127,7 @@ defmodule TelemetryUI.WriteBufferTest do
 
     test "group buffer with time" do
       backend = %FakeBackend{max_buffer_size: 3, self: self()}
-      {:ok, _write_buffer} = WriteBuffer.start_link(name: :buffer_test, backend: backend)
+      {:ok, _write_buffer} = WriteBuffer.start_link(name: :group_buffer_test, backend: backend)
 
       buffer = [
         %TelemetryUI.Event{
@@ -164,7 +164,7 @@ defmodule TelemetryUI.WriteBufferTest do
 
     test "group buffer with names" do
       backend = %FakeBackend{max_buffer_size: 3, self: self()}
-      {:ok, _write_buffer} = WriteBuffer.start_link(name: :buffer_test, backend: backend)
+      {:ok, _write_buffer} = WriteBuffer.start_link(name: :group_buffer_name_test, backend: backend)
       now = DateTime.utc_now()
 
       buffer = [
