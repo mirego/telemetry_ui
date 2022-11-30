@@ -153,10 +153,29 @@ defmodule TelemetryUI.Backend.EctoPostgres do
         buckets = fetch_buckets(metric)
 
         from(entries in queryable,
-          left_lateral_join: buckets in fragment("SELECT ?::double precision[] as values", ^buckets),
+          left_lateral_join:
+            buckets in fragment("SELECT ?::double precision[] as values", ^buckets),
           select_merge: %{
-            bucket_start: fragment("min(?)", fragment("?[width_bucket(?::double precision,  ?)]", buckets.values, entries.value, buckets.values)),
-            bucket_end: fragment("min(?)", fragment("?[width_bucket(?::double precision,  ?) + 1]", buckets.values, entries.value, buckets.values))
+            bucket_start:
+              fragment(
+                "min(?)",
+                fragment(
+                  "?[width_bucket(?::double precision,  ?)]",
+                  buckets.values,
+                  entries.value,
+                  buckets.values
+                )
+              ),
+            bucket_end:
+              fragment(
+                "min(?)",
+                fragment(
+                  "?[width_bucket(?::double precision,  ?) + 1]",
+                  buckets.values,
+                  entries.value,
+                  buckets.values
+                )
+              )
           }
         )
       else
@@ -179,7 +198,10 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     defp filter_tags(queryable, metric) do
       if Enum.any?(metric.tags) do
         tags = Enum.map(metric.tags, &to_string/1)
-        from(entries in queryable, where: fragment("ARRAY(SELECT jsonb_object_keys(?))", entries.tags) == ^tags)
+
+        from(entries in queryable,
+          where: fragment("ARRAY(SELECT jsonb_object_keys(?))", entries.tags) == ^tags
+        )
       else
         from(entries in queryable, where: entries.tags == ^%{})
       end

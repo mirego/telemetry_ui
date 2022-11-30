@@ -6,7 +6,6 @@ defmodule TelemetryUI.Web.Components.Stat do
   alias VegaLite, as: Vl
 
   def spec(metric = %{tags: []}, assigns, options) do
-    domain = [assigns.filters.from, assigns.filters.to]
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
     unit = to_unit(metric.unit)
 
@@ -16,22 +15,32 @@ defmodule TelemetryUI.Web.Components.Stat do
     ]
 
     assigns
-    |> base_spec(height: 40)
+    |> stat_base_spec()
     |> data_from_metric(metric, assigns)
     |> Vl.layers([
       Vl.new()
-      |> Vl.transform(aggregate: [[op: options.aggregate, field: options.aggregate_field || options.field, as: "aggregate_value"]])
+      |> Vl.transform(
+        aggregate: [
+          [op: options.aggregate, field: options.aggregate_field || options.field, as: "aggregate_value"],
+          [op: "max", field: "date", as: "to_date"],
+          [op: "min", field: "date", as: "from_date"]
+        ]
+      )
       |> Vl.transform(calculate: "format(datum.aggregate_value#{options.aggregate_value_suffix}, '#{options.format}') + '#{unit}'", as: "formatted_aggregate_value")
-      |> Vl.mark(:text, font_size: 50, font_weight: "bold", color: hd(assigns.theme.scale), x: 0, y: 0)
-      |> Vl.encode(:text, type: :nominal, field: "formatted_aggregate_value"),
+      |> Vl.mark(:text, font_size: 50, font_weight: "bold", color: hd(assigns.theme.scale), x: 0, y: 0, align: "left")
+      |> Vl.encode(:text, type: :nominal, field: "formatted_aggregate_value")
+      |> Vl.encode(:tooltip, [
+        [field: "from_date", title: "From", type: :temporal, time_unit: [unit: "yearmonthdatehoursminutes"]],
+        [field: "to_date", title: "To", type: :temporal, time_unit: [unit: "yearmonthdatehoursminutes"]]
+      ]),
       Vl.new()
-      |> Vl.mark(:area, opacity: 0.2, tooltip: true, color: hd(assigns.theme.scale), y_offset: 40, y2_offset: 40, y2: [expr: "height + 40"])
+      |> Vl.mark(:area, opacity: 0.2, tooltip: true, color: hd(assigns.theme.scale), y_offset: 50, y2_offset: 50, y2: [expr: "height + 50"])
       |> Vl.encode(:tooltip, tooltip)
-      |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit], scale: [domain: domain])
+      |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate),
       Vl.new()
-      |> Vl.mark(:line, opacity: 0.3, color: hd(assigns.theme.scale), y_offset: 40, y2_offset: 40)
-      |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit], scale: [domain: domain])
+      |> Vl.mark(:line, opacity: 0.3, color: hd(assigns.theme.scale), y_offset: 50, y2_offset: 50)
+      |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate)
     ])
   end

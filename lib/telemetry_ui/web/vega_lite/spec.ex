@@ -29,6 +29,18 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
     end
   end
 
+  def stat_base_spec(assigns, config \\ []) do
+    config = Keyword.merge([width: "container", height: 100, background: "transparent"], config)
+
+    Vl.config(
+      Vl.new(config),
+      autosize: [type: "fit-x"],
+      view: [stroke: nil],
+      axes: [],
+      range: [category: assigns.theme.scale]
+    )
+  end
+
   def base_spec(assigns, config \\ []) do
     grid_color = "rgba(0,0,0,0.1)"
     label_color = "#666"
