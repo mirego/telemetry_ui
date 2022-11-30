@@ -41,3 +41,15 @@ defmodule TelemetryUI.InvalidThemeShareKeyError do
     %__MODULE__{message: message}
   end
 end
+
+defmodule TelemetryUI.Digest.InvalidServiceError do
+  defexception [:message]
+end
+
+defmodule TelemetryUI.Digest.InvalidShareKeyError do
+  defexception [:message]
+end
+
+defmodule TelemetryUI.Digest.InvalidTimeDiffError do
+  defexception [:message]
+end

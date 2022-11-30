@@ -102,7 +102,12 @@ defmodule TelemetryUI do
   def theme(name), do: config(name, :theme)
   def backend(name), do: config(name, :backend)
 
+  def valid_share_key?(share_key) do
+    is_binary(share_key) and byte_size(share_key) === 16
+  end
+
   def page_by_id(name, id), do: Enum.find(pages(name), &(&1.id === id))
+  def page_by_title(name, title), do: Enum.find(pages(name), &(&1.title === title))
 
   def metric_by_id(name, id) do
     name

@@ -44,6 +44,8 @@ end
 
 Application.ensure_all_started(:os_mon)
 
+Mimic.copy(:httpc)
+
 ExUnit.start()
 
 defmodule TestCustomRenderMetric do
@@ -80,6 +82,7 @@ Supervisor.start_link(
   [
     TelemetryUI.Test.Endpoint,
     TelemetryUI.Test.Repo,
+    {TelemetryUI, [name: :digest, theme: [share_key: "1111111111111111"], metrics: [{"Page", []}]]},
     {TelemetryUI, [name: :empty_metrics, metrics: [], theme: [title: "My test metrics"]]},
     {TelemetryUI, [name: :custom_render_metrics, metrics: [custom_render_metric], theme: [title: "My custom render metrics"]]},
     {TelemetryUI, [name: :data_metrics, metrics: [data_metric], theme: [title: "My data metrics"]]}

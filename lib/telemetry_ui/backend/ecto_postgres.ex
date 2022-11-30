@@ -153,8 +153,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
         buckets = fetch_buckets(metric)
 
         from(entries in queryable,
-          left_lateral_join:
-            buckets in fragment("SELECT ?::double precision[] as values", ^buckets),
+          left_lateral_join: buckets in fragment("SELECT ?::double precision[] as values", ^buckets),
           select_merge: %{
             bucket_start:
               fragment(
