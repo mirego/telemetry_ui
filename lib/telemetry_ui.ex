@@ -131,7 +131,7 @@ defmodule TelemetryUI do
   end
 
   defp validate_theme!(theme) do
-    if not is_nil(theme.share_key) and not is_binary(theme.share_key) do
+    if not is_nil(theme.share_key) and not valid_share_key?(theme.share_key) do
       raise TelemetryUI.InvalidThemeShareKeyError.exception(theme.share_key)
     end
   end
