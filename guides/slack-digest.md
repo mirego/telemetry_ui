@@ -39,4 +39,4 @@ config :my_app, Oban,
 
 Here is the kind of result you should see in Slack:
 
-<img style="border-radius: 4px" width="321" alt="image" src="https://user-images.githubusercontent.com/464900/204909541-89df8db6-348e-4134-81f9-8bab89518dff.png">
+<img width="321" src="https://user-images.githubusercontent.com/464900/204909541-89df8db6-348e-4134-81f9-8bab89518dff.png">
