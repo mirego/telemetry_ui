@@ -99,10 +99,14 @@ defmodule TelemetryUI do
   end
 
   def pages(name), do: config(name, :pages)
+
   def theme(name), do: config(name, :theme)
+
   def backend(name), do: config(name, :backend)
 
   def valid_share_key?(share_key), do: is_binary(share_key)
+
+  def valid_share_url?(url), do: is_binary(URI.parse(url).host)
 
   def page_by_id(name, id), do: Enum.find(pages(name), &(&1.id === id))
   def page_by_title(name, title), do: Enum.find(pages(name), &(&1.title === title))

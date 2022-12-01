@@ -7,7 +7,6 @@ if Code.ensure_loaded?(Oban) do
 
     @impl Oban.Worker
     def perform(%Oban.Job{args: args}) do
-      {time_amount, time_unit} = Digest.cast_time_diff(args["time_diff"])
       telemetry_name = get_telemetry_name(args)
       share_key = TelemetryUI.theme(telemetry_name).share_key
 
@@ -15,35 +14,36 @@ if Code.ensure_loaded?(Oban) do
         raise TelemetryUI.InvalidThemeShareKeyError.exception(share_key)
       end
 
+      if not TelemetryUI.valid_share_url?(args["share_url"]) do
+        raise TelemetryUI.InvalidDigestShareURLError.exception(share_key)
+      end
+
+      {time_amount, time_unit} = Digest.cast_time_diff(args["time_diff"])
       to = DateTime.utc_now()
       from = DateTime.add(to, -time_amount, time_unit)
-
-      pages =
-        args["pages"]
-        |> Enum.map(&TelemetryUI.page_by_title(telemetry_name, &1))
-        |> Enum.reject(&is_nil/1)
-        |> Enum.map(fn page ->
-          filters = %Filter{
-            page: page.id,
-            from: from,
-            to: to
-          }
-
-          share = Filter.encrypt(filters, args["share_key"])
-          {page, args["share_url"] <> "?share=" <> share}
-        end)
+      filters = %Filter{page: nil, to: to, from: from}
+      pages = generate_pages_links(args["pages"], telemetry_name, filters, args["share_url"], share_key)
 
       Digest.send!(args, pages, from, to)
 
       :ok
     end
 
+    defp generate_pages_links(pages, telemetry_name, filters, share_url, share_key) do
+      pages
+      |> Enum.map(&TelemetryUI.page_by_title(telemetry_name, &1))
+      |> Enum.reject(&is_nil/1)
+      |> Enum.map(fn page ->
+        filters = %{filters | page: page.id}
+        share = Filter.encrypt(filters, share_key)
+        {page, share_url <> "?share=" <> share}
+      end)
+    end
+
     defp get_telemetry_name(args) do
-      if args["telemetry_ui_name"] do
-        String.to_existing_atom(args["telemetry_ui_name"])
-      else
-        :default
-      end
+      if args["telemetry_ui_name"],
+        do: String.to_existing_atom(args["telemetry_ui_name"]),
+        else: :default
     end
   end
 end
