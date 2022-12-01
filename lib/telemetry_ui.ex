@@ -102,9 +102,7 @@ defmodule TelemetryUI do
   def theme(name), do: config(name, :theme)
   def backend(name), do: config(name, :backend)
 
-  def valid_share_key?(share_key) do
-    is_binary(share_key) and byte_size(share_key) === 16
-  end
+  def valid_share_key?(share_key), do: is_binary(share_key)
 
   def page_by_id(name, id), do: Enum.find(pages(name), &(&1.id === id))
   def page_by_title(name, title), do: Enum.find(pages(name), &(&1.title === title))
@@ -133,7 +131,7 @@ defmodule TelemetryUI do
   end
 
   defp validate_theme!(theme) do
-    if theme.share_key && String.length(theme.share_key) !== 16 do
+    if not is_nil(theme.share_key) and not is_binary(theme.share_key) do
       raise TelemetryUI.InvalidThemeShareKeyError.exception(theme.share_key)
     end
   end

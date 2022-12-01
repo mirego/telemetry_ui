@@ -46,10 +46,6 @@ defmodule TelemetryUI.Digest.InvalidServiceError do
   defexception [:message]
 end
 
-defmodule TelemetryUI.Digest.InvalidShareKeyError do
-  defexception [:message]
-end
-
 defmodule TelemetryUI.Digest.InvalidTimeDiffError do
   defexception [:message]
 end

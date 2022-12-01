@@ -12,17 +12,7 @@ if Code.ensure_loaded?(Oban) do
       share_key = TelemetryUI.theme(telemetry_name).share_key
 
       if not TelemetryUI.valid_share_key?(share_key) do
-        raise Digest.InvalidShareKeyError,
-          message: """
-          Invalid share_key in your theme. Must be a binary of exactly 16 characters.
-
-          %{
-            metrics: ...,
-            theme: %{
-              share_key: "0123456789123456"
-            }
-          }
-          """
+        raise TelemetryUI.InvalidThemeShareKeyError.exception(share_key)
       end
 
       to = DateTime.utc_now()
