@@ -4,11 +4,13 @@
 
 To schedule a weekly digest, we rely on [Oban](https://hexdocs.pm/oban/) to have a safe, unique and _schedulable_ queue across our system.
 
-**Requirements:**
-You will need to [install it before continuing this guide](https://hexdocs.pm/oban/installation.html).
+## Requirements
+
+You will need to [install it](https://hexdocs.pm/oban/installation.html) before continuing this guide.
+
 You will also need to have a valid [Slack hook URL](https://api.slack.com/messaging/webhooks#enable_webhooks).
 
----
+## Usage
 
 We can now add a Cron config with custom arguments to publish our digest on Slack:
 
