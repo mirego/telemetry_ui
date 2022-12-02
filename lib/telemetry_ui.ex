@@ -87,6 +87,13 @@ defmodule TelemetryUI do
           []
         end
 
+    children =
+      if Application.get_env(:telemetry_ui, :disabled, false) do
+        []
+      else
+        children
+      end
+
     Supervisor.init(children, strategy: :one_for_one)
   end
 
