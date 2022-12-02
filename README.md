@@ -14,7 +14,7 @@ Your data should not have to be uploaded somewhere else to have insighful metric
 
 It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to quickly (and efficiently) store and query your application events.
 
-<img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/189182735-c8ce1699-cde5-4432-9f4a-c8cdeddcf4f5.png">
+<img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/205386716-a4aa9387-6125-40e6-b764-b2e76df5e83b.png">
 
 ## Usage
 
