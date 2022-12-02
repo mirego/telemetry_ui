@@ -2,7 +2,6 @@
 
 <img width="1181" alt="Preview of complex config in Accent" src="https://user-images.githubusercontent.com/464900/203413557-a152b388-4501-4940-a3b8-36c3892b63a9.png">
 
-
 <hr />
 
 Here is an example of a complex config, declared in its own module.

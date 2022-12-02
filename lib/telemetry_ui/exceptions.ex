@@ -36,8 +36,27 @@ defmodule TelemetryUI.InvalidThemeShareKeyError do
 
   @impl Exception
   def exception(key) do
-    message = ":share_key is not valid. It must be a a binary of exactly 16 characters. Got: #{inspect(key)} (#{String.length(key)} characters)"
+    message = ":share_key is not valid. It must be a binary of exactly 16 characters. Got: #{inspect(key)} (#{String.length(key)} characters)"
 
     %__MODULE__{message: message}
   end
+end
+
+defmodule TelemetryUI.InvalidDigestShareURLError do
+  defexception [:message]
+
+  @impl Exception
+  def exception(url) do
+    message = "`share_url` worker argument is not valid. It must be a valid URL (parsable by `URI.parse/1`). Got: #{inspect(url)}"
+
+    %__MODULE__{message: message}
+  end
+end
+
+defmodule TelemetryUI.Digest.InvalidServiceError do
+  defexception [:message]
+end
+
+defmodule TelemetryUI.Digest.InvalidTimeDiffError do
+  defexception [:message]
 end

@@ -47,7 +47,7 @@ defmodule TelemetryUI.Mixfile do
   end
 
   def application do
-    [mod: []]
+    [mod: [], extra_applications: [:inets]]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
@@ -66,6 +66,7 @@ defmodule TelemetryUI.Mixfile do
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:timex, "~> 3.7"},
+      {:oban, "~> 2.13", optional: true},
 
       # Frontend
       {:vega_lite, "~> 0.1"},
@@ -86,7 +87,8 @@ defmodule TelemetryUI.Mixfile do
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
 
       # Test
-      {:factori, ">= 0.0.0", only: :test}
+      {:factori, ">= 0.0.0", only: :test},
+      {:mimic, "~> 1.7", only: :test}
     ]
   end
 

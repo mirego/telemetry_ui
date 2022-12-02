@@ -66,13 +66,11 @@ defmodule TelemetryUI.Web do
   defp assign_share(conn = %{assigns: %{shared: true}}, _), do: conn
 
   defp assign_share(conn, _) do
-    case conn.assigns.theme.share_key do
-      secret_key when is_binary(secret_key) and byte_size(secret_key) >= 16 ->
-        share = Filter.encrypt(conn.assigns.filters, secret_key)
-        assign(conn, :share, share)
-
-      _ ->
-        assign(conn, :share, nil)
+    if TelemetryUI.valid_share_key?(conn.assigns.theme.share_key) do
+      share = Filter.encrypt(conn.assigns.filters, conn.assigns.theme.share_key)
+      assign(conn, :share, share)
+    else
+      assign(conn, :share, nil)
     end
   end
 

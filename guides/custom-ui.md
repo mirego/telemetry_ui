@@ -32,7 +32,6 @@ Here is the list of available options:
 
 The list of metrics can also be customized with TailwindCSS classes. Here is an example with 2 metrics side-by-side in a grid:
 
-
 ```elixir
 metrics = [
   distribution("my_app.repo.query.total_time",
