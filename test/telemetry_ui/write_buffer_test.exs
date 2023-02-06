@@ -11,8 +11,8 @@ defmodule TelemetryUI.WriteBufferTest do
               verbose: false
 
     defimpl TelemetryUI.Backend do
-      def insert_event(backend, value, time, event_name, tags, count, report_as) do
-        send(backend.self, {value, time, event_name, tags, count, report_as})
+      def insert_event(backend, value, time, event_name, tags, count) do
+        send(backend.self, {value, time, event_name, tags, count})
       end
 
       def prune_events!(_backend, _date) do
@@ -34,13 +34,12 @@ defmodule TelemetryUI.WriteBufferTest do
         value: 1,
         time: DateTime.utc_now(),
         event_name: "test",
-        tags: %{},
-        report_as: nil
+        tags: %{}
       }
 
       WriteBuffer.insert(write_buffer, event)
 
-      assert_receive {1.0, _, "test", %{}, 1, nil}, 1000
+      assert_receive {1.0, _, "test", %{}, 1}, 1000
     end
 
     test "insert with buffer size" do
@@ -51,14 +50,13 @@ defmodule TelemetryUI.WriteBufferTest do
         value: 1,
         time: DateTime.utc_now(),
         event_name: "test",
-        tags: %{},
-        report_as: nil
+        tags: %{}
       }
 
       state = :sys.get_state(write_buffer)
       WriteBuffer.handle_cast({:insert, event}, state)
 
-      assert_receive {1.0, _, "test", %{}, 1, nil}
+      assert_receive {1.0, _, "test", %{}, 1}
     end
 
     test "resilient to invalid event" do
@@ -70,15 +68,13 @@ defmodule TelemetryUI.WriteBufferTest do
           value: "invalid",
           time: ~U[2020-01-01T00:00:30Z],
           event_name: "test",
-          tags: %{},
-          report_as: nil
+          tags: %{}
         },
         %TelemetryUI.Event{
           value: 1,
           time: ~U[2020-01-01T00:14:12Z],
           event_name: "test_2",
-          tags: %{},
-          report_as: nil
+          tags: %{}
         }
       ]
 
@@ -86,8 +82,8 @@ defmodule TelemetryUI.WriteBufferTest do
 
       WriteBuffer.handle_info(:tick, state)
 
-      refute_receive {2.0, ~U[2020-01-01T00:00:00Z], "test", %{}, nil, nil}
-      assert_receive {1.0, ~U[2020-01-01T00:14:00Z], "test_2", %{}, 1, nil}
+      refute_receive {2.0, ~U[2020-01-01T00:00:00Z], "test", %{}, nil}
+      assert_receive {1.0, ~U[2020-01-01T00:14:00Z], "test_2", %{}, 1}
     end
 
     test "cast_value event" do
@@ -105,7 +101,6 @@ defmodule TelemetryUI.WriteBufferTest do
           time: ~U[2020-01-01T00:00:30Z],
           event_name: "test",
           tags: %{},
-          report_as: nil,
           cast_value: cast_value
         },
         %TelemetryUI.Event{
@@ -113,7 +108,6 @@ defmodule TelemetryUI.WriteBufferTest do
           time: ~U[2020-01-01T00:00:30Z],
           event_name: "test",
           tags: %{},
-          report_as: nil,
           cast_value: cast_value
         }
       ]
@@ -122,7 +116,7 @@ defmodule TelemetryUI.WriteBufferTest do
 
       WriteBuffer.handle_info(:tick, state)
 
-      assert_receive {1.0, ~U[2020-01-01T00:00:00Z], "test", %{}, 2, nil}
+      assert_receive {1.0, ~U[2020-01-01T00:00:00Z], "test", %{}, 2}
     end
 
     test "group buffer with time" do
@@ -134,15 +128,13 @@ defmodule TelemetryUI.WriteBufferTest do
           value: 2,
           time: ~U[2020-01-01T00:00:30Z],
           event_name: "test",
-          tags: %{},
-          report_as: nil
+          tags: %{}
         },
         %TelemetryUI.Event{
           value: 1,
           time: ~U[2020-01-01T00:14:12Z],
           event_name: "test",
-          tags: %{},
-          report_as: nil
+          tags: %{}
         }
       ]
 
@@ -152,14 +144,13 @@ defmodule TelemetryUI.WriteBufferTest do
         value: 4,
         time: ~U[2020-01-01T00:00:33Z],
         event_name: "test",
-        tags: %{},
-        report_as: nil
+        tags: %{}
       }
 
       WriteBuffer.handle_cast({:insert, event}, state)
 
-      assert_receive {3.0, ~U[2020-01-01T00:00:00Z], "test", %{}, 2, nil}
-      assert_receive {1.0, ~U[2020-01-01T00:14:00Z], "test", %{}, 1, nil}
+      assert_receive {3.0, ~U[2020-01-01T00:00:00Z], "test", %{}, 2}
+      assert_receive {1.0, ~U[2020-01-01T00:14:00Z], "test", %{}, 1}
     end
 
     test "group buffer with names" do
@@ -172,15 +163,13 @@ defmodule TelemetryUI.WriteBufferTest do
           value: 2,
           time: now,
           event_name: "test",
-          tags: %{},
-          report_as: nil
+          tags: %{}
         },
         %TelemetryUI.Event{
           value: 1,
           time: now,
           event_name: "test2",
-          tags: %{},
-          report_as: nil
+          tags: %{}
         }
       ]
 
@@ -190,14 +179,13 @@ defmodule TelemetryUI.WriteBufferTest do
         value: 4,
         time: now,
         event_name: "test",
-        tags: %{},
-        report_as: nil
+        tags: %{}
       }
 
       WriteBuffer.handle_cast({:insert, event}, state)
 
-      assert_receive {3.0, _, "test", %{}, 2, nil}
-      assert_receive {1.0, _, "test2", %{}, 1, nil}
+      assert_receive {3.0, _, "test", %{}, 2}
+      assert_receive {1.0, _, "test2", %{}, 1}
     end
   end
 end

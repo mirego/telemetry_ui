@@ -5,6 +5,7 @@ defmodule TelemetryUI.Web do
   alias TelemetryUI.Web.Filter
 
   plug(:assign_telemetry_name)
+  plug(:assign_version)
   plug(:assign_theme)
   plug(:fetch_query_params)
   plug(:fetch_shared)
@@ -47,6 +48,19 @@ defmodule TelemetryUI.Web do
     else
       assign(conn, :telemetry_ui_name, :default)
     end
+  end
+
+  defp assign_version(conn, _) do
+    version =
+      case :application.get_key(:telemetry_ui, :vsn) do
+        {:ok, current} ->
+          List.to_string(current)
+
+        _ ->
+          "dev"
+      end
+
+    assign(conn, :telemetry_ui_version, version)
   end
 
   defp assign_filters(conn = %{assigns: %{shared: true}}, _), do: conn

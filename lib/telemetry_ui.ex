@@ -55,13 +55,6 @@ defmodule TelemetryUI do
 
   @impl Supervisor
   def init(state) do
-    metrics =
-      state.pages
-      |> Enum.flat_map(& &1.metrics)
-      |> Enum.map(&Map.get(&1, :telemetry_metric))
-      |> Enum.reject(&is_nil/1)
-      |> Enum.uniq_by(&{&1.event_name, &1.tags, TelemetryUI.Event.cast_report_as(&1)})
-
     children = [
       {TelemetryUI.Config, config: state, name: config_name(state.name)}
     ]
@@ -69,6 +62,13 @@ defmodule TelemetryUI do
     children =
       children ++
         if state.backend do
+          metrics =
+            state.pages
+            |> Enum.flat_map(& &1.metrics)
+            |> Enum.map(&Map.get(&1, :telemetry_metric))
+            |> Enum.reject(&is_nil/1)
+            |> Enum.uniq_by(&{&1.name, &1.tags})
+
           [
             {TelemetryUI.WriteBuffer, backend: state.backend, name: writer_buffer_name(state.name)},
             {TelemetryUI.Reporter, metrics: metrics, write_buffer: writer_buffer_name(state.name)}

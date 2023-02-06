@@ -151,6 +151,8 @@ defmodule TelemetryUI.Web.View do
           Built with ♥ by the team @ <a href="https://www.mirego.com">Mirego</a>.
         </footer>
 
+        <div class="fixed bottom-0 left-0 p-3 font-light font-mono opacity-25 text-xs"><%= @telemetry_ui_version %></div>
+
         <script type="text/javascript" integrity={app_js_integrity()}>
           <%= raw(render("app.js")) %>
         </script>

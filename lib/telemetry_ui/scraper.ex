@@ -6,7 +6,7 @@ defmodule TelemetryUI.Scraper do
   defmodule Options do
     @moduledoc false
 
-    defstruct from: nil, to: nil, event_name: nil, report_as: nil
+    defstruct from: nil, to: nil, event_name: nil
 
     @type t :: %__MODULE__{}
   end
@@ -16,8 +16,7 @@ defmodule TelemetryUI.Scraper do
 
     filters = %{
       filters
-      | report_as: cast_report_as(metric),
-        event_name: cast_event_name(metric)
+      | event_name: cast_event_name(metric)
     }
 
     backend

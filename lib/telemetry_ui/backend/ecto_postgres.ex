@@ -7,7 +7,8 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             flush_interval_ms: 10_000,
             insert_date_trunc: "minute",
             verbose: false,
-            telemetry_prefix: [:telemetry_ui, :repo]
+            telemetry_prefix: [:telemetry_ui, :repo],
+            telemetry_options: [telemetry_ui_conf: []]
 
   import Ecto.Query
 
@@ -25,7 +26,6 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       field(:count, :integer)
       field(:date, :utc_datetime)
       field(:tags, :map)
-      field(:report_as, :string, load_in_query: false)
     end
   end
 
@@ -36,20 +36,21 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       end
     end
 
-    def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1, report_as \\ "") do
+    def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1) do
       backend.repo.query!(
         """
-        INSERT INTO telemetry_ui_events (value, min_value, max_value, date, name, tags, count, report_as) VALUES($1, $1, $1, date_trunc($7::text, $2::timestamp), $3, $4, $5, $6)
-        ON CONFLICT (date, name, tags, report_as)
+        INSERT INTO telemetry_ui_events (value, min_value, max_value, date, name, tags, count) VALUES($1, $1, $1, date_trunc($6::text, $2::timestamp), $3, $4, $5)
+        ON CONFLICT (date, name, tags)
         DO UPDATE SET
           max_value = GREATEST(telemetry_ui_events.value, $1),
           min_value = LEAST(telemetry_ui_events.value, $1),
           value = (telemetry_ui_events.value + $1) / 2,
           count = telemetry_ui_events.count + $5
         """,
-        [value, date, event_name, tags, count, report_as, backend.insert_date_trunc],
+        [value, date, event_name, tags, count, backend.insert_date_trunc],
         log: backend.verbose,
-        telemetry_prefix: backend.telemetry_prefix
+        telemetry_prefix: backend.telemetry_prefix,
+        telemetry_options: backend.telemetry_options
       )
     end
 
@@ -57,7 +58,8 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       backend.repo.delete_all(
         from(entries in Entry, where: entries.date <= ^date),
         log: backend.verbose,
-        telemetry_prefix: backend.telemetry_prefix
+        telemetry_prefix: backend.telemetry_prefix,
+        telemetry_options: backend.telemetry_options
       )
     end
 
@@ -66,7 +68,6 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       |> aggregated_query(options)
       |> group_by_date(options)
       |> filter_tags(metric)
-      |> filter_report_as(options.report_as)
       |> select_buckets(metric)
       |> backend.repo.all()
       |> fill_buckets(metric)
@@ -186,12 +187,6 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       metric.reporter_options
       |> Keyword.fetch!(:buckets)
       |> Enum.map(&(&1 * 1.0))
-    end
-
-    defp filter_report_as(queryable, nil), do: queryable
-
-    defp filter_report_as(queryable, report_as) do
-      from(entries in queryable, where: entries.report_as == ^report_as)
     end
 
     defp filter_tags(queryable, metric) do

@@ -43,7 +43,6 @@ defmodule TelemetryUI.Reporter do
           time: DateTime.utc_now(),
           event_name: event_name,
           tags: tags,
-          report_as: cast_report_as(metric),
           cast_value: cast_reporter_cast_value(metric)
         }
       )

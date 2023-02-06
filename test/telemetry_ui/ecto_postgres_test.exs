@@ -9,7 +9,6 @@ defmodule TelemetryUI.EctoPostgresTest do
 
   def factory_event(metric, attributes \\ []) do
     attributes = Keyword.put_new(attributes, :name, Enum.join(metric.name, "."))
-    attributes = Keyword.put_new(attributes, :report_as, "")
     Factory.insert("telemetry_ui_events", attributes)
   end
 

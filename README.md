@@ -6,6 +6,33 @@
   <a href="https://hex.pm/packages/telemetry_ui"><img src="https://img.shields.io/hexpm/v/telemetry_ui.svg" /></a>
 </div>
 
+## 2.0 breaking change
+
+The `2.0` version fixes a hack that was introduced to register unique event name based on the `keep` and `drop` options.
+Since the name is used to register the event like `counter("phoenix.router_dispatch.stop.duration"`, we added a `reporter_options: [report_as: "some unique name"]`. But the way to actually do this is documented here: https://hexdocs.pm/telemetry_metrics/Telemetry.Metrics.html#module-filtering-on-metadata. So in `2.0`, we removed the `report_as` option to use the `event_name` option on every metric definition.
+
+_1.x_:
+
+```
+distribution(
+  "http.client.request.duration",
+  reporter_options: [report_as: "fast_client"],
+  keep: &(match?(%{name: :fast_client}, &1))
+)
+```
+
+_2.x_:
+
+```
+distribution(
+  "http.fast.client.request.duration",
+  event_name: [:http_client, :request, :stop],
+  keep: &(match?(%{name: :fast_client}, &1))
+)
+```
+
+This changes impact the unique index on the database, so you can either manually delete every metrics with a `report_as` before running the `2.0` migration, or truncate the table.
+
 ## Features
 
 `telemetry_ui`’s primary goal is to display [your application metrics](https://hexdocs.pm/telemetry_metrics) without external infrastructure dependencies. [Phoenix](https://hexdocs.pm/phoenix/telemetry.html), [Absinthe](https://hexdocs.pm/absinthe/telemetry.html), [Ecto](https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events), [Erlang VM](https://hexdocs.pm/telemetry_poller/readme.html), [Tesla](https://hexdocs.pm/tesla/Tesla.Middleware.Telemetry.html), [Redix](https://hexdocs.pm/redix/telemetry.html), [Oban](https://hexdocs.pm/oban/Oban.Telemetry.html) and others expose all sorts of data that can be useful. You can also emit your own events from your application.

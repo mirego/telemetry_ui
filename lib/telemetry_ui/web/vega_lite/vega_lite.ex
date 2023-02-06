@@ -23,7 +23,7 @@ defmodule TelemetryUI.Web.VegaLite do
 
   defp fullscreen_button(assigns) do
     ~H"""
-    <button role="button" telemetry-component="ToggleFullscreen" data-view-id={@id} class="absolute right-0 top-0 p-2 block hover:opacity-50">
+    <button role="button" telemetry-component="ToggleFullscreen" data-view-id={@id} class="absolute right-0 top-0 py-2 px-3 block hover:opacity-50">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
         <path
           stroke-linecap="round"

@@ -78,8 +78,7 @@ defmodule TelemetryUI.WriteBuffer do
             event.time,
             event.event_name,
             event.tags,
-            count,
-            event.report_as
+            count
           )
         end)
     end
