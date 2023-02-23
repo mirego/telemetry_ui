@@ -10,33 +10,60 @@ interface ViewInternal {
   _signals: any;
 }
 
+interface SelectOptions {
+  multi: boolean;
+}
+
 const viewsById = {};
 const heightsById = {};
 
-const putLegendSelect = (
-  view: View,
-  value: string,
-  legendItems: HTMLElement[]
-) => {
-  legendItems.forEach((item) => {
-    item.classList.add('opacity-50');
-    item.classList.add('truncate');
-  });
-  view.signal('tags_tags_legend', atob(value)).run();
-};
-
 const onSelectTag = (
   view: View,
-  item: HTMLElement,
-  legendItems: HTMLElement[]
+  selectedItem: HTMLElement,
+  legendItems: HTMLElement[],
+  options: SelectOptions
 ) => {
-  if (item.dataset.selected) {
-    resetLegendSelect(view, legendItems);
+  if (options.multi) {
+    legendItems.forEach((item) => {
+      item.classList.add('opacity-50');
+      item.classList.add('truncate');
+    });
+
+    let items = legendItems.filter((item) => item.dataset.selected);
+    if (selectedItem.dataset.selected) {
+      selectedItem.removeAttribute('data-selected');
+      items = items.filter(
+        (item) => item.dataset.value !== selectedItem.dataset.value
+      );
+    } else {
+      items = items.concat([selectedItem]);
+    }
+
+    const values = items.map((item) => atob(item.dataset.value as string));
+    view.signal('tags_tags_legend', values).run();
+
+    items.forEach((item) => {
+      item.dataset.selected = 'true';
+      item.classList.remove('opacity-50');
+      item.classList.remove('truncate');
+    });
   } else {
-    putLegendSelect(view, item.dataset.value as string, legendItems);
-    item.dataset.selected = 'true';
-    item.classList.remove('opacity-50');
-    item.classList.remove('truncate');
+    if (selectedItem.dataset.selected) {
+      resetLegendSelect(view, legendItems);
+    } else {
+      legendItems.forEach((item) => {
+        item.removeAttribute('data-selected');
+        item.classList.add('opacity-50');
+        item.classList.add('truncate');
+      });
+      view
+        .signal('tags_tags_legend', atob(selectedItem.dataset.value as string))
+        .run();
+
+      selectedItem.dataset.selected = 'true';
+      selectedItem.classList.remove('opacity-50');
+      selectedItem.classList.remove('truncate');
+    }
   }
 };
 
@@ -65,9 +92,10 @@ const bindLegend = (element: HTMLElement, id: string, viewUnknown: unknown) => {
     if (!item.dataset.value) return;
 
     item.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      onSelectTag(view, item, legendItems);
+      const mouseEvent = event as MouseEvent;
+      mouseEvent.preventDefault();
+      mouseEvent.stopPropagation();
+      onSelectTag(view, item, legendItems, {multi: mouseEvent.shiftKey});
     });
   });
 
@@ -77,14 +105,15 @@ const bindLegend = (element: HTMLElement, id: string, viewUnknown: unknown) => {
       if (!selectedItem || !selectedItem.datum || !selectedItem.datum['tags'])
         return;
 
-      event.preventDefault();
-      event.stopPropagation();
+      const mouseEvent = event as MouseEvent;
+      mouseEvent.preventDefault();
+      mouseEvent.stopPropagation();
 
       const item = legendItems.find(
         (item) => item.dataset.value === btoa(selectedItem.datum['tags'])
       );
       if (!item) return;
-      onSelectTag(view, item, legendItems);
+      onSelectTag(view, item, legendItems, {multi: mouseEvent.shiftKey});
     }
   );
 
