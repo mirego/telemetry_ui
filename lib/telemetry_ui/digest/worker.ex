@@ -48,13 +48,14 @@ if Code.ensure_loaded?(Oban) do
             %{
               width: metric_definition["width"],
               height: metric_definition["height"],
+              id: "#{metric.id}.png",
               share: share
             },
             fn {_, value} -> value not in [nil, ""] end
           )
 
         {:ok, uri} = URI.new(share_url)
-        uri = %{uri | path: uri.path <> "/#{metric.id}", query: URI.encode_query(params)}
+        uri = %{uri | query: URI.encode_query(params)}
 
         {page, metric, URI.to_string(uri)}
       end)
