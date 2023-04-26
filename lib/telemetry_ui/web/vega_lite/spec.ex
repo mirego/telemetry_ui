@@ -12,7 +12,7 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
               summary_aggregate: nil,
               aggregate_field: nil,
               aggregate_label: "Average",
-              format: ".2f",
+              format: ".0s",
               unit: "",
               aggregate_value_suffix: ""
   end
@@ -29,31 +29,32 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
     end
   end
 
-  def stat_base_spec(assigns, config \\ []) do
-    config = Keyword.merge([width: "container", height: 100, background: "transparent"], config)
+  def title(metric, mark_options \\ []) do
+    options = Keyword.merge([font_size: 16, description: "main-title", color: "#333", x: 0, y: 0, align: "left"], mark_options)
 
-    Vl.config(
-      Vl.new(config),
-      autosize: [type: "fit-x"],
-      view: [stroke: nil],
-      axes: [],
-      range: [category: assigns.theme.scale]
-    )
+    Vl.new()
+    |> Vl.transform(aggregate: [[op: "min", field: "date", as: "single_value"]])
+    |> Vl.mark(:text, options)
+    |> Vl.encode(:text, value: metric.title)
   end
 
-  def base_spec(assigns, config \\ []) do
+  def base_spec(assigns, extra_options \\ []) do
+    options = base_options(assigns)
+
+    Vl.config(Vl.new(assigns.default_config), options ++ extra_options)
+  end
+
+  defp base_options(assigns) do
     grid_color = "rgba(0,0,0,0.1)"
     label_color = "#666"
-    config = Keyword.merge([width: "container", height: 100, background: "transparent"], config)
 
-    Vl.config(
-      Vl.new(config),
+    [
       autosize: [type: "fit-x"],
       axis_y: [domain_color: label_color, label_color: label_color, tick_color: label_color, grid_color: grid_color],
       axis_x: [domain_color: label_color, label_color: label_color, tick_color: label_color, grid_color: grid_color],
       view: [stroke: nil],
       range: [category: assigns.theme.scale]
-    )
+    ]
   end
 
   def encode_tags_color(spec, nil), do: spec

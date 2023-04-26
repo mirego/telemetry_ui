@@ -15,14 +15,21 @@ defmodule TelemetryUI.Web.Components.Buckets do
 
     tooltip = if Enum.any?(metric.tags), do: tooltip ++ [[field: "tags", title: "Tags"]], else: tooltip
 
-    assigns
-    |> base_spec()
-    |> data_from_metric(metric, assigns)
-    |> Vl.transform(calculate: "datum.bucket_start + '#{unit}' + (datum.bucket_end ? ' - ' + datum.bucket_end + '#{unit}' : ' +')", as: "bucket_label")
-    |> encode_offset_tags_color(metric.tags, assigns)
-    |> Vl.encode(:tooltip, tooltip)
-    |> Vl.encode_field(:x, "bucket_label", type: :nominal, title: nil, axis: [label_angle: 0], sort: [field: "bucket_start"])
-    |> Vl.encode_field(:y, options.field, aggregate: options.aggregate, type: :quantitative, title: nil, sort: [field: "bucket_start"])
+    spec =
+      assigns
+      |> base_spec()
+      |> data_from_metric(metric, assigns)
+
+    buckets_chart =
+      Vl.new()
+      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(calculate: "datum.bucket_start + '#{unit}' + (datum.bucket_end ? ' - ' + datum.bucket_end + '#{unit}' : ' +')", as: "bucket_label")
+      |> encode_offset_tags_color(metric.tags, assigns)
+      |> Vl.encode(:tooltip, tooltip)
+      |> Vl.encode_field(:x, "bucket_label", type: :nominal, title: nil, axis: [label_angle: 0], sort: [field: "bucket_start"])
+      |> Vl.encode_field(:y, options.field, aggregate: options.aggregate, type: :quantitative, title: nil, sort: [field: "bucket_start"])
+
+    Vl.layers(spec, [title(metric), buckets_chart])
   end
 
   def encode_offset_tags_color(spec, tags, assigns) do

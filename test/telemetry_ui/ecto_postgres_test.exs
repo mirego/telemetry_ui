@@ -27,7 +27,8 @@ defmodule TelemetryUI.EctoPostgresTest do
     %Options{
       from: from,
       to: to,
-      event_name: event.name
+      event_name: event.name,
+      compare: false
     }
   end
 
@@ -109,6 +110,36 @@ defmodule TelemetryUI.EctoPostgresTest do
       [data] = Backend.metric_data(backend, metric, options)
 
       assert data.value === 90.0
+    end
+
+    test "with compare event", %{backend: backend} do
+      metric = summary("some.app.event")
+      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30])
+      _compare_event = factory_event(metric, value: 30.0, count: 2, date: ~N[2022-02-09T23:45:30])
+
+      options = default_options(event)
+      options = %{options | event_name: "some.app.event", compare: true}
+
+      [data, compare_data] = Backend.metric_data(backend, metric, options)
+
+      assert data.value === 90.0
+      assert data.compare === 0
+      assert compare_data.value === 30.0
+      assert compare_data.compare === 1
+    end
+
+    test "with empty compare event", %{backend: backend} do
+      metric = summary("some.app.event")
+      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30])
+
+      options = default_options(event)
+      options = %{options | event_name: "some.app.event", compare: true}
+
+      [data, compare_data] = Backend.metric_data(backend, metric, options)
+
+      assert data.value === 90.0
+      assert compare_data.value === 0
+      assert compare_data.compare === 1
     end
 
     test "with aggregated event", %{backend: backend} do

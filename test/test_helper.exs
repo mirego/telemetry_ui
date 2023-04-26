@@ -46,7 +46,7 @@ Application.ensure_all_started(:os_mon)
 
 Mimic.copy(:httpc)
 
-ExUnit.start()
+ExUnit.start(capture_log: true)
 
 defmodule TestCustomRenderMetric do
   use TelemetryUI.Metrics
@@ -54,7 +54,11 @@ defmodule TestCustomRenderMetric do
   def new(attrs), do: struct!(__MODULE__, attrs)
 
   defimpl TelemetryUI.Web.Component do
-    def render(_metric, _assigns) do
+    def to_image(_metric, _extension, _assigns) do
+      {:error, "invalid"}
+    end
+
+    def to_html(_metric, _assigns) do
       "Custom metric in render function"
     end
   end
@@ -70,11 +74,11 @@ custom_render_metric =
   })
 
 data_metric =
-  TelemetryUI.Metrics.count_over_time(:data,
+  TelemetryUI.Metrics.counter(:data,
     description: "Users count",
     unit: " users",
     data_resolver: fn ->
-      {:ok, [%{date: DateTime.utc_now(), value: 1.2, count: 1}]}
+      {:ok, [%{compare: 0, date: DateTime.utc_now(), value: 1.2, count: 1}]}
     end
   )
 
@@ -82,7 +86,8 @@ Supervisor.start_link(
   [
     TelemetryUI.Test.Endpoint,
     TelemetryUI.Test.Repo,
-    {TelemetryUI, [name: :digest, theme: [share_key: "1111111111111111"], metrics: [{"Page", []}]]},
+    {TelemetryUI, [name: :digest_images, theme: [share_key: "012345678912345"], metrics: [{"Test", [data_metric]}]]},
+    {TelemetryUI, [name: :digest, theme: [share_key: "012345678912345"], metrics: [{"Page", []}]]},
     {TelemetryUI, [name: :empty_metrics, metrics: [], theme: [title: "My test metrics"]]},
     {TelemetryUI, [name: :custom_render_metrics, metrics: [custom_render_metric], theme: [title: "My custom render metrics"]]},
     {TelemetryUI, [name: :data_metrics, metrics: [data_metric], theme: [title: "My data metrics"]]}

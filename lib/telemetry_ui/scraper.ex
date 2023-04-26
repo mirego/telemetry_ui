@@ -6,9 +6,9 @@ defmodule TelemetryUI.Scraper do
   defmodule Options do
     @moduledoc false
 
-    defstruct from: nil, to: nil, event_name: nil
+    defstruct from: nil, to: nil, event_name: nil, compare: true
 
-    @type t :: %__MODULE__{}
+    @type t :: %__MODULE__{compare: true}
   end
 
   def metric(backend, metric, params) do

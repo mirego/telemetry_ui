@@ -36,7 +36,7 @@ defmodule TelemetryUI.InvalidThemeShareKeyError do
 
   @impl Exception
   def exception(key) do
-    message = ":share_key is not valid. It must be a binary of exactly 16 characters. Got: #{inspect(key)} (#{String.length(key)} characters)"
+    message = ":share_key is not valid. It must be a binary of less than 16 characters. Got: #{inspect(key)} (#{String.length(key)} characters)"
 
     %__MODULE__{message: message}
   end

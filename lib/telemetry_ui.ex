@@ -111,7 +111,7 @@ defmodule TelemetryUI do
 
   def backend(name), do: config(name, :backend)
 
-  def valid_share_key?(share_key), do: is_binary(share_key)
+  def valid_share_key?(share_key), do: is_binary(share_key) and String.length(share_key) <= 15
 
   def valid_share_url?(url), do: is_binary(URI.parse(url).host)
 

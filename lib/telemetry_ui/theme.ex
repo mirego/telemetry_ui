@@ -67,9 +67,11 @@ defmodule TelemetryUI.Theme do
   defstruct header_color: hd(@color_palette),
             primary_color: hd(@color_palette),
             title: "/metrics",
+            description: "Metrics",
             logo: @logo,
             scale: @color_palette,
             share_key: nil,
+            share_path: nil,
             frame_options: [
               {:last_30_minutes, 30, :minute},
               {:last_2_hours, 120, :minute},

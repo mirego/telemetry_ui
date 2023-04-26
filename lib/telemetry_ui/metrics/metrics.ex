@@ -28,7 +28,7 @@ defmodule TelemetryUI.Metrics do
       {ui_options, options} = Keyword.pop(options, :ui_options, [])
 
       struct!(unquote(metric_struct),
-        id: Base.url_encode64(options[:description], padding: false),
+        id: id(options[:description]),
         title: options[:description],
         unit: options[:unit],
         ui_options: ui_options,
@@ -62,6 +62,20 @@ defmodule TelemetryUI.Metrics do
     end
   end
 
+  defp id(name) when is_binary(name) do
+    id =
+      :sha256
+      |> :crypto.hash(name)
+      |> Base.url_encode64(padding: false)
+      |> String.slice(0..10)
+
+    if String.match?(id, ~r/^[a-zA-Z]/) do
+      id
+    else
+      "a" <> id
+    end
+  end
+
   defp id(metric) do
     reporter_options = Enum.reject(List.wrap(Map.get(metric, :reporter_options)), fn {_, value} -> is_function(value) end)
     reporter_options = Jason.encode!(Map.new(reporter_options))
@@ -75,6 +89,6 @@ defmodule TelemetryUI.Metrics do
     |> List.flatten()
     |> Enum.reject(&(&1 in [nil, ""]))
     |> Enum.join()
-    |> Base.url_encode64(padding: false)
+    |> id()
   end
 end

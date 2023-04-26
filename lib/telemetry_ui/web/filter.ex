@@ -57,7 +57,7 @@ defmodule TelemetryUI.Web.Filter do
 
   def encrypt(filters, key) do
     {filters.page, DateTime.to_iso8601(filters.from), DateTime.to_iso8601(filters.to)}
-    |> :erlang.term_to_binary()
+    |> :erlang.term_to_binary(compressed: 9)
     |> Crypto.encrypt(key)
     |> case do
       nil -> nil
@@ -67,7 +67,7 @@ defmodule TelemetryUI.Web.Filter do
 
   def decrypt(data, key) do
     with data when is_binary(data) <- Crypto.decrypt(Base.url_decode64!(data, padding: false), key),
-         {page, from, to} <- :erlang.binary_to_term(data),
+         {page, from, to} <- safe_binary_to_term(data),
          {:ok, from, _} <- DateTime.from_iso8601(from),
          {:ok, to, _} <- DateTime.from_iso8601(to) do
       %{
@@ -78,6 +78,14 @@ defmodule TelemetryUI.Web.Filter do
     else
       _ -> nil
     end
+  rescue
+    ArgumentError -> nil
+  end
+
+  defp safe_binary_to_term(data) do
+    :erlang.binary_to_term(data, [:safe])
+  rescue
+    ArgumentError -> nil
   end
 
   defp fetch_time_frame(:second, duration), do: {[second: 0], [seconds: -duration]}

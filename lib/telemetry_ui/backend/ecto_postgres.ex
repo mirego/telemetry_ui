@@ -64,14 +64,33 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     end
 
     def metric_data(backend, metric, options = %TelemetryUI.Scraper.Options{}) do
-      Entry
-      |> aggregated_query(options)
-      |> group_by_date(options)
-      |> filter_tags(metric)
-      |> select_buckets(metric)
-      |> backend.repo.all()
-      |> fill_buckets(metric)
-      |> cast_date()
+      current =
+        Entry
+        |> aggregated_query(options)
+        |> filter_tags(metric)
+        |> select_buckets(metric)
+        |> group_by_date(options)
+        |> backend.repo.all()
+        |> fill_buckets(metric)
+        |> cast_date()
+
+      compare =
+        if Enum.any?(current) and options.compare do
+          values =
+            Entry
+            |> compare_aggregated_query(options)
+            |> filter_tags(metric)
+            |> select_buckets(metric)
+            |> group_by_date(options)
+            |> backend.repo.all()
+            |> cast_date()
+
+          if Enum.empty?(values), do: [%{bucket_start: 0, bucket_end: 0, date: nil, compare: 1, count: 0, value: 0, tags: %{}}], else: values
+        else
+          []
+        end
+
+      Enum.concat(current, compare)
     end
 
     defp cast_date(records) do
@@ -91,6 +110,26 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       )
     end
 
+    defp compare_aggregated_query(queryable, options) do
+      diff = DateTime.diff(options.from, options.to)
+      from = DateTime.add(options.from, diff)
+      to = DateTime.add(options.from, -1)
+
+      from(
+        entries in queryable,
+        where:
+          entries.name == ^options.event_name and
+            entries.date >= ^from and
+            entries.date <= ^to,
+        select: %{
+          compare: 1,
+          value: fragment("avg(?)", entries.value),
+          count: fragment("sum(?)", entries.count),
+          tags: entries.tags
+        }
+      )
+    end
+
     defp aggregated_query(queryable, options) do
       from(
         entries in queryable,
@@ -99,6 +138,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             entries.date >= ^options.from and
             entries.date <= ^options.to,
         select: %{
+          compare: 0,
           value: fragment("avg(?)", entries.value),
           count: fragment("sum(?)", entries.count),
           tags: entries.tags
@@ -136,6 +176,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
               max_value: 0.0,
               value: 0.0,
               count: 0,
+              compare: 0,
               date: DateTime.utc_now(),
               tags: %{},
               bucket_start: bucket_start,

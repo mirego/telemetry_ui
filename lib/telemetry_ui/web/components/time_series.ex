@@ -3,6 +3,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
 
   import TelemetryUI.Web.VegaLite.Spec
 
+  alias TelemetryUI.Web.Components.CompareAggregate
   alias VegaLite, as: Vl
 
   def spec(metric = %{tags: []}, assigns, options) do
@@ -22,7 +23,9 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
 
     summary_chart =
       Vl.new()
+      |> Vl.transform(filter: "datum.compare==0")
       |> Vl.mark(:bar,
+        clip: true,
         align: "left",
         baseline: "line-bottom",
         tooltip: true,
@@ -31,11 +34,12 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         color: hd(assigns.theme.scale),
         corner_radius_end: 2
       )
+      |> Vl.transform(filter: "datum.compare==0")
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, format: options.format)
       |> Vl.encode(:tooltip, tooltip)
 
-    Vl.layers(spec, [aggregate_text_spec(options, unit), summary_chart])
+    Vl.layers(spec, [title(metric, y: -24), compare_aggregate_text_spec(options, metric), aggregate_text_spec(options, unit), summary_chart])
   end
 
   def spec(metric, assigns, options) do
@@ -56,7 +60,9 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
 
     summary_chart =
       Vl.new()
+      |> Vl.transform(filter: "datum.compare==0")
       |> Vl.mark(:area,
+        clip: true,
         align: "left",
         baseline: "line-bottom",
         point: [size: 14],
@@ -65,6 +71,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         fill_opacity: 0.3,
         color: hd(assigns.theme.scale)
       )
+      |> Vl.transform(filter: "datum.compare==0")
       |> encode_tags_color(metric.tags)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, stack: nil, format: options.format)
@@ -72,19 +79,34 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
       |> Vl.encode(:opacity, value: 0, condition: [param: "tags", value: 1, empty: true])
       |> Vl.encode(:tooltip, tooltip)
 
-    Vl.layers(spec, [aggregate_text_spec(options, unit), summary_chart])
+    Vl.layers(spec, [title(metric, y: -24), compare_aggregate_text_spec(options, metric), aggregate_text_spec(options, unit), summary_chart])
+  end
+
+  defp compare_aggregate_text_spec(options, metric) do
+    options
+    |> CompareAggregate.spec()
+    |> Vl.mark(:text,
+      font: "monospace",
+      fill_opacity: 0.8,
+      font_size: 11,
+      x: "width",
+      y: -8,
+      align: "right",
+      fill: [expr: CompareAggregate.fill_expression(metric)]
+    )
   end
 
   defp aggregate_text_spec(options, unit) do
     Vl.new()
+    |> Vl.transform(filter: "datum.compare==0")
     |> Vl.mark(:text,
-      font_size: 12,
+      font_size: 11,
       font_weight: "bold",
       baseline: "top",
       align: "right",
       color: "#666",
       x: "width",
-      y: -20
+      y: -28
     )
     |> Vl.transform(
       aggregate: [

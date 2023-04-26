@@ -11,14 +11,19 @@ defmodule TelemetryUI.Metrics.CountOverTime do
       field: "count",
       field_label: "Count",
       aggregate: "sum",
-      aggregate_label: "Total",
-      format: ""
+      aggregate_label: "Total"
     }
 
-    def render(metric, assigns) do
+    def to_image(metric, extension, assigns) do
+      spec = Components.TimeSeries.spec(metric, assigns, @options)
+      spec = VegaLite.Export.to_json(spec)
+      TelemetryUI.VegaLiteConvert.export(spec, extension)
+    end
+
+    def to_html(metric, assigns) do
       metric
       |> Components.TimeSeries.spec(assigns, @options)
-      |> TelemetryUI.Web.VegaLite.draw(metric)
+      |> TelemetryUI.Web.VegaLite.draw(metric, assigns)
     end
   end
 end

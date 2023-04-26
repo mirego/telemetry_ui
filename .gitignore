@@ -26,3 +26,6 @@ npm-debug.log
 
 # Sobelow version breadcrumb
 .sobelow
+
+# Shared objects build by Rust.
+*.so

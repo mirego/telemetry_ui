@@ -6,20 +6,61 @@ body {
   background: #f7f7f7;
 }
 
-header h1 > svg {
-  height: 20px;
+.vega-lite-metric::before {
+  content: '';
+  height: 60px;
+  width: 70px;
+  position: absolute;
+  right: -70px;
+  top: 0;
+  background: transparent;
 }
 
-header select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+html.dark .vega-lite-metric .vega-embed.has-actions .vega-actions,
+html.dark .vega-lite-metric .vega-embed.has-actions summary {
+  filter: invert(1);
 }
 
-.dark header select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fafafa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+.vega-lite-metric .vega-embed.has-actions {
+  padding: 0 !important;
 }
 
-.vega-embed path[opacity='0'][role='graphics-symbol'],
-.vega-embed path[opacity='0.2'][role='graphics-symbol'] {
+.vega-lite-metric .vega-embed.has-actions details {
+  position: absolute;
+  right: -38px;
+  top: -5px;
+  transform: scale(0.8);
+  display: none;
+}
+
+.vega-lite-metric .vega-embed.has-actions summary {
+  box-shadow: none;
+  opacity: 1;
+  border-color: transparent;
+  background: transparent;
+}
+
+.vega-lite-metric:hover .vega-embed.has-actions details {
+  display: block;
+}
+
+.vega-lite-metric .vega-embed.has-actions .vega-actions {
+  box-shadow: none;
+}
+
+.vega-lite-metric .vega-embed.has-actions .vega-actions a {
+  font-weight: normal;
+  font-family: inherit;
+  color: #000;
+  padding: 6px 12px;
+}
+
+html.dark .vega-lite-metric svg text[aria-label='main-title'] {
+  fill: #d7d7d7 !important;
+}
+
+.vega-lite-metric .vega-embed path[opacity='0'][role='graphics-symbol'],
+.vega-lite-metric .vega-embed path[opacity='0.2'][role='graphics-symbol'] {
   pointer-events: none;
 }
 
@@ -35,6 +76,18 @@ header select {
   box-shadow: 0 2px 11px rgba(0, 0, 0, 0.55);
   background-color: rgb(24, 24, 27);
   color: white;
+}
+
+header h1 > svg {
+  height: 20px;
+}
+
+header select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+.dark header select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fafafa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
 
 .animation-loading {

@@ -3,22 +3,31 @@ defmodule TelemetryUI.Web.Components.Stat do
 
   import TelemetryUI.Web.VegaLite.Spec
 
+  alias TelemetryUI.Web.Components.CompareAggregate
   alias VegaLite, as: Vl
 
   def spec(metric = %{tags: []}, assigns, options) do
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
     unit = to_unit(metric.unit)
+    chart_offset = 80
 
     tooltip = [
       [field: "date", type: :temporal, title: "Date", time_unit: time_unit],
       [field: options.field, type: :quantitative, title: options.field_label, aggregate: options.summary_aggregate || options.aggregate, format: options.format]
     ]
 
+    compare_layer =
+      options
+      |> CompareAggregate.spec()
+      |> Vl.mark(:text, font: "monospace", fill_opacity: 0.8, font_size: 13, x: 0, y: 19, align: "left", fill: [expr: CompareAggregate.fill_expression(metric)])
+
     assigns
-    |> stat_base_spec()
+    |> base_spec(axes: [])
     |> data_from_metric(metric, assigns)
     |> Vl.layers([
+      title(metric),
       Vl.new()
+      |> Vl.transform(filter: "datum.compare==0")
       |> Vl.transform(
         aggregate: [
           [op: options.aggregate, field: options.aggregate_field || options.field, as: "aggregate_value"],
@@ -27,19 +36,22 @@ defmodule TelemetryUI.Web.Components.Stat do
         ]
       )
       |> Vl.transform(calculate: "format(datum.aggregate_value#{options.aggregate_value_suffix}, '#{options.format}') + '#{unit}'", as: "formatted_aggregate_value")
-      |> Vl.mark(:text, font_size: 50, font_weight: "bold", color: hd(assigns.theme.scale), x: 0, y: 0, align: "left")
+      |> Vl.mark(:text, font_size: 50, font_weight: "bold", color: hd(assigns.theme.scale), x: 0, y: 55, align: "left")
       |> Vl.encode(:text, type: :nominal, field: "formatted_aggregate_value")
       |> Vl.encode(:tooltip, [
         [field: "from_date", title: "From", type: :temporal, time_unit: [unit: "yearmonthdatehoursminutes"]],
         [field: "to_date", title: "To", type: :temporal, time_unit: [unit: "yearmonthdatehoursminutes"]]
       ]),
+      compare_layer,
       Vl.new()
-      |> Vl.mark(:area, opacity: 0.2, tooltip: true, color: hd(assigns.theme.scale), y_offset: 50, y2_offset: 50, y2: [expr: "height + 50"])
+      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.mark(:area, opacity: 0.2, tooltip: true, color: hd(assigns.theme.scale), y_offset: chart_offset, y2_offset: chart_offset, y2: [expr: "height + #{chart_offset}"])
       |> Vl.encode(:tooltip, tooltip)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate),
       Vl.new()
-      |> Vl.mark(:line, opacity: 0.3, color: hd(assigns.theme.scale), y_offset: 50, y2_offset: 50)
+      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.mark(:line, opacity: 0.3, color: hd(assigns.theme.scale), y_offset: chart_offset, y2_offset: chart_offset)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate)
     ])
@@ -49,6 +61,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     assigns
     |> base_spec()
     |> data_from_metric(metric, assigns)
+    |> Vl.transform(filter: "datum.compare==0")
     |> Vl.transform(aggregate: [[op: options.aggregate, field: options.field, as: "aggregate_value"]], groupby: ["tags"])
     |> Vl.encode_field(:x, "tags", type: :nominal, title: nil, axis: [label_angle: -30])
     |> Vl.encode_field(:color, "tags", title: nil, legend: nil)

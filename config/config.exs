@@ -39,5 +39,7 @@ if config_env() in [:test] do
     render_errors: [view: TelemetryUI.Test.ErrorView]
 end
 
+config :rustler_precompiled, :force_build, telemetry_ui: true
+
 config :telemetry_ui,
   ecto_repos: [TelemetryUI.Test.Repo]

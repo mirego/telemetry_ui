@@ -1,0 +1,75 @@
+name: Build precompiled NIFs
+
+on:
+  push:
+    branches:
+      - master
+      - next/v3
+    paths:
+      # Just run on master branch if "native" path changed.
+      - "native/**"
+      # Also run if this file changes.
+      - ".github/workflows/release.yml"
+    tags:
+      # Tags will always run.
+      - "*"
+
+jobs:
+  build_release:
+    name: NIF ${{ matrix.nif }} - ${{ matrix.job.target }} (${{ matrix.job.os }})
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        nif: ["2.16", "2.15"]
+        job:
+          - { target: arm-unknown-linux-gnueabihf, os: ubuntu-20.04, use-cross: true}
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-20.04, use-cross: true }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-20.04, use-cross: true }
+          - { target: aarch64-apple-darwin, os: macos-11 }
+          - { target: x86_64-apple-darwin, os: macos-11 }
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-20.04 }
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-20.04, use-cross: true }
+          - { target: riscv64gc-unknown-linux-gnu, os: ubuntu-20.04, use-cross: true }
+          - { target: x86_64-pc-windows-gnu, os: windows-2019 }
+          - { target: x86_64-pc-windows-msvc, os: windows-2019 }
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Extract crate information
+        shell: bash
+        run: |
+          # Get the project version from mix.exs
+          echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> $GITHUB_ENV
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2023-02-14
+          targets: ${{ matrix.job.target }}
+
+      - name: Build the project
+        id: build-crate
+        uses: philss/rustler-precompiled-action@v1.0.1
+        with:
+          project-name: vegaliteconvert
+          project-version: ${{ env.PROJECT_VERSION }}
+          target: ${{ matrix.job.target }}
+          nif-version: ${{ matrix.nif }}
+          use-cross: ${{ matrix.job.use-cross }}
+          project-dir: "native/vegaliteconvert"
+
+      - name: Artifact upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.build-crate.outputs.file-name }}
+          path: ${{ steps.build-crate.outputs.file-path }}
+
+      - name: Publish archives and packages
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{ steps.build-crate.outputs.file-path }}
+        if: startsWith(github.ref, 'refs/tags/')

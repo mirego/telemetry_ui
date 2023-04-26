@@ -169,7 +169,7 @@ const emptySource = (source) => {
   return false;
 };
 
-const toggleFullscreen = (parentElement, id) => {
+const toggleFullscreen = (parentElement: HTMLElement, id: string) => {
   const fixedStyle = [
     'fixed',
     'top-0',
@@ -182,17 +182,20 @@ const toggleFullscreen = (parentElement, id) => {
     'overscroll-contain',
     'dark:bg-neutral-900'
   ];
+  const closeButton = parentElement.querySelector('.close-fullscreen-button');
 
   if (parentElement.classList.contains('fixed')) {
     parentElement.classList.remove(...fixedStyle);
     parentElement.classList.add('relative');
     parentElement.classList.add('dark:bg-black/40');
+    closeButton.classList.add('hidden');
 
     viewsById[id].signal('height', heightsById[id]);
   } else {
     parentElement.classList.add(...fixedStyle);
     parentElement.classList.remove('relative');
     parentElement.classList.remove('dark:bg-black/40');
+    closeButton.classList.remove('hidden');
 
     heightsById[id] = viewsById[id].signal('height');
     viewsById[id].signal('height', window.innerHeight - 130);
@@ -202,10 +205,21 @@ const toggleFullscreen = (parentElement, id) => {
 };
 
 window.drawChart = async (id, spec) => {
-  const {view} = await vegaEmbed(id, spec, {renderer: 'svg', actions: false});
+  const {view} = await vegaEmbed(id, spec, {
+    renderer: 'svg',
+    actions: {
+      export: {svg: false},
+      source: true,
+      compiled: false,
+      editor: false
+    }
+  });
   const element = document.querySelector(id) as HTMLElement;
 
   if (emptySource(view.data('source'))) {
+    const title = document.querySelector(id + '-title') as HTMLElement;
+    title.classList.remove('hidden');
+
     const empty = document.querySelector(id + '-empty') as HTMLElement;
     empty.classList.remove('hidden');
     element.classList.add('hidden');
@@ -255,6 +269,8 @@ document.addEventListener('DOMContentLoaded', () => {
     .forEach((button) => {
       const buttonElement = button as HTMLButtonElement;
       button.addEventListener('click', () => {
+        if (!button.parentElement) return;
+
         toggleFullscreen(
           button.parentElement,
           '#' + buttonElement.dataset.viewId
@@ -263,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   document.querySelectorAll('[telemetry-component="Form"]').forEach((form) => {
-    const formElement = form as HTMLFormElement;
+    const formElement = form.querySelector('form') as HTMLFormElement;
     form.querySelectorAll('input, select').forEach((input) => {
       input.addEventListener('change', () => formElement.submit());
     });

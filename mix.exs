@@ -1,7 +1,9 @@
 defmodule TelemetryUI.Mixfile do
   use Mix.Project
 
-  @version "2.0.1"
+  @force_build? System.get_env("TELEMETRY_UI_BUILD") in ["1", "true"]
+
+  @version "3.0.0"
 
   def project do
     [
@@ -55,6 +57,9 @@ defmodule TelemetryUI.Mixfile do
 
   defp deps do
     [
+      {:rustler, "~> 0.27", optional: not @force_build?},
+      {:rustler_precompiled, "~> 0.5"},
+      {:vix, "~> 0.16"},
       {:phoenix, "~> 1.4"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_view, "~> 1.0 or ~> 2.0"},
@@ -94,6 +99,8 @@ defmodule TelemetryUI.Mixfile do
 
   defp aliases do
     [
+      "rust.lint": ["cmd cargo clippy --manifest-path=native/vegaliteconvert/Cargo.toml -- -Dwarnings"],
+      "rust.fmt": ["cmd cargo fmt --manifest-path=native/vegaliteconvert/Cargo.toml --all"],
       "assets.compile": ["esbuild default", "tailwind default"],
       test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
