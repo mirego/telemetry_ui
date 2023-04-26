@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - next/v3
     paths:
       # Just run on master branch if "native" path changed.
       - "native/**"

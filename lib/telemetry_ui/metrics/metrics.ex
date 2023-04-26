@@ -12,7 +12,7 @@ defmodule TelemetryUI.Metrics do
     {:last_value, UIMetrics.LastValue},
     {:median, UIMetrics.Median},
     {:median_over_time, UIMetrics.MedianOverTime},
-    {:summary, UIMetrics.Summary},
+    {:summary, UIMetrics.AverageOverTime},
     {:sum, UIMetrics.Sum},
     {:value_over_time, UIMetrics.AverageOverTime}
   ]

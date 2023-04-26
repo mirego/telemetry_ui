@@ -1,4 +1,4 @@
-defmodule TelemetryUI.WebShare do
+defmodule TelemetryUI.Web.Share do
   use Plug.Builder
 
   alias Ecto.Changeset
@@ -60,10 +60,10 @@ defmodule TelemetryUI.WebShare do
     end
 
     string_config_param = fn value ->
-      if value not in [nil, ""] do
-        value
-      else
+      if value in [nil, ""] do
         nil
+      else
+        value
       end
     end
 
