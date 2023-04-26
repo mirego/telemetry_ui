@@ -10,15 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HEX_API_KEY: ${{ secrets.MIREGO_HEXPM_API_KEY }}
+      RUST_TOOLCHAIN_VERSION: nightly-2023-02-14
+      TELEMETRY_UI_BUILD: true
+
     steps:
       - uses: actions/checkout@v2
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "${{ env.RUST_TOOLCHAIN_VERSION }}"
+
       - uses: erlef/setup-beam@v1
         with:
           otp-version: 25.x
           elixir-version: 1.14.x
+
       - uses: actions/setup-node@v1
         with:
           node-version: 16.13
+
       - run: make prepare
       - run: mix compile --docs
       - run: mix hex.publish --yes

@@ -6,7 +6,7 @@
 
 - `TelemetryUI.Web.Component` now can render image, so the protocol has a `to_html` and a `to_image` instead of the single `render` function
 - `TelemetryUI.Web` controller does not include the "share" param parsing anymore. If you want to have sharable URL, you need to add `TelemetryUI.Web.Share` controller
-in your router and the `share_path` config in your theme.
+  in your router and the `share_path` config in your theme.
 
 ### Features
 
