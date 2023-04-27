@@ -19,6 +19,9 @@ telemetry_ui_digest_args = %{
   time_diff: [7, "day"],
   share_url: "http://localhost:4004/metrics",
   pages: ["Ecto", "Phoenix"],
+  metric_images: [
+    %{"page" => "Ecto", "description" => "Requests average duration"}
+  ],
   apparence: %{
     header: "Here is your digest, each minute.",
     icon_emoji: ":smile:",

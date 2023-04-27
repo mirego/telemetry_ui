@@ -6,6 +6,21 @@
   <a href="https://hex.pm/packages/telemetry_ui"><img src="https://img.shields.io/hexpm/v/telemetry_ui.svg" /></a>
 </div>
 
+## Features
+
+`telemetry_ui`’s primary goal is to display [your application metrics](https://hexdocs.pm/telemetry_metrics) without external infrastructure dependencies. [Phoenix](https://hexdocs.pm/phoenix/telemetry.html), [Absinthe](https://hexdocs.pm/absinthe/telemetry.html), [Ecto](https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events), [Erlang VM](https://hexdocs.pm/telemetry_poller/readme.html), [Tesla](https://hexdocs.pm/tesla/Tesla.Middleware.Telemetry.html), [Redix](https://hexdocs.pm/redix/telemetry.html), [Oban](https://hexdocs.pm/oban/Oban.Telemetry.html) and others expose all sorts of data that can be useful. You can also emit your own events from your application.
+
+Your data should not have to be uploaded somewhere else to have insighful metrics.
+
+It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to quickly (and efficiently) store and query your application events.
+
+<img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/205386716-a4aa9387-6125-40e6-b764-b2e76df5e83b.png">
+
+## 3.0 breaking change
+
+The `3.0` version adds the possibility to render component as image. We renamed `Component.render` protocol callback to `to_html` to add the `to_image` callback.
+If you have a custom component, you juste need to rename `def render/2` to `def to_html/2`.
+
 ## 2.0 breaking change
 
 The `2.0` version fixes a hack that was introduced to register unique event name based on the `keep` and `drop` options.
@@ -32,16 +47,6 @@ distribution(
 ```
 
 This changes impact the unique index on the database, so you can either manually delete every metrics with a `report_as` before running the `2.0` migration, or truncate the table.
-
-## Features
-
-`telemetry_ui`’s primary goal is to display [your application metrics](https://hexdocs.pm/telemetry_metrics) without external infrastructure dependencies. [Phoenix](https://hexdocs.pm/phoenix/telemetry.html), [Absinthe](https://hexdocs.pm/absinthe/telemetry.html), [Ecto](https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events), [Erlang VM](https://hexdocs.pm/telemetry_poller/readme.html), [Tesla](https://hexdocs.pm/tesla/Tesla.Middleware.Telemetry.html), [Redix](https://hexdocs.pm/redix/telemetry.html), [Oban](https://hexdocs.pm/oban/Oban.Telemetry.html) and others expose all sorts of data that can be useful. You can also emit your own events from your application.
-
-Your data should not have to be uploaded somewhere else to have insighful metrics.
-
-It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to quickly (and efficiently) store and query your application events.
-
-<img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/205386716-a4aa9387-6125-40e6-b764-b2e76df5e83b.png">
 
 ## Usage
 

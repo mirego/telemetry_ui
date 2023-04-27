@@ -69,6 +69,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     |> Vl.encode(:opacity, value: 0.2, condition: [param: "tags", value: 1, empty: true])
     |> Vl.encode_field(:y, "aggregate_value#{options.aggregate_value_suffix}", type: :quantitative, title: nil)
     |> Vl.layers([
+      title(metric),
       Vl.new()
       |> Vl.mark(:bar, width: [band: 0.6], corner_radius_end: 2)
       |> Vl.encode(:tooltip, [

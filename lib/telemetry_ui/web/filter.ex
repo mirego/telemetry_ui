@@ -59,10 +59,7 @@ defmodule TelemetryUI.Web.Filter do
     {filters.page, DateTime.to_iso8601(filters.from), DateTime.to_iso8601(filters.to)}
     |> :erlang.term_to_binary(compressed: 9)
     |> Crypto.encrypt(key)
-    |> case do
-      nil -> nil
-      data -> Base.url_encode64(data, padding: false)
-    end
+    |> Base.url_encode64(padding: false)
   end
 
   def decrypt(data, key) do

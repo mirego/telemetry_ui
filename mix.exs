@@ -37,7 +37,13 @@ defmodule TelemetryUI.Mixfile do
           ],
           Web: [
             TelemetryUI.Web,
+            TelemetryUI.Web.Share,
             TelemetryUI.Web.Component
+          ],
+          Reports: [
+            TelemetryUI.Digest,
+            TelemetryUI.Digest.Slack,
+            TelemetryUI.Digest.Worker
           ]
         ],
         main: "readme",

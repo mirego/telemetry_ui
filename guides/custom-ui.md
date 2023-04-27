@@ -26,6 +26,7 @@ Here is the list of available options:
 - `logo`: An SVG binary used in the header and the favicon
 - `scale`: Available colors used in graph. The colors are used in the same order they are defined in.
 - `share_key`: 16 characters key that enable the sharing of a dashboard page. The share feature is hidden when the option is `nil`
+- `share_path`: Application router path to render the share pages.
 - `frame_options`: List of options for the time frame select in the UI. Format: `{atom_identitifer, number, unit}` `{:last_3_minutes, 3, :minute}`
 
 ## Layout
