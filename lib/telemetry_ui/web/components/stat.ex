@@ -22,7 +22,7 @@ defmodule TelemetryUI.Web.Components.Stat do
       |> Vl.mark(:text, font: "monospace", fill_opacity: 0.8, font_size: 13, x: 0, y: 19, align: "left", fill: [expr: CompareAggregate.fill_expression(metric)])
 
     assigns
-    |> base_spec(axes: [])
+    |> base_spec()
     |> data_from_metric(metric, assigns)
     |> Vl.layers([
       title(metric),
@@ -58,20 +58,22 @@ defmodule TelemetryUI.Web.Components.Stat do
   end
 
   def spec(metric, assigns, options) do
+    chart_offset = 80
+
     assigns
     |> base_spec()
     |> data_from_metric(metric, assigns)
-    |> Vl.transform(filter: "datum.compare==0")
-    |> Vl.transform(aggregate: [[op: options.aggregate, field: options.field, as: "aggregate_value"]], groupby: ["tags"])
-    |> Vl.encode_field(:x, "tags", type: :nominal, title: nil, axis: [label_angle: -30])
-    |> Vl.encode_field(:color, "tags", title: nil, legend: nil)
-    |> Vl.param("tags", select: [fields: ["tags"], type: :point], bind: "legend")
-    |> Vl.encode(:opacity, value: 0.2, condition: [param: "tags", value: 1, empty: true])
-    |> Vl.encode_field(:y, "aggregate_value#{options.aggregate_value_suffix}", type: :quantitative, title: nil)
     |> Vl.layers([
-      title(metric),
+      title(metric, y: -20),
       Vl.new()
-      |> Vl.mark(:bar, width: [band: 0.6], corner_radius_end: 2)
+      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(aggregate: [[op: options.aggregate, field: options.field, as: "aggregate_value"]], groupby: ["tags"])
+      |> Vl.encode_field(:x, "tags", type: :nominal, title: nil, axis: [label_angle: -30])
+      |> Vl.encode_field(:color, "tags", title: nil, legend: nil)
+      |> Vl.param("tags", select: [fields: ["tags"], type: :point], bind: "legend")
+      |> Vl.encode(:opacity, value: 0.2, condition: [param: "tags", value: 1, empty: true])
+      |> Vl.encode_field(:y, "aggregate_value#{options.aggregate_value_suffix}", type: :quantitative, title: nil)
+      |> Vl.mark(:bar, width: [band: 0.6], corner_radius_end: 2, y: chart_offset)
       |> Vl.encode(:tooltip, [
         [field: "aggregate_value#{options.aggregate_value_suffix}", type: :quantitative, title: options.field_label, aggregate: options.aggregate, format: options.format]
       ])
