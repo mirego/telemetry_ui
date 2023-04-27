@@ -3,7 +3,7 @@ defmodule TelemetryUI.Mixfile do
 
   @force_build? System.get_env("TELEMETRY_UI_BUILD") in ["1", "true"]
 
-  @version "3.0.2"
+  @version "3.0.3"
 
   def project do
     [
