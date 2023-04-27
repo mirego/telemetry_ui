@@ -31,4 +31,5 @@ jobs:
 
       - run: make prepare
       - run: mix compile --docs
+      - run: mix rustler_precompiled.download TelemetryUI.VegaLiteConvert --only-local
       - run: mix hex.publish --yes

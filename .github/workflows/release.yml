@@ -60,6 +60,7 @@ jobs:
         with:
           name: ${{ steps.build-crate.outputs.file-name }}
           path: ${{ steps.build-crate.outputs.file-path }}
+        if: startsWith(github.ref, 'refs/tags/')
 
       - name: Publish archives and packages
         uses: softprops/action-gh-release@v1

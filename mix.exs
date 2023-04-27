@@ -111,7 +111,16 @@ defmodule TelemetryUI.Mixfile do
       maintainers: ["Simon Prévost"],
       licenses: ["BSD-3-Clause"],
       links: %{github: "https://github.com/mirego/telemetry_ui"},
-      files: ~w(dist lib mix.exs README.md)
+      files: [
+        "dist",
+        "lib",
+        "mix.exs",
+        "README.md",
+        "native/vegaliteconvert/.cargo",
+        "native/vegaliteconvert/Cargo*",
+        "native/vegaliteconvert/src",
+        "checksum-*.exs"
+      ]
     ]
   end
 end
