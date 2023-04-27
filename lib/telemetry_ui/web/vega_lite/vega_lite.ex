@@ -8,7 +8,7 @@ defmodule TelemetryUI.Web.VegaLite do
     assigns = Map.merge(assigns, %{spec: spec, metric: metric})
 
     ~H"""
-    <div class="vega-lite-metric group relative flex flex-col bg-white dark:bg-black/40 text-slate dark:text-white p-3 pt-2 shadow min-h-[200px] h-full">
+    <div class="vega-lite-metric group relative flex flex-col bg-white dark:bg-black/40 text-slate dark:text-white p-3 pt-2 shadow min-h-[180px] h-full">
       <%= if @conn.assigns[:share] && @theme.share_path do %>
         <img loading="lazy" class="hidden" src={@theme.share_path <> "?id=#{@metric.id}.png&share=" <> @conn.assigns.share} />
       <% end %>

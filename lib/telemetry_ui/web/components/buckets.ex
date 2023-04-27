@@ -29,7 +29,7 @@ defmodule TelemetryUI.Web.Components.Buckets do
       |> Vl.encode_field(:x, "bucket_label", type: :nominal, title: nil, axis: [label_angle: 0], sort: [field: "bucket_start"])
       |> Vl.encode_field(:y, options.field, aggregate: options.aggregate, type: :quantitative, title: nil, sort: [field: "bucket_start"])
 
-    Vl.layers(spec, [title(metric), buckets_chart])
+    Vl.layers(spec, [title(metric, y: -20), buckets_chart])
   end
 
   def encode_offset_tags_color(spec, tags, assigns) do
