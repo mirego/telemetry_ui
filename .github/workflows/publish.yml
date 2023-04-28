@@ -1,9 +1,10 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - v*
+  workflow_run:
+    workflows: ["Build precompiled NIFs"]
+    types:
+      - completed
 
 jobs:
   publish:

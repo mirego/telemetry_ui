@@ -32,7 +32,9 @@ defmodule TelemetryUI.Web.Share do
 
   def index(conn, _opts) do
     metrics = Enum.map(conn.assigns.current_page.metrics, &resolve_metric(conn, &1))
+    conn = assign(conn, :share, conn.params["share"])
     conn = assign(conn, :current_page, %{conn.assigns.current_page | metrics: metrics})
+
     content = Phoenix.HTML.Safe.to_iodata(View.render("index.html", Map.put(conn.assigns, :conn, conn)))
 
     conn

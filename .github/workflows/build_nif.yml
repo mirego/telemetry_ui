@@ -2,16 +2,8 @@ name: Build precompiled NIFs
 
 on:
   push:
-    branches:
-      - master
-    paths:
-      # Just run on master branch if "native" path changed.
-      - "native/**"
-      # Also run if this file changes.
-      - ".github/workflows/release.yml"
     tags:
-      # Tags will always run.
-      - "*"
+      - v*
 
 jobs:
   build_release:
