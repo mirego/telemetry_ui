@@ -38,10 +38,10 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
     |> Vl.encode(:text, value: metric.title)
   end
 
-  def base_spec(assigns, extra_options \\ []) do
+  def base_spec(assigns, config \\ []) do
     options = base_options(assigns)
 
-    Vl.config(Vl.new(assigns.default_config), options ++ extra_options)
+    Vl.config(Vl.new(Keyword.merge(assigns.default_config, config)), options)
   end
 
   defp base_options(assigns) do

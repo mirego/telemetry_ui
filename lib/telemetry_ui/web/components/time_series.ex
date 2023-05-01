@@ -18,7 +18,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
 
     spec =
       assigns
-      |> base_spec()
+      |> base_spec(height: 130)
       |> data_from_metric(metric, assigns)
 
     summary_chart =
@@ -55,7 +55,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
 
     spec =
       assigns
-      |> base_spec()
+      |> base_spec(height: 130)
       |> data_from_metric(metric, assigns)
 
     summary_chart =

@@ -17,7 +17,7 @@ defmodule TelemetryUI.Web.Components.Buckets do
 
     spec =
       assigns
-      |> base_spec()
+      |> base_spec(height: 130)
       |> data_from_metric(metric, assigns)
 
     buckets_chart =

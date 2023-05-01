@@ -22,7 +22,7 @@ defmodule TelemetryUI.Web.Components.Stat do
       |> Vl.mark(:text, font: "monospace", fill_opacity: 0.8, font_size: 13, x: 0, y: 19, align: "left", fill: [expr: CompareAggregate.fill_expression(metric)])
 
     assigns
-    |> base_spec()
+    |> base_spec(height: 90)
     |> data_from_metric(metric, assigns)
     |> Vl.layers([
       title(metric),
@@ -61,7 +61,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     chart_offset = 80
 
     assigns
-    |> base_spec()
+    |> base_spec(height: 130)
     |> data_from_metric(metric, assigns)
     |> Vl.layers([
       title(metric, y: -20),
