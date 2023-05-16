@@ -9,8 +9,7 @@ defmodule TelemetryUI.DigestTest do
       args = %{
         "telemetry_ui_name" => "digest_images",
         "time_diff" => [7, "day"],
-        "share_url" => "http://localhost:5000/metrics",
-        "image_share_url" => "http://localhost:5000/metrics_image_render",
+        "share_url" => "http://localhost:5000/public_metrics",
         "pages" => ["Test"],
         "metric_images" => [
           %{"page" => "Test", "description" => "Users count"}
@@ -29,7 +28,7 @@ defmodule TelemetryUI.DigestTest do
         image_uri = URI.parse(image_block["image_url"])
         assert URI.decode_query(image_uri.query)["id"] === "T3Hwd9L68ku.png"
         assert is_binary(URI.decode_query(image_uri.query)["share"])
-        assert image_uri.path === "/metrics_image_render"
+        assert image_uri.path === "/public_metrics"
         assert image_uri.host === "localhost"
 
         assert match?(

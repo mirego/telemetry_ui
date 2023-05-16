@@ -24,7 +24,7 @@ if Code.ensure_loaded?(Oban) do
       filters = %Filter{page: nil, to: to, from: from}
 
       pages = generate_pages_links(args["pages"], telemetry_name, filters, args["share_url"], share_key)
-      metric_images = generate_metric_images(args["metric_images"] || [], telemetry_name, filters, args["image_share_url"], share_key)
+      metric_images = generate_metric_images(args["metric_images"] || [], telemetry_name, filters, args["share_url"], share_key)
 
       Digest.send!(args, pages, metric_images, from, to)
 
