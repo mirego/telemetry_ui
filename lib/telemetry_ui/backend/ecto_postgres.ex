@@ -196,6 +196,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
 
         from(entries in queryable,
           left_lateral_join: buckets in fragment("SELECT ?::double precision[] as values", ^buckets),
+          on: true,
           select_merge: %{
             bucket_start:
               fragment(

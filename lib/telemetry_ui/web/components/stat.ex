@@ -19,7 +19,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     compare_layer =
       options
       |> CompareAggregate.spec()
-      |> Vl.mark(:text, font: "monospace", fill_opacity: 0.8, font_size: 13, x: 0, y: 19, align: "left", fill: [expr: CompareAggregate.fill_expression(metric)])
+      |> Vl.mark(:text, font: "monospace", fill_opacity: 0.8, font_size: 13, x: "width", y: 0, align: "right", fill: [expr: CompareAggregate.fill_expression(metric)])
 
     assigns
     |> base_spec(height: 90)
@@ -36,7 +36,7 @@ defmodule TelemetryUI.Web.Components.Stat do
         ]
       )
       |> Vl.transform(calculate: "format(datum.aggregate_value#{options.aggregate_value_suffix}, '#{options.format}') + '#{unit}'", as: "formatted_aggregate_value")
-      |> Vl.mark(:text, font_size: 50, font_weight: "bold", color: hd(assigns.theme.scale), x: 0, y: 55, align: "left")
+      |> Vl.mark(:text, font_size: 30, font_weight: "bold", color: hd(assigns.theme.scale), x: 0, y: 30, align: "left")
       |> Vl.encode(:text, type: :nominal, field: "formatted_aggregate_value")
       |> Vl.encode(:tooltip, [
         [field: "from_date", title: "From", type: :temporal, time_unit: [unit: "yearmonthdatehoursminutes"]],

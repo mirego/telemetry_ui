@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.0.0 (2023-06-26)
+
+### BREAKING CHANGES
+
+- `TelemetryUI.Web.Component.to_image` implementation of VegaLite components has been extracted to a standalone library to remove hard dependency on rustler precompiled and vix.
+
 ## v3.0.0 (2023-04-26)
 
 ### BREAKING CHANGES

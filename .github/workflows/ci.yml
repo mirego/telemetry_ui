@@ -24,15 +24,9 @@ jobs:
       DATABASE_POOL_SIZE: 30
       DATABASE_URL: postgres://postgres:pass1234@localhost/telemetry_ui_test
       MIX_ENV: test
-      RUST_TOOLCHAIN_VERSION: nightly-2023-02-14
-      TELEMETRY_UI_BUILD: true
 
     steps:
       - uses: actions/checkout@v2
-
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: "${{ env.RUST_TOOLCHAIN_VERSION }}"
 
       - uses: erlef/setup-elixir@v1
         with:

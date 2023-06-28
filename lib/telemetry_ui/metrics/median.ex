@@ -19,7 +19,7 @@ defmodule TelemetryUI.Metrics.Median do
     def to_image(metric, extension, assigns) do
       spec = Components.Stat.spec(metric, assigns, @options)
       spec = VegaLite.Export.to_json(spec)
-      TelemetryUI.VegaLiteConvert.export(spec, extension)
+      TelemetryUI.VegaLiteToImage.export(spec, extension)
     end
 
     def to_html(metric, assigns) do
