@@ -85,7 +85,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             |> backend.repo.all()
             |> cast_date()
 
-          if Enum.empty?(values), do: [%{bucket_start: 0, bucket_end: 0, date: nil, compare: 1, count: 0, value: 0, tags: %{}}], else: values
+          if Enum.empty?(values), do: [%{bucket_start: 0, bucket_end: 0, date: nil, compare: 1, count: 0, value: 0, min_value: 0.0, max_value: 0.0, tags: %{}}], else: values
         else
           []
         end
@@ -94,7 +94,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     end
 
     defp cast_date(records) do
-      update_in(records, [Access.all(), :date], &DateTime.from_naive!(&1, "Etc/UTC"))
+      update_in(records, [Access.all(), :date], &DateTime.to_unix(DateTime.from_naive!(&1, "Etc/UTC"), :millisecond))
     end
 
     defp group_by_date(queryable, options) do

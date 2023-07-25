@@ -16,38 +16,6 @@ It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to
 
 <img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/205386716-a4aa9387-6125-40e6-b764-b2e76df5e83b.png">
 
-## 3.0 breaking change
-
-The `3.0` version adds the possibility to render component as image. We renamed `Component.render` protocol callback to `to_html` to add the `to_image` callback.
-If you have a custom component, you juste need to rename `def render/2` to `def to_html/2`.
-
-## 2.0 breaking change
-
-The `2.0` version fixes a hack that was introduced to register unique event name based on the `keep` and `drop` options.
-Since the name is used to register the event like `counter("phoenix.router_dispatch.stop.duration"`, we added a `reporter_options: [report_as: "some unique name"]`. But the way to actually do this is documented here: https://hexdocs.pm/telemetry_metrics/Telemetry.Metrics.html#module-filtering-on-metadata. So in `2.0`, we removed the `report_as` option to use the `event_name` option on every metric definition.
-
-_1.x_:
-
-```
-distribution(
-  "http.client.request.duration",
-  reporter_options: [report_as: "fast_client"],
-  keep: &(match?(%{name: :fast_client}, &1))
-)
-```
-
-_2.x_:
-
-```
-distribution(
-  "http.fast.client.request.duration",
-  event_name: [:http_client, :request, :stop],
-  keep: &(match?(%{name: :fast_client}, &1))
-)
-```
-
-This changes impact the unique index on the database, so you can either manually delete every metrics with a `report_as` before running the `2.0` migration, or truncate the table.
-
 ## Usage
 
 ### Installation
@@ -164,7 +132,7 @@ That’s it! You can declare as many metrics as you want and they will render in
 
 ## License
 
-`TelemetryUI` is © 2022 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/telemetry_ui/blob/master/LICENSE.md) file.
+`TelemetryUI` is © 2023 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/telemetry_ui/blob/master/LICENSE.md) file.
 
 ## About Mirego
 

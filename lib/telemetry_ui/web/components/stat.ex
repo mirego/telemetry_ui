@@ -24,6 +24,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     assigns
     |> base_spec(height: 90)
     |> data_from_metric(metric, assigns)
+    |> Vl.param("date_domain", value: [])
     |> Vl.layers([
       title(metric),
       Vl.new()
@@ -63,6 +64,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     assigns
     |> base_spec(height: 130)
     |> data_from_metric(metric, assigns)
+    |> Vl.param("date_domain", value: [])
     |> Vl.layers([
       title(metric, y: -20),
       Vl.new()

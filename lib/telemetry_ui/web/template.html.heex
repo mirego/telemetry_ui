@@ -55,36 +55,47 @@
       </div>
     <% else %>
       <div class="bg-white dark:bg-black shadow-sm">
-        <header class="max-w-6xl mx-auto flex justify-between p-2 mb-4 lg:pr-2 pr-[40px]" style={theme_color_style(@theme)}>
+        <header class="max-w-6xl mx-auto flex justify-between p-2 mb-4" style={theme_color_style(@theme)}>
           <a class="flex items-center gap-3 text-base font-light font-mono" href={page_href(List.first(@pages).id, %{frame: nil})}>
             <%= {:safe, @theme.logo} %><%= @theme.title %>
           </a>
 
           <div telemetry-component="Form">
-          <.form :let={f} for={@filter_form} method="get" class="flex align-items-center">
-            <%= hidden_input(f, :page, value: @current_page.id) %>
-            <%= select(f, :frame, frame_options(@filters.frame, @theme),
-              class: "p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
-            ) %>
+            <.form :let={f} for={@filter_form} method="get" class="flex align-items-center">
+              <%= hidden_input(f, :page, value: @current_page.id) %>
+              <%= select(f, :frame, frame_options(@filters.frame, @theme),
+                class: "p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
+              ) %>
 
-            <div class="right-3 absolute top-4 flex items-center gap-3">
-              <%= if @share do %>
-                <a href={"#{@theme.share_path}?share=#{@share}"} target="_blank">
-                  <span class="dark:text-neutral-500 text-neutral-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+  <div class="dropdown inline-block relative">
+    <button onclick="event.preventDefault()" class="p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-gray-500 dark:text-gray-200 text-xs">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-5">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+</svg>
+
+    </button>
+
+    <ul class="dropdown-menu w-[160px] absolute hidden flex-col gap-3 bg-white dark:bg-black shadow rounded mt-3 text-gray-700 right-[-3px] p-3">
+                <%= if @share do %>
+                  <a href={"#{@theme.share_path}?share=#{@share}"} target="_blank" class="flex items-center gap-1 dark:text-neutral-200 text-neutral-500 text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
                       />
                     </svg>
-                  </span>
-                </a>
-              <% end %>
+                    Share URL
+                  </a>
+                <% end %>
 
-              <.theme_switch />
-            </div>
-          </.form>
+                <.theme_switch>
+                Switch theme
+            </.theme_switch>
+    </ul>
+  </div>
+            </.form>
           </div>
         </header>
       </div>
@@ -116,11 +127,11 @@
     </div>
   </div>
 
-  <footer class="p-5 text-center opacity-25 text-xs dark:text-gray-300">
+  <footer class="relative p-5 text-center opacity-25 text-xs dark:text-gray-300">
+    <div class="absolute bottom-0 left-0 p-5 font-light font-mono text-xs"><%= version() %></div>
+
     Built with ♥ by the team @ <a href="https://www.mirego.com">Mirego</a>.
   </footer>
-
-  <div class="fixed bottom-0 left-0 p-3 font-light font-mono text-xs text-gray-400 dark:text-gray-600"><%= version() %></div>
 
   <script type="text/javascript" integrity={app_js_integrity()}>
     <%= raw(render("app.js")) %>

@@ -12,7 +12,7 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
               summary_aggregate: nil,
               aggregate_field: nil,
               aggregate_label: "Average",
-              format: ".4~s",
+              format: ".3~s",
               unit: "",
               aggregate_value_suffix: ""
   end

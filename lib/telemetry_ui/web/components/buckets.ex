@@ -19,6 +19,7 @@ defmodule TelemetryUI.Web.Components.Buckets do
       assigns
       |> base_spec(height: 130)
       |> data_from_metric(metric, assigns)
+      |> Vl.param("date_domain", value: [])
 
     buckets_chart =
       Vl.new()

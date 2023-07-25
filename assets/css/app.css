@@ -6,6 +6,40 @@ body {
   background: #f7f7f7;
 }
 
+.dropdown .dropdown-menu {
+  z-index: 1005;
+}
+
+html.dark .dropdown .dropdown-menu::after {
+  border-bottom-color: #000;
+}
+
+.dropdown .dropdown-menu::after {
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid #fff;
+  content: '';
+  height: 0;
+  position: absolute;
+  top: -7px;
+  width: 0;
+  right: 10px;
+}
+
+.dropdown .dropdown-menu::before {
+  content: '';
+  position: absolute;
+  background: transparent;
+  width: 160px;
+  height: 35px;
+  top: -30px;
+  right: 0;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: flex;
+}
+
 .vega-lite-metric::before {
   content: '';
   height: 60px;
@@ -31,6 +65,7 @@ html.dark .vega-lite-metric .vega-embed.has-actions summary {
   top: -5px;
   transform: scale(0.8);
   display: none;
+  z-index: 1001;
 }
 
 .vega-lite-metric .vega-embed.has-actions summary {

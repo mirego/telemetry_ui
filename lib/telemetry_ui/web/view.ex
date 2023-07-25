@@ -64,9 +64,9 @@ defmodule TelemetryUI.Web.View do
 
   defp theme_switch(assigns) do
     ~H"""
-    <button telemetry-component="ThemeSwitch">
-      <span class="dark:block hidden text-neutral-500">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+    <button telemetry-component="ThemeSwitch" class="flex items-center gap-1 dark:text-neutral-200 text-neutral-500 text-xs">
+      <span class="dark:block hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -75,8 +75,8 @@ defmodule TelemetryUI.Web.View do
         </svg>
       </span>
 
-      <span class="dark:hidden block text-neutral-200">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+      <span class="dark:hidden block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -84,6 +84,9 @@ defmodule TelemetryUI.Web.View do
           />
         </svg>
       </span>
+      <%= if assigns[:inner_block] do %>
+        <%= render_slot(@inner_block) %>
+      <% end %>
     </button>
     """
   end

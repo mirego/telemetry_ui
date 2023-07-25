@@ -7,7 +7,8 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
   alias VegaLite, as: Vl
 
   def spec(metric = %{tags: []}, assigns, options) do
-    domain = [assigns.filters.from, assigns.filters.to]
+    to = DateTime.to_unix(DateTime.add(assigns.filters.to, 60, :second), :millisecond)
+    from = DateTime.to_unix(assigns.filters.from, :millisecond)
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
     unit = to_unit(metric.unit)
 
@@ -20,6 +21,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
       assigns
       |> base_spec(height: 130)
       |> data_from_metric(metric, assigns)
+      |> Vl.param("date_domain", value: [from, to])
 
     summary_chart =
       Vl.new()
@@ -35,7 +37,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         corner_radius_end: 2
       )
       |> Vl.transform(filter: "datum.compare==0")
-      |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
+      |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: [expr: "date_domain"]])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, format: options.format)
       |> Vl.encode(:tooltip, tooltip)
 
@@ -43,7 +45,8 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
   end
 
   def spec(metric, assigns, options) do
-    domain = [assigns.filters.from, assigns.filters.to]
+    to = DateTime.to_unix(DateTime.add(assigns.filters.to, 60, :second), :millisecond)
+    from = DateTime.to_unix(assigns.filters.from, :millisecond)
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
     unit = to_unit(metric.unit)
 
@@ -57,6 +60,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
       assigns
       |> base_spec(height: 130)
       |> data_from_metric(metric, assigns)
+      |> Vl.param("date_domain", value: [from, to])
 
     summary_chart =
       Vl.new()
@@ -73,7 +77,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
       )
       |> Vl.transform(filter: "datum.compare==0")
       |> encode_tags_color(metric.tags)
-      |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: domain])
+      |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: [expr: "date_domain"]])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, stack: nil, format: options.format)
       |> Vl.param("tags", select: [fields: ["tags"], type: :point], bind: "legend")
       |> Vl.encode(:opacity, value: 0, condition: [param: "tags", value: 1, empty: true])
