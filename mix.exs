@@ -118,11 +118,7 @@ defmodule TelemetryUI.Mixfile do
         "dist",
         "lib",
         "mix.exs",
-        "README.md",
-        "native/vegaliteconvert/.cargo",
-        "native/vegaliteconvert/Cargo*",
-        "native/vegaliteconvert/src",
-        "checksum-*.exs"
+        "README.md"
       ]
     ]
   end
