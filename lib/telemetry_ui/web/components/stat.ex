@@ -6,7 +6,7 @@ defmodule TelemetryUI.Web.Components.Stat do
   alias TelemetryUI.Web.Components.CompareAggregate
   alias VegaLite, as: Vl
 
-  def spec(metric = %{tags: []}, assigns, options) do
+  def spec(%{tags: []} = metric, assigns, options) do
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
     unit = to_unit(metric.unit)
     chart_offset = 80

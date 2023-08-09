@@ -1,5 +1,11 @@
 defmodule TelemetryUI.Config do
-  @moduledoc false
+  @moduledoc """
+  Holds the state of the config.
+
+  See other modules for more details:
+  - `TelemetryUI.Theme`
+  - `TelemetryUI.Backend`
+  """
 
   use GenServer
 

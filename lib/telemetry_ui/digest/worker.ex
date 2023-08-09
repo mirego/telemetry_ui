@@ -1,5 +1,6 @@
 if Code.ensure_loaded?(Oban) do
   defmodule TelemetryUI.Digest.Worker do
+    @moduledoc false
     use Oban.Worker
 
     alias TelemetryUI.Digest

@@ -41,7 +41,7 @@ defmodule TelemetryUI.DigestTest do
                  image_block
                )
 
-        {:ok, {{'HTTP/1.1', 200, 'OK'}, [], 'ok'}}
+        {:ok, {{~c"HTTP/1.1", 200, ~c"OK"}, [], ~c"ok"}}
       end)
 
       Digest.Worker.perform(%Oban.Job{args: args})
@@ -82,10 +82,10 @@ defmodule TelemetryUI.DigestTest do
         "username" => "TelemetryUI - Test"
       }
 
-      request = {args["slack_hook_url"], [], 'application/json', Jason.encode!(body)}
+      request = {args["slack_hook_url"], [], ~c"application/json", Jason.encode!(body)}
 
       expect(:httpc, :request, fn :post, ^request, [], [] ->
-        {:ok, {{'HTTP/1.1', 200, 'OK'}, [], 'ok'}}
+        {:ok, {{~c"HTTP/1.1", 200, ~c"OK"}, [], ~c"ok"}}
       end)
 
       Digest.Worker.perform(%Oban.Job{args: args})

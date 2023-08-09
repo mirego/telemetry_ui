@@ -1,4 +1,85 @@
 defmodule TelemetryUI do
+  @moduledoc """
+  Main entry point to start all the processes as part of your application.
+
+  # Usage
+  ```
+  use Application
+
+  def start(_type, _args) do
+    children = [
+      Shopcast.Repo,
+      MyAppWeb.Endpoint,
+      {TelemetryUI, my_config()}
+    ]
+  ```
+  The reporter, write buffer and pruner processes will be part of your supervision tree, ensuring that everything runs smoothly.
+
+  The config is a data structure representing all settings used by TelemetryUI.
+
+  ## Config example
+
+  ```
+    [
+      metrics: [
+        {"System", [last_value("vm.memory.total", unit: {:byte, :megabyte})]}
+      ],
+      theme: %{title: "Metrics"},
+      backend: 
+        %TelemetryUI.Backend.EctoPostgres{
+          repo: MuyApp.Repo,
+          pruner_threshold: [months: -1],
+          pruner_interval_ms: 3_600_000,
+          max_buffer_size: 1_000,
+          flush_interval_ms: 10_000
+        }
+    ]
+  ```
+
+  This config will show a basic "last value" chart for the memory usage reported by the VM.
+  The title of the page will be "Metrics" and the backend used to store and query metrics will be PostgreSQL.
+  See `TelemetryUI.Config` for a list of all options.
+
+  ## Metrics list
+
+  Every kind of metrics exposed by `TelemetryMetrics` is supported by `TelemetryUI`:
+  - `last_value`
+  - `summary`
+  - `sum`
+  - `counter`
+  - `distribution`
+
+  `TelemetryUI` also exposes its own set of metrics:
+  - `average`
+  - `average_over_time`
+  - `count_over_time`
+  - `median`
+  - `median_over_time`
+
+  ## The Web
+  Finally, when the configuration is done and we actually want to see our metrics, we need to add the `TelemetryUI.Web` module in our router:
+
+  *Phoenix*
+  ```
+  scope "/" do
+    pipe_through([:browser])
+    get("/metrics", TelemetryUI.Web, [], [assigns: %{telemetry_ui_allowed: true}])
+  end
+  ```
+
+  The metrics page is protected by default. It needs to have the `telemetry_ui_allowed` assign to true to render.
+  We can imagine having a `:admin_protected` plug that ensure a user is an admin and also assign `telemetry_ui_allowed` to true.
+
+  ```
+  scope "/" do
+    pipe_through([:browser, :admin_protected])
+    get("/metrics", TelemetryUI.Web, [])
+  end
+  ```
+
+  That’s it! The `/metrics` page will show the metrics as they are recorded. Checkout the Guides to dive into more complex configuration and awesome features :)
+  """
+
   use Supervisor
 
   defmodule Page do
@@ -6,8 +87,8 @@ defmodule TelemetryUI do
 
     defstruct id: nil, title: nil, metrics: [], ui_options: []
 
-    def cast_all(pages = [{_, _} | _]), do: Enum.map(pages, &cast/1)
-    def cast_all(pages = [{_, _, _} | _]), do: Enum.map(pages, &cast/1)
+    def cast_all([{_, _} | _] = pages), do: Enum.map(pages, &cast/1)
+    def cast_all([{_, _, _} | _] = pages), do: Enum.map(pages, &cast/1)
     def cast_all(metrics), do: [cast({"", metrics})]
 
     defp cast({title, metrics}), do: cast({title, metrics, []})

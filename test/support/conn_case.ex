@@ -1,4 +1,5 @@
 defmodule TelemetryUI.Test.ConnCase do
+  @moduledoc false
   use ExUnit.CaseTemplate
 
   alias Ecto.Adapters.SQL.Sandbox
@@ -6,9 +7,9 @@ defmodule TelemetryUI.Test.ConnCase do
 
   using do
     quote do
+      import Phoenix.ConnTest
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
 
       alias TelemetryUI.Test.Factory
       alias TelemetryUI.Test.Repo

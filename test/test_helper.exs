@@ -8,6 +8,7 @@ defmodule TelemetryUI.Test.Router do
   use Phoenix.Router
 
   defmodule Select do
+    @moduledoc false
     import Plug.Conn
 
     def init(_), do: []
@@ -49,6 +50,7 @@ Mimic.copy(:httpc)
 ExUnit.start(capture_log: true)
 
 defmodule TestCustomRenderMetric do
+  @moduledoc false
   use TelemetryUI.Metrics
 
   def new(attrs), do: struct!(__MODULE__, attrs)

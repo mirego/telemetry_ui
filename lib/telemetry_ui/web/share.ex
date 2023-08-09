@@ -1,4 +1,5 @@
 defmodule TelemetryUI.Web.Share do
+  @moduledoc false
   use Plug.Builder
 
   alias Ecto.Changeset
@@ -12,7 +13,7 @@ defmodule TelemetryUI.Web.Share do
   plug(:fetch_current_page)
   plug(:index)
 
-  def index(conn = %{params: %{"id" => id} = params}, _opts) do
+  def index(%{params: %{"id" => id} = params} = conn, _opts) do
     metric = fetch_page_metric(conn.assigns.current_page, Path.rootname(id))
     metric = resolve_metric(conn, metric)
 

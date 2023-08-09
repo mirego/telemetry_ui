@@ -1,4 +1,5 @@
 defmodule TelemetryUI.Web do
+  @moduledoc false
   use Plug.Builder
 
   alias Ecto.Changeset
@@ -15,7 +16,7 @@ defmodule TelemetryUI.Web do
   plug(:assign_share)
   plug(:index)
 
-  def index(conn = %{params: %{"metric-data" => id}}, _) do
+  def index(%{params: %{"metric-data" => id}} = conn, _) do
     data =
       with metric when is_struct(metric) <- TelemetryUI.metric_by_id(conn.assigns.telemetry_ui_name, id),
            {:async, async} <- fetch_component_metric_data(conn, metric) do

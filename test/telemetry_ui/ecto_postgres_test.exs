@@ -102,7 +102,7 @@ defmodule TelemetryUI.EctoPostgresTest do
 
     test "with event", %{backend: backend} do
       metric = summary("some.app.event")
-      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30])
+      event = factory_event(metric, value: 90.0, count: 1, date: ~U[2022-02-10T00:00:30Z])
 
       options = default_options(event)
       options = %{options | event_name: "some.app.event"}
@@ -114,8 +114,8 @@ defmodule TelemetryUI.EctoPostgresTest do
 
     test "with compare event", %{backend: backend} do
       metric = summary("some.app.event")
-      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30])
-      _compare_event = factory_event(metric, value: 30.0, count: 2, date: ~N[2022-02-09T23:45:30])
+      event = factory_event(metric, value: 90.0, count: 1, date: ~U[2022-02-10T00:00:30Z])
+      _compare_event = factory_event(metric, value: 30.0, count: 2, date: ~U[2022-02-09T23:45:30Z])
 
       options = default_options(event)
       options = %{options | event_name: "some.app.event", compare: true}
@@ -130,7 +130,7 @@ defmodule TelemetryUI.EctoPostgresTest do
 
     test "with empty compare event", %{backend: backend} do
       metric = summary("some.app.event")
-      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30])
+      event = factory_event(metric, value: 90.0, count: 1, date: ~U[2022-02-10T00:00:30Z])
 
       options = default_options(event)
       options = %{options | event_name: "some.app.event", compare: true}
@@ -144,10 +144,10 @@ defmodule TelemetryUI.EctoPostgresTest do
 
     test "with aggregated event", %{backend: backend} do
       metric = summary("some.app.event")
-      event = factory_event(metric, value: 100.0, count: 1, date: ~N[2022-02-10T12:00:30])
-      factory_event(metric, value: 80.0, count: 2, date: ~N[2022-02-10T11:00:30])
-      factory_event(metric, value: 80.0, count: 2, date: ~N[2022-02-10T11:00:30], tags: %{route: "/"})
-      factory_event(metric, value: 10.0, count: 3, date: ~N[2024-02-10T11:00:30])
+      event = factory_event(metric, value: 100.0, count: 1, date: ~U[2022-02-10T12:00:30Z])
+      factory_event(metric, value: 80.0, count: 2, date: ~U[2022-02-10T11:00:30Z])
+      factory_event(metric, value: 80.0, count: 2, date: ~U[2022-02-10T11:00:30Z], tags: %{route: "/"})
+      factory_event(metric, value: 10.0, count: 3, date: ~U[2024-02-10T11:00:30Z])
 
       options = default_options(event, years: -2)
       options = %{options | event_name: "some.app.event"}
@@ -161,9 +161,9 @@ defmodule TelemetryUI.EctoPostgresTest do
 
     test "with tags", %{backend: backend} do
       metric = summary("some.app.event", tags: [:foo])
-      _event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{})
-      _event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{"foo" => "bar", "other" => "bar"})
-      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T00:00:30], tags: %{"foo" => "bar"})
+      _event = factory_event(metric, value: 90.0, count: 1, date: ~U[2022-02-10T00:00:30Z], tags: %{})
+      _event = factory_event(metric, value: 90.0, count: 1, date: ~U[2022-02-10T00:00:30Z], tags: %{"foo" => "bar", "other" => "bar"})
+      event = factory_event(metric, value: 90.0, count: 1, date: ~U[2022-02-10T00:00:30Z], tags: %{"foo" => "bar"})
 
       options = default_options(event)
       options = %{options | event_name: "some.app.event"}
@@ -176,7 +176,7 @@ defmodule TelemetryUI.EctoPostgresTest do
 
     test "with buckets", %{backend: backend} do
       metric = distribution("some.app.event", reporter_options: [buckets: [0, 200, 1000, 5000]])
-      event = factory_event(metric, value: 90.0, count: 1, date: ~N[2022-02-10T01:00:00])
+      event = factory_event(metric, value: 90.0, count: 1, date: ~U[2022-02-10T01:00:00Z])
 
       options = default_options(event, seconds: -7200)
       options = %{options | event_name: "some.app.event"}

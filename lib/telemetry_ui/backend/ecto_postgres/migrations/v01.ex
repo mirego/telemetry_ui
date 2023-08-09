@@ -3,7 +3,7 @@ defmodule TelemetryUI.Backend.EctoPostgres.Migrations.V01 do
 
   use Ecto.Migration
 
-  def up(opts = %{create_schema: create?, prefix: prefix}) do
+  def up(%{create_schema: create?, prefix: prefix} = opts) do
     %{quoted_prefix: quoted} = opts
 
     if create?, do: execute("CREATE SCHEMA IF NOT EXISTS #{quoted}")

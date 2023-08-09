@@ -8,13 +8,29 @@
 
 ## Features
 
-`telemetry_ui`’s primary goal is to display [your application metrics](https://hexdocs.pm/telemetry_metrics) without external infrastructure dependencies. [Phoenix](https://hexdocs.pm/phoenix/telemetry.html), [Absinthe](https://hexdocs.pm/absinthe/telemetry.html), [Ecto](https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events), [Erlang VM](https://hexdocs.pm/telemetry_poller/readme.html), [Tesla](https://hexdocs.pm/tesla/Tesla.Middleware.Telemetry.html), [Redix](https://hexdocs.pm/redix/telemetry.html), [Oban](https://hexdocs.pm/oban/Oban.Telemetry.html) and others expose all sorts of data that can be useful. You can also emit your own events from your application.
+`TelemetryUI`’s primary goal is to display [your application metrics](https://hexdocs.pm/telemetry_metrics) without external infrastructure dependencies. [Plug](https://hexdocs.pm/plug/Plug.Telemetry.html), [Phoenix](https://hexdocs.pm/phoenix/telemetry.html), [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view/telemetry.html), [Absinthe](https://hexdocs.pm/absinthe/telemetry.html), [Ecto](https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events), [Erlang VM](https://hexdocs.pm/telemetry_poller/readme.html), [Tesla](https://hexdocs.pm/tesla/Tesla.Middleware.Telemetry.html), [Finch](https://hexdocs.pm/finch/Finch.Telemetry.html), [Redix](https://hexdocs.pm/redix/telemetry.html), [Oban](https://hexdocs.pm/oban/Oban.Telemetry.html), [Broadway](https://hexdocs.pm/broadway/Broadway.html#module-telemetry) and others expose all sorts of data that can be useful. You can also emit your own events from your application.
 
 Your data should not have to be uploaded somewhere else to have insighful metrics.
 
 It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to quickly (and efficiently) store and query your application events.
 
 <img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/205386716-a4aa9387-6125-40e6-b764-b2e76df5e83b.png">
+
+### Advantages over other tools
+
+- Persisted metrics inside your own database
+- Live dashboard
+- Many built-in charts and visualizations using [VegaLite](https://vega.github.io/vega-lite/)
+
+### Advanced features
+
+- 100% custom UI hook to show your own components
+- 100% custom data fetching to show live data
+- Shareable metrics page (secured, cacheable, without external requests)
+- Slack digest with rendered images
+- Multiple metrics dashboard living in the same app
+
+Checkout the Guides for more informations.
 
 ## Usage
 
@@ -26,7 +42,7 @@ TelemetryUI is published on Hex. Add it to your list of dependencies in `mix.exs
 # mix.exs
 def deps do
   [
-    {:telemetry_ui, ">= 0.0.1"}
+    {:telemetry_ui, "~> 4.0"}
   ]
 end
 ```

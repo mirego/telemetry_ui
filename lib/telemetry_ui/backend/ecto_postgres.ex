@@ -1,4 +1,7 @@
 defmodule TelemetryUI.Backend.EctoPostgres do
+  @moduledoc false
+  import Ecto.Query
+
   @enforce_keys ~w(repo)a
   defstruct repo: nil,
             pruner_threshold: [months: -1],
@@ -9,8 +12,6 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             verbose: false,
             telemetry_prefix: [:telemetry_ui, :repo],
             telemetry_options: [telemetry_ui_conf: []]
-
-  import Ecto.Query
 
   defmodule Entry do
     @moduledoc false
@@ -63,7 +64,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       )
     end
 
-    def metric_data(backend, metric, options = %TelemetryUI.Scraper.Options{}) do
+    def metric_data(backend, metric, %TelemetryUI.Scraper.Options{} = options) do
       current =
         Entry
         |> aggregated_query(options)

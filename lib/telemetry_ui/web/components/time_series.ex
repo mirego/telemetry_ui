@@ -6,7 +6,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
   alias TelemetryUI.Web.Components.CompareAggregate
   alias VegaLite, as: Vl
 
-  def spec(metric = %{tags: []}, assigns, options) do
+  def spec(%{tags: []} = metric, assigns, options) do
     to = DateTime.to_unix(DateTime.add(assigns.filters.to, 60, :second), :millisecond)
     from = DateTime.to_unix(assigns.filters.from, :millisecond)
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)

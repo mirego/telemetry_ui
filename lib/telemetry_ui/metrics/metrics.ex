@@ -1,4 +1,5 @@
 defmodule TelemetryUI.Metrics do
+  @moduledoc false
   alias Telemetry.Metrics
   alias TelemetryUI.Event
   alias TelemetryUI.Metrics, as: UIMetrics

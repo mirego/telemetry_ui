@@ -4,6 +4,7 @@ defmodule TelemetryUI.WriteBufferTest do
   alias TelemetryUI.WriteBuffer
 
   defmodule FakeBackend do
+    @moduledoc false
     defstruct max_buffer_size: 1,
               self: nil,
               flush_interval_ms: 10_000,

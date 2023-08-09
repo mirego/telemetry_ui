@@ -16,7 +16,7 @@ defmodule TelemetryUI.Web.Filter do
   def frame_options(:custom, theme), do: theme.frame_options
   def frame_options(_frame, theme), do: Enum.reject(theme.frame_options, fn {option, _, _} -> option === :custom end)
 
-  def cast(params = %{"frame" => "custom"}, _) do
+  def cast(%{"frame" => "custom"} = params, _) do
     to =
       with to when not is_nil(to) <- params["to"],
            {:ok, datetime, _} <- DateTime.from_iso8601(to) do
@@ -90,14 +90,11 @@ defmodule TelemetryUI.Web.Filter do
   defp fetch_time_frame(:hour, duration), do: {[second: 0, minute: 0], [hours: -duration]}
   defp fetch_time_frame(:day, duration), do: {[second: 0, minute: 0], [days: -duration]}
 
-  defp fetch_time_frame(:week, duration),
-    do: {[second: 0, minute: 0, hour: 0], [weeks: -duration]}
+  defp fetch_time_frame(:week, duration), do: {[second: 0, minute: 0, hour: 0], [weeks: -duration]}
 
-  defp fetch_time_frame(:month, duration),
-    do: {[second: 0, minute: 0, hour: 0], [months: -duration]}
+  defp fetch_time_frame(:month, duration), do: {[second: 0, minute: 0, hour: 0], [months: -duration]}
 
-  defp fetch_time_frame(:year, duration),
-    do: {[second: 0, minute: 0, hour: 0], [years: -duration]}
+  defp fetch_time_frame(:year, duration), do: {[second: 0, minute: 0, hour: 0], [years: -duration]}
 
   defp fetch_time_frame(_, duration), do: fetch_time_frame(:hour, duration)
 end

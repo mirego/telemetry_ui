@@ -1,9 +1,10 @@
 defmodule TelemetryUI.Reporter do
   @moduledoc false
 
+  use GenServer
+
   import TelemetryUI.Event
 
-  use GenServer
   require Logger
 
   def start_link(initial_state) do

@@ -30,11 +30,11 @@ defmodule TelemetryUI.Scraper do
 
   defp map_tags(entry) do
     update_in(entry, [:tags], fn tags ->
-      if map_size(tags) === 1 do
-        Enum.map_join(tags, ",", fn {_key, value} -> "#{value}" end)
-      else
-        Enum.map_join(tags, ",", fn {key, value} -> "#{key}: #{value}" end)
-      end
+      predicate = if map_size(tags) === 1, do: &map_single_tag/1, else: &map_multi_tag/1
+      Enum.map_join(tags, ",", predicate)
     end)
   end
+
+  defp map_single_tag({_key, value}), do: "#{value}"
+  defp map_multi_tag({key, value}), do: "#{key}: #{value}"
 end

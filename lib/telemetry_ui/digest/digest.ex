@@ -1,4 +1,5 @@
 defmodule TelemetryUI.Digest do
+  @moduledoc false
   alias TelemetryUI.Digest.InvalidServiceError
   alias TelemetryUI.Digest.InvalidTimeDiffError
   alias TelemetryUI.Digest.Slack

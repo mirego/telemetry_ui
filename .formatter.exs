@@ -9,7 +9,7 @@
     "{config,lib,test,rel}/**/*.{ex,exs}"
   ],
   subdirectories: ["priv/my-app"],
-  plugins: [Phoenix.LiveView.HTMLFormatter],
+  plugins: [Phoenix.LiveView.HTMLFormatter, Styler],
   import_deps: [:ecto, :phoenix],
   line_length: 180
 ]

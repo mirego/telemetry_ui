@@ -1,4 +1,5 @@
 defmodule TelemetryUI.VegaLiteToImage do
+  @moduledoc false
   if Code.ensure_loaded?(VegaLiteConvert) and Code.ensure_loaded?(Vix.Vips) do
     def enabled?, do: true
   else

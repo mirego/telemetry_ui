@@ -2,6 +2,7 @@ defmodule TelemetryUI.WriteBuffer do
   @moduledoc false
 
   use GenServer
+
   require Logger
 
   defmodule State do
@@ -29,7 +30,7 @@ defmodule TelemetryUI.WriteBuffer do
   end
 
   @impl GenServer
-  def terminate(_reason, state = %State{}) do
+  def terminate(_reason, %State{} = state) do
     info_log(state.backend, "Flushing event buffer before shutdown…")
     do_flush(state.buffer, state.backend)
   end
@@ -40,7 +41,7 @@ defmodule TelemetryUI.WriteBuffer do
   end
 
   @impl GenServer
-  def handle_cast({:insert, event}, state = %State{}) do
+  def handle_cast({:insert, event}, %State{} = state) do
     new_buffer = [event | state.buffer]
 
     if length(new_buffer) >= state.backend.max_buffer_size do
@@ -55,7 +56,7 @@ defmodule TelemetryUI.WriteBuffer do
   end
 
   @impl GenServer
-  def handle_info(:tick, state = %State{}) do
+  def handle_info(:tick, %State{} = state) do
     do_flush(state.buffer, state.backend)
     timer = Process.send_after(self(), :tick, state.backend.flush_interval_ms)
     {:noreply, %{state | buffer: [], timer: timer}}

@@ -1,4 +1,5 @@
 defmodule TelemetryUI.NotStartedError do
+  @moduledoc false
   defexception [:message]
 
   @impl Exception
@@ -21,6 +22,7 @@ defmodule TelemetryUI.NotStartedError do
 end
 
 defmodule TelemetryUI.InvalidMetricWebComponentError do
+  @moduledoc false
   defexception [:message]
 
   @impl Exception
@@ -32,6 +34,7 @@ defmodule TelemetryUI.InvalidMetricWebComponentError do
 end
 
 defmodule TelemetryUI.InvalidThemeShareKeyError do
+  @moduledoc false
   defexception [:message]
 
   @impl Exception
@@ -43,6 +46,7 @@ defmodule TelemetryUI.InvalidThemeShareKeyError do
 end
 
 defmodule TelemetryUI.InvalidDigestShareURLError do
+  @moduledoc false
   defexception [:message]
 
   @impl Exception
@@ -54,9 +58,11 @@ defmodule TelemetryUI.InvalidDigestShareURLError do
 end
 
 defmodule TelemetryUI.Digest.InvalidServiceError do
+  @moduledoc false
   defexception [:message]
 end
 
 defmodule TelemetryUI.Digest.InvalidTimeDiffError do
+  @moduledoc false
   defexception [:message]
 end

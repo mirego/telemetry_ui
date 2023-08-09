@@ -1,4 +1,5 @@
 defmodule TelemetryUI.Test.Repo.Migrations.AddTelemetryUIEventsTable do
+  @moduledoc false
   use Ecto.Migration
 
   defdelegate up, to: TelemetryUI.Backend.EctoPostgres.Migrations

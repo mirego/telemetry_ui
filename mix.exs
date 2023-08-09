@@ -92,6 +92,7 @@ defmodule TelemetryUI.Mixfile do
       {:credo, "~> 1.1", only: [:dev, :test]},
       {:credo_envvar, "~> 0.1", only: [:dev, :test], runtime: false},
       {:credo_naming, "~> 2.0", only: [:dev, :test], runtime: false},
+      {:styler, "~> 0.7", only: [:dev, :test], runtime: false},
 
       # Docs
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},

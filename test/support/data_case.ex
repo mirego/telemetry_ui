@@ -1,4 +1,5 @@
 defmodule TelemetryUI.Test.DataCase do
+  @moduledoc false
   use ExUnit.CaseTemplate
 
   alias Ecto.Adapters.SQL.Sandbox
