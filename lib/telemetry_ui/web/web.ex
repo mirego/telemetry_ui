@@ -1,5 +1,10 @@
 defmodule TelemetryUI.Web do
-  @moduledoc false
+  @moduledoc """
+  Plug to render an HTML view with all metrics.
+  The view handles the different pages in the configurationa and the assets pipeline for CSS and JavaScript.
+  The module also handles "async" components data request called in the components.
+  """
+
   use Plug.Builder
 
   alias Ecto.Changeset

@@ -5,6 +5,7 @@ defmodule TelemetryUI.Digest do
   alias TelemetryUI.Digest.Slack
 
   defprotocol Service do
+    @moduledoc false
     def send!(service)
   end
 

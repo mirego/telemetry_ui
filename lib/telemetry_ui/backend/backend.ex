@@ -3,14 +3,13 @@ defprotocol TelemetryUI.Backend do
   Inserting, fetching and pruning of metrics.
 
   ## Inserting
-  Inserting is called by `TelemetryUI.WriteBuffer`. It can be grouped depending on the buffer configuration inside the backend struct:
+  Inserting is called by the internal `WriteBuffer`. It can be grouped depending on the buffer configuration inside the backend struct:
 
   - `flush_interval_ms`: Time interval before the write buffer calls the backend
   - `max_buffer_size`: Maximum count of events before the write  buffer calls the backend
 
   ## Fetching
-  Fetching is called when rendering metrics in the view. `TelemetryUI.Scraper` is responsible for calling the backend.
-  The `filters` argument is a `TelemetryUI.Scraper.Options` struct.
+  Fetching is called when rendering metrics in the view. The `filters` argument is a struct with predefined fields: `to`, `from`, `event_name` and `compare`.
 
   ## Pruning
   Pruning is implemented to keep the datastore clean. Keeping data forever will increase the size of the storage and affect performance.

@@ -27,7 +27,7 @@ defmodule TelemetryUI do
       theme: %{title: "Metrics"},
       backend: 
         %TelemetryUI.Backend.EctoPostgres{
-          repo: MuyApp.Repo,
+          repo: MyApp.Repo,
           pruner_threshold: [months: -1],
           pruner_interval_ms: 3_600_000,
           max_buffer_size: 1_000,
