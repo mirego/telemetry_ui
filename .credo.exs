@@ -45,6 +45,7 @@ common_checks = [
   {Credo.Check.Warning.UnusedStringOperation},
   {Credo.Check.Warning.UnusedTupleOperation},
   {Credo.Check.Warning.OperationWithConstantResult},
+  {CredoEnvvar.Check.Warning.EnvironmentVariablesAtCompileTime},
   {CredoNaming.Check.Warning.AvoidSpecificTermsInModuleNames, terms: ["Manager", "Fetcher", "Builder", "Persister", "Serializer", ~r/^Helpers?$/i, ~r/^Utils?$/i]},
   {CredoNaming.Check.Consistency.ModuleFilename, excluded_paths: ["config", "mix.exs", "priv", "test/support", "lib/telemetry_ui/exceptions.ex"]}
 ]
@@ -58,11 +59,7 @@ common_checks = [
         included: ["*.exs", "lib/", "config/", "rel/"],
         excluded: []
       },
-      checks:
-        common_checks ++
-          [
-            {Credo.Check.Design.DuplicatedCode, excluded_macros: [], mass_threshold: 50}
-          ]
+      checks: common_checks
     },
     %{
       name: "test",

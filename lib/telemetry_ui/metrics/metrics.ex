@@ -6,8 +6,10 @@ defmodule TelemetryUI.Metrics do
 
   @telemetry_metrics [
     {:average, UIMetrics.Average},
+    {:average_list, UIMetrics.AverageList},
     {:average_over_time, UIMetrics.AverageOverTime},
     {:count_over_time, UIMetrics.CountOverTime},
+    {:count_list, UIMetrics.CountList},
     {:counter, UIMetrics.Counter},
     {:distribution, UIMetrics.Distribution},
     {:last_value, UIMetrics.LastValue},

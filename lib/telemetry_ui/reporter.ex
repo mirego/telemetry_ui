@@ -32,6 +32,8 @@ defmodule TelemetryUI.Reporter do
   end
 
   def handle_event(_event_name, measurements, metadata, {writer_buffer, metrics}) do
+    metadata = Map.put(metadata, :measurements, measurements)
+
     for metric <- metrics, keep?(metric, metadata) do
       event_name = cast_event_name(metric)
       value = extract_measurement(metric, measurements, metadata)
@@ -50,8 +52,13 @@ defmodule TelemetryUI.Reporter do
     end
   end
 
-  defp keep?(%{keep: nil}, _metadata), do: true
-  defp keep?(metric, metadata), do: metric.keep.(metadata)
+  defp keep?(metric, metadata) do
+    cond do
+      Map.has_key?(metric, :keep) and is_function(metric.keep, 1) -> metric.keep.(metadata)
+      Map.has_key?(metric, :drop) and is_function(metric.drop, 1) -> not metric.drop.(metadata)
+      true -> true
+    end
+  end
 
   defp extract_measurement(metric, measurements, metadata) do
     case metric.measurement do

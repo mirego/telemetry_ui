@@ -20,6 +20,8 @@ defmodule TelemetryUI.Metrics.Sum do
     end
 
     def to_html(metric, assigns) do
+      assigns = %{assigns | options: @options}
+
       metric
       |> Components.Stat.spec(assigns, @options)
       |> TelemetryUI.Web.VegaLite.draw(metric, assigns)

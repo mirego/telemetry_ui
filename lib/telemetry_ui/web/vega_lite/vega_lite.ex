@@ -15,7 +15,7 @@ defmodule TelemetryUI.Web.VegaLite do
 
       <.title id={@metric.id} title={@metric.title} />
       <.container id={@metric.id} />
-      <.legend id={@metric.id} />
+      <.legend :if={Map.has_key?(@options, :legend) && @options.legend} id={@metric.id} />
       <.loading_view id={@metric.id} />
       <.empty_view id={@metric.id} />
       <.close_fullscreen_button id={@metric.id} />

@@ -21,6 +21,8 @@ defmodule TelemetryUI.Metrics.CountOverTime do
     end
 
     def to_html(metric, assigns) do
+      assigns = %{assigns | options: @options}
+
       metric
       |> Components.TimeSeries.spec(assigns, @options)
       |> TelemetryUI.Web.VegaLite.draw(metric, assigns)

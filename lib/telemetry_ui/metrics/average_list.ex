@@ -1,4 +1,4 @@
-defmodule TelemetryUI.Metrics.AverageOverTime do
+defmodule TelemetryUI.Metrics.AverageList do
   @moduledoc false
 
   use TelemetryUI.Metrics
@@ -10,13 +10,15 @@ defmodule TelemetryUI.Metrics.AverageOverTime do
     @options %Spec.Options{
       field: "value",
       field_label: "Value",
+      summary_aggregate: "average",
+      aggregate_field: "value",
       aggregate: "average",
-      aggregate_label: "Average",
-      format: ".2f"
+      format: ".2f",
+      legend: false
     }
 
     def to_image(metric, extension, assigns) do
-      spec = Components.TimeSeries.spec(metric, assigns, @options)
+      spec = Components.StatList.spec(metric, assigns, @options)
       spec = VegaLite.Export.to_json(spec)
       TelemetryUI.VegaLiteToImage.export(spec, extension)
     end
@@ -25,7 +27,7 @@ defmodule TelemetryUI.Metrics.AverageOverTime do
       assigns = %{assigns | options: @options}
 
       metric
-      |> Components.TimeSeries.spec(assigns, @options)
+      |> Components.StatList.spec(assigns, @options)
       |> TelemetryUI.Web.VegaLite.draw(metric, assigns)
     end
   end
