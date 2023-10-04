@@ -61,6 +61,9 @@ Open the generated migration in your editor and call the up and down functions o
 defmodule MyApp.Repo.Migrations.AddTelemetryUIEventsTable do
   use Ecto.Migration
 
+  @disable_migration_lock true
+  @disable_ddl_transaction true
+
   def up do
     TelemetryUI.Backend.EctoPostgres.Migrations.up()
   end
