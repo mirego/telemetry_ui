@@ -14,7 +14,7 @@ Your data should not have to be uploaded somewhere else to have insighful metric
 
 It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to quickly (and efficiently) store and query your application events.
 
-<img alt="Screenshot of /metrics showcasing values and charts" src="https://user-images.githubusercontent.com/464900/205386716-a4aa9387-6125-40e6-b764-b2e76df5e83b.png">
+<img alt="Screenshot of /metrics showcasing values and charts" src="https://github.com/mirego/telemetry_ui/assets/464900/88a9863f-4762-42cd-90cb-74a433ec1494">
 
 ### Advantages over other tools
 
