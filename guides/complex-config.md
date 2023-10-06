@@ -259,7 +259,7 @@ defmodule MyApp.TelemetryUI do
       header_color: "#28cb87",
       primary_color: "#28cb87",
       title: "My app metrics",
-      share_key: "0123456789123456",
+      share_key: "012345678912345",
       logo: """
       <svg
         viewBox="0 0 480 480"
