@@ -47,6 +47,13 @@ def deps do
 end
 ```
 
+Configure TelemetryUI for test.
+
+```elixir
+# config/test.exs
+config :telemetry_ui, disabled: true
+```
+
 Then run mix deps.get to install Telemetry and its dependencies.
 
 After the packages are installed you must create a database migration to add the `telemetry_ui_events` table to your database:
