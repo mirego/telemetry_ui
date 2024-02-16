@@ -82,9 +82,9 @@ defmodule TelemetryUI.DigestTest do
         "username" => "TelemetryUI - Test"
       }
 
-      request = {args["slack_hook_url"], [], ~c"application/json", Jason.encode!(body)}
-
-      expect(:httpc, :request, fn :post, ^request, [], [] ->
+      expect(:httpc, :request, fn :post, {url, [], ~c"application/json", received_body}, [], [] ->
+        assert url === args["slack_hook_url"]
+        assert Jason.decode!(received_body) === body
         {:ok, {{~c"HTTP/1.1", 200, ~c"OK"}, [], ~c"ok"}}
       end)
 
