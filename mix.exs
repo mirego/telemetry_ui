@@ -76,7 +76,7 @@ defmodule TelemetryUI.Mixfile do
 
       # Frontend
       {:vega_lite, "~> 0.1"},
-      {:phoenix_html, "~> 3.0"},
+      {:phoenix_html, "~> 3.0 or ~> 4.0"},
       {:phoenix_live_view, "~> 0.18"},
 
       # Images

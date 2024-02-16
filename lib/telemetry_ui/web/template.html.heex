@@ -9,7 +9,7 @@
 
     <title><%= @theme.title %></title>
     <style>
-      <%= raw render("app.css") %>
+      <%= {:safe, render("app.css")} %>
     </style>
     <link rel="icon" href={favicon(@theme)} type="image/svg+xml" />
   </head>
@@ -62,10 +62,16 @@
 
             <div telemetry-component="Form">
               <.form :let={f} for={@filter_form} method="get" class="flex align-items-center">
-                <%= hidden_input(f, :page, value: @current_page.id) %>
-                <%= select(f, :frame, frame_options(@filters.frame, @theme),
-                  class: "p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
-                ) %>
+                <input id="filter_page" name="filter[page]" type="hidden" value={@current_page.id} />
+                <select
+                  id="filter_frame"
+                  name="filter[frame]"
+                  class="p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
+                >
+                  <%= for {label, value} <- frame_options(@filters.frame, @theme) do %>
+                    <option selected={f.data.frame === value} value={value}><%= label %></option>
+                  <% end %>
+                </select>
 
                 <div class="dropdown inline-block relative">
                   <button onclick="event.preventDefault()" class="p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-gray-500 dark:text-gray-200 text-xs">
@@ -136,7 +142,7 @@
     </footer>
 
     <script type="text/javascript" integrity={app_js_integrity()}>
-      <%= raw(render("app.js")) %>
+      <%= {:safe, render("app.js")} %>
     </script>
   </body>
 </html>

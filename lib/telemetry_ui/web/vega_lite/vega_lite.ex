@@ -1,7 +1,5 @@
 defmodule TelemetryUI.Web.VegaLite do
   @moduledoc false
-
-  use Phoenix.HTML
   use Phoenix.Component
 
   def draw(spec, metric, assigns) do
@@ -54,7 +52,7 @@ defmodule TelemetryUI.Web.VegaLite do
     ~H"""
     <script>
       document.addEventListener("DOMContentLoaded", function() {
-        window.drawChart('#<%= @id %>', <%= raw VegaLite.Export.to_json(@spec) %>)
+        window.drawChart('#<%= @id %>', <%= {:safe, VegaLite.Export.to_json(@spec)} %>)
       })
     </script>
     """

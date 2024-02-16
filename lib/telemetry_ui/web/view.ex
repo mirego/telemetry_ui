@@ -3,9 +3,6 @@ defmodule TelemetryUI.Web.View do
 
   use Phoenix.Component
 
-  import Phoenix.HTML, only: [raw: 1]
-  import Phoenix.HTML.Form, only: [hidden_input: 3, select: 4]
-
   alias TelemetryUI.Web.Component
 
   embed_templates("template.html")
