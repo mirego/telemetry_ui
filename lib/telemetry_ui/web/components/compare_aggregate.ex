@@ -4,7 +4,7 @@ defmodule TelemetryUI.Web.Components.CompareAggregate do
   alias VegaLite, as: Vl
 
   def fill_expression(metric) do
-    {good, bad} = Keyword.get(metric.ui_options, :compare_value_scale, {~c"green", ~c"red"})
+    {good, bad} = Keyword.get(metric.ui_options, :compare_value_scale, {"green", "red"})
 
     "datum.compare_percentage >= 1 ? '#{good}' : '#{bad}'"
   end

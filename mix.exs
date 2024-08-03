@@ -69,7 +69,7 @@ defmodule TelemetryUI.Mixfile do
       {:ecto_sql, "~> 3.0"},
       {:postgrex, "~> 0.16"},
       {:telemetry, "~> 1.0"},
-      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_metrics, ">= 0.6.0"},
       {:telemetry_poller, "~> 1.0"},
       {:timex, "~> 3.7"},
       {:oban, "~> 2.13", optional: true},
