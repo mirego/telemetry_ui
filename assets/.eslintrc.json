@@ -1,0 +1,14 @@
+{
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "ignores": [
+    "node_modules/*",
+    "**/static/*.js",
+    "static/**/*.js",
+    "js/vendor/*"
+  ],
+  "env": {
+    "es6": true
+  }
+}

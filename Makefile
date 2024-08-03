@@ -7,7 +7,7 @@ APP_VERSION = `grep -Eo 'version: "[0-9\.]*(-?[a-z]+[0-9]*)?"' mix.exs | cut -d 
 # Linter and formatter configuration
 # ----------------------------------
 
-PRETTIER_FILES_PATTERN = '{js,css}/**/*.{ts,js,css}' '../*.md' '../guides/*.md'
+PRETTIER_FILES_PATTERN = '{mjs,js,css}/**/*.{ts,js,css}' '../*.md' '../guides/*.md'
 
 # Introspection targets
 # ---------------------

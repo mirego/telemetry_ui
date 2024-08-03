@@ -1,4 +1,0 @@
-node_modules/*
-**/static/*.js
-static/**/*.js
-js/vendor/*

@@ -35,7 +35,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 16.13
+          node-version: 20.16.0
 
       - uses: actions/cache@v1
         id: deps-cache
