@@ -14,7 +14,7 @@
     <link rel="icon" href={favicon(@theme)} type="image/svg+xml" />
   </head>
 
-  <body class="flex flex-col justify-between min-h-screen bg-neutral-50 dark:bg-neutral-900">
+  <body class="flex flex-col justify-between min-h-screen bg-white dark:bg-black">
     <script type="text/javascript">
       (function () {
         try {
@@ -54,8 +54,8 @@
           <.theme_switch />
         </div>
       <% else %>
-        <div class="bg-white dark:bg-black shadow-sm">
-          <header class="max-w-6xl mx-auto flex justify-between p-2 mb-4" style={theme_color_style(@theme)}>
+        <div class="bg-white dark:bg-black">
+          <header class="max-w-6xl mx-auto flex justify-between p-2 mb-4 mt-12" style={theme_color_style(@theme)}>
             <a class="flex items-center gap-3 text-base font-light font-mono" href={page_href(List.first(@pages).id, %{frame: nil})}>
               <%= {:safe, @theme.logo} %><%= @theme.title %>
             </a>
@@ -74,7 +74,10 @@
                 </select>
 
                 <div class="dropdown inline-block relative">
-                  <button onclick="event.preventDefault()" class="p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-gray-500 dark:text-gray-200 text-xs">
+                  <button
+                    onclick="event.preventDefault()"
+                    class="cursor-pointer p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-gray-500 dark:text-gray-200 text-xs"
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-5">
                       <path
                         stroke-linecap="round"
@@ -85,7 +88,7 @@
                     </svg>
                   </button>
 
-                  <ul class="dropdown-menu w-[160px] absolute hidden flex-col gap-3 bg-white dark:bg-black shadow rounded mt-3 text-gray-700 right-[-3px] p-3">
+                  <ul class="dropdown-menu w-[160px] absolute hidden flex-col gap-3 bg-white dark:bg-black rounded shadow-lg mt-2 dark:border dark:border-white/10 text-gray-700 right-[-3px] p-3">
                     <%= if @share do %>
                       <a href={"#{@theme.share_path}?share=#{@share}"} target="_blank" class="flex items-center gap-1 dark:text-neutral-200 text-neutral-500 text-xs">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -99,9 +102,7 @@
                       </a>
                     <% end %>
 
-                    <.theme_switch>
-                      Switch theme
-                    </.theme_switch>
+                    <.theme_switch>Switch theme</.theme_switch>
                   </ul>
                 </div>
               </.form>
@@ -111,14 +112,14 @@
       <% end %>
 
       <%= if not @shared and length(@pages) > 1 do %>
-        <div class="max-w-6xl mx-auto flex flex-wrap gap-3 mb-4">
+        <div class="max-w-6xl mx-auto flex flex-wrap gap-1 mb-4 -left-4 relative">
           <%= for page <- @pages do %>
             <%= if page.id === @current_page.id do %>
               <.page_link
                 page={page}
                 filters={@filters}
                 style={theme_color_style(@theme)}
-                class="px-4 py-1 shadow-sm bg-white dark:bg-black font-bold text-primary text-sm dark:text-gray-50"
+                class="px-4 py-1 bg-white dark:bg-black font-bold text-primary text-sm dark:text-gray-50"
               />
             <% else %>
               <.page_link page={page} filters={@filters} class="transition px-4 py-1 font-bold text-sm dark:text-gray-50 hover:opacity-50" />

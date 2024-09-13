@@ -49,11 +49,15 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
     grid_color = "rgba(0,0,0,0.1)"
     label_color = "#666"
 
+    font =
+      ~s|ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"|
+
     [
       autosize: [type: "fit-x"],
       axis_y: [domain_color: label_color, label_color: label_color, tick_color: label_color, grid_color: grid_color],
       axis_x: [domain_color: label_color, label_color: label_color, tick_color: label_color, grid_color: grid_color],
       view: [stroke: nil],
+      font: font,
       range: [category: assigns.theme.scale]
     ]
   end

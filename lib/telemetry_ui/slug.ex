@@ -671,11 +671,11 @@ defmodule TelemetryUI.Slug do
   replacements_by_search =
     replacements
     |> Enum.group_by(fn {search, _} -> search end, fn {_, replace} -> replace end)
-    |> Enum.into([])
+    |> Enum.to_list()
 
   # Create replacement
   for {search, replaces} <- replacements_by_search do
-    if search != @separator_char do
+    unless search == @separator_char do
       replace = hd(replaces)
       defp replace_chars([unquote(search) | t]), do: unquote(replace) ++ replace_chars(t)
     end

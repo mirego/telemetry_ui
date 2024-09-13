@@ -1,8 +1,8 @@
 import * as vega from 'vega';
-import vegaEmbed from 'vega-embed';
+import vegaEmbed, {VisualizationSpec} from 'vega-embed';
 
 declare global {
-  var drawChart: (id: string, spec: string) => void;
+  var drawChart: (id: string, spec: VisualizationSpec) => void;
 }
 
 interface ViewInternal {
@@ -69,7 +69,7 @@ const onSelectTag = (
   }
 };
 
-const resetLegendSelect = (view: View, legendItems: HTMLElement[]) => {
+const resetLegendSelect = (view: vega.View, legendItems: HTMLElement[]) => {
   legendItems.forEach((item) => {
     item.removeAttribute('data-selected');
     item.classList.remove('opacity-50');
@@ -78,11 +78,14 @@ const resetLegendSelect = (view: View, legendItems: HTMLElement[]) => {
   view.signal('tags_tags_legend', null).run();
 };
 
-const bindLegend = (element: HTMLElement, id: string, viewUnknown: unknown) => {
-  const legend = document.querySelector(id + '-legend');
+const bindLegend = (
+  legend: HTMLElement,
+  element: HTMLElement,
+  viewUnknown: unknown
+) => {
   const runtime = (viewUnknown as ViewInternal)._runtime;
   const signals = (viewUnknown as ViewInternal)._signals;
-  const view = viewUnknown as View;
+  const view = viewUnknown as vega.View;
 
   if (!legend || !runtime.scales.color || !signals.tags_tags_legend) return;
 
@@ -123,12 +126,11 @@ const bindLegend = (element: HTMLElement, id: string, viewUnknown: unknown) => {
   legend.addEventListener('click', () => resetLegendSelect(view, legendItems));
 };
 
-const renderLegend = (id: string, viewUnknown: unknown) => {
+const renderLegend = (legend: HTMLElement, viewUnknown: unknown) => {
   const runtime = (viewUnknown as ViewInternal)._runtime;
-  const view = viewUnknown as View;
+  const view = viewUnknown as vega.View;
 
-  const legend = document.querySelector(id + '-legend');
-  if (!legend || !runtime.scales.color) return;
+  if (!runtime.scales.color) return;
 
   legend.classList.remove('hidden');
   const itemsCount = Array.from(
@@ -214,14 +216,14 @@ const toggleFullscreen = (parentElement: HTMLElement, id: string) => {
     parentElement.classList.remove(...fixedStyle);
     parentElement.classList.add('relative');
     parentElement.classList.add('dark:bg-black/40');
-    closeButton.classList.add('hidden');
+    closeButton?.classList.add('hidden');
 
     viewsById[id].signal('height', heightsById[id]);
   } else {
     parentElement.classList.add(...fixedStyle);
     parentElement.classList.remove('relative');
     parentElement.classList.remove('dark:bg-black/40');
-    closeButton.classList.remove('hidden');
+    closeButton?.classList.remove('hidden');
 
     heightsById[id] = viewsById[id].signal('height');
     viewsById[id].signal('height', window.innerHeight - 130);
@@ -230,7 +232,7 @@ const toggleFullscreen = (parentElement: HTMLElement, id: string) => {
   window.dispatchEvent(new Event('resize'));
 };
 
-window.drawChart = async (id, spec) => {
+window.drawChart = async (id, spec: VisualizationSpec) => {
   const {view} = await vegaEmbed(id, spec, {
     renderer: 'svg',
     actions: {
@@ -241,9 +243,11 @@ window.drawChart = async (id, spec) => {
     }
   });
 
-  if (spec.data.url) {
+  const specData = spec.data as vega.UrlData;
+
+  if (specData?.url) {
     setInterval(async () => {
-      const response = await fetch(spec.data.url);
+      const response = await fetch(String(specData.url));
       const data = await response.json();
 
       const now = Number(new Date());
@@ -273,10 +277,10 @@ window.drawChart = async (id, spec) => {
   viewsById[id] = view;
 };
 
-const setSideElements = (view, id) => {
+const setSideElements = (view: vega.View, id: string) => {
   const title = document.querySelector(id + '-title') as HTMLElement;
   const element = document.querySelector(id) as HTMLElement;
-  const legend = document.querySelector(id + '-legend') as HTMLElement;
+  const legend = document.querySelector(id + '-legend') as HTMLElement | null;
   const empty = document.querySelector(id + '-empty') as HTMLElement;
 
   if (emptySource(view.data('source'))) {
@@ -284,15 +288,17 @@ const setSideElements = (view, id) => {
     empty.classList.remove('hidden');
     element.classList.add('hidden');
     element.classList.remove('vega-embed');
-    legend.classList.add('hidden');
+    legend?.classList.add('hidden');
   } else {
     title.classList.add('hidden');
     empty.classList.add('hidden');
     element.classList.remove('hidden');
     element.classList.add('vega-embed');
 
-    const renderedLegend = renderLegend(id, view);
-    if (renderedLegend) bindLegend(element, id, view);
+    if (legend) {
+      const renderedLegend = renderLegend(legend, view);
+      if (renderedLegend) bindLegend(legend, element, view);
+    }
   }
 };
 

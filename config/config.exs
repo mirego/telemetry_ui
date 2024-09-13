@@ -1,35 +1,32 @@
 import Config
 
+alias TelemetryUI.Test.Repo
+
+config :logger, :console, format: "[$level] $message\n"
+config :logger, level: :warn
+
 config :phoenix, :json_library, Jason
 config :phoenix, :stacktrace_depth, 20
 
-config :logger, level: :warn
-config :logger, :console, format: "[$level] $message\n"
-
 if config_env() in [:dev, :test] do
-  config :tailwind,
-    version: "3.1.6",
-    default: [
-      args: ~w(
-      --config=tailwind.config.js
-      --input=css/app.css
-      --output=../dist/app.css
-      --minify
-    ),
-      cd: Path.expand("../assets", __DIR__)
-    ]
-
   config :esbuild,
-    version: "0.14.41",
-    default: [
-      args: ~w(js/app.ts --bundle --target=es2020 --outdir=../dist --minify --tree-shaking=true --bundle),
+    version: "0.17.11",
+    telemetry_ui: [
+      args: ~w(js/app.ts --outdir=../priv/static/assets --bundle),
       cd: Path.expand("../assets", __DIR__),
       env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+    ]
+
+  config :tailwind,
+    version: "3.2.7",
+    telemetry_ui: [
+      args: ~w(--config=tailwind.config.js --input=css/app.css --output=../priv/static/assets/app.css),
+      cd: Path.expand("../assets", __DIR__)
     ]
 end
 
 if config_env() in [:test] do
-  config :telemetry_ui, TelemetryUI.Test.Repo,
+  config :telemetry_ui, Repo,
     priv: "test/support/",
     pool: Ecto.Adapters.SQL.Sandbox,
     url: System.get_env("DATABASE_URL", "postgres://postgres:development@localhost/telemetry_ui_test")
@@ -39,4 +36,4 @@ if config_env() in [:test] do
     render_errors: [view: TelemetryUI.Test.ErrorView]
 end
 
-config :telemetry_ui, ecto_repos: [TelemetryUI.Test.Repo]
+config :telemetry_ui, ecto_repos: [Repo]

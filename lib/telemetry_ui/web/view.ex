@@ -7,8 +7,8 @@ defmodule TelemetryUI.Web.View do
 
   embed_templates("template.html")
 
-  js_path = Path.join(__DIR__, "../../../dist/app.js")
-  css_path = Path.join(__DIR__, "../../../dist/app.css")
+  js_path = :telemetry_ui |> :code.priv_dir() |> Path.join("static/assets/app.js")
+  css_path = :telemetry_ui |> :code.priv_dir() |> Path.join("static/assets/app.css")
 
   @external_resource js_path
   @external_resource css_path
@@ -101,8 +101,8 @@ defmodule TelemetryUI.Web.View do
       %{
         "filter[page]": page_id,
         "filter[frame]": params.frame,
-        "filter[to]": if(params.frame !== :custom, do: nil, else: params.to && DateTime.to_iso8601(params.to)),
-        "filter[from]": if(params.frame !== :custom, do: nil, else: params.from && DateTime.to_iso8601(params.from))
+        "filter[to]": if(params.frame === :custom, do: params.to && DateTime.to_iso8601(params.to)),
+        "filter[from]": if(params.frame === :custom, do: params.from && DateTime.to_iso8601(params.from))
       }
       |> Enum.reject(fn {_key, value} -> is_nil(value) end)
       |> Map.new()

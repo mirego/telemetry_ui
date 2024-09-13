@@ -84,15 +84,15 @@ defmodule TelemetryUI.Mixfile do
       {:vix, "~> 0.16", optional: true},
 
       # Asset
-      {:tailwind, "~> 0.1", only: [:dev, :test]},
-      {:esbuild, "~> 0.5", only: [:dev, :test]},
+      {:tailwind, "~> 0.1", only: [:dev, :test], runtime: false},
+      {:esbuild, "~> 0.5", only: [:dev, :test], runtime: false},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
 
       # Linting
       {:credo, "~> 1.1", only: [:dev, :test]},
       {:credo_envvar, "~> 0.1", only: [:dev, :test], runtime: false},
       {:credo_naming, "~> 2.0", only: [:dev, :test], runtime: false},
-      {:styler, "~> 0.7", only: [:dev, :test], runtime: false},
+      {:styler, "~> 1.0", only: [:dev, :test], runtime: false},
 
       # Docs
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
@@ -105,7 +105,18 @@ defmodule TelemetryUI.Mixfile do
 
   defp aliases do
     [
-      "assets.compile": ["esbuild default", "tailwind default"],
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing",
+        "cmd --cd assets npm install"
+      ],
+      "assets.build": ["esbuild telemetry_ui", "tailwind default"],
+      "assets.watch.esbuild": ["esbuild telemetry_ui --watch"],
+      "assets.watch.tailwind": ["tailwind telemetry_ui --watch"],
+      "assets.deploy": [
+        "tailwind telemetry_ui --minify",
+        "esbuild telemetry_ui --minify --metafile=meta.json"
+      ],
       test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end

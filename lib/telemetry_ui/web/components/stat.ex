@@ -46,13 +46,21 @@ defmodule TelemetryUI.Web.Components.Stat do
       compare_layer,
       Vl.new()
       |> Vl.transform(filter: "datum.compare==0")
-      |> Vl.mark(:area, opacity: 0.2, tooltip: true, color: hd(assigns.theme.scale), y_offset: chart_offset, y2_offset: chart_offset, y2: [expr: "height + #{chart_offset}"])
+      |> Vl.mark(:area,
+        opacity: 0.2,
+        interpolate: "monotone",
+        tooltip: true,
+        color: hd(assigns.theme.scale),
+        y_offset: chart_offset,
+        y2_offset: chart_offset,
+        y2: [expr: "height + #{chart_offset}"]
+      )
       |> Vl.encode(:tooltip, tooltip)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate),
       Vl.new()
       |> Vl.transform(filter: "datum.compare==0")
-      |> Vl.mark(:line, opacity: 0.3, color: hd(assigns.theme.scale), y_offset: chart_offset, y2_offset: chart_offset)
+      |> Vl.mark(:line, opacity: 0.3, interpolate: "monotone", color: hd(assigns.theme.scale), y_offset: chart_offset, y2_offset: chart_offset)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate)
     ])

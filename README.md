@@ -136,6 +136,21 @@ scope "/" do
 end
 ```
 
+### Image generation
+
+Optionally, you can add 2 dependencies to generate png images from the charts. When you use the share feature, every chart will have an associated image (hidden) that will render a nice preview when sharing on Slack/other platforms.
+
+```elixir
+# mix.exs
+def deps do
+  [
+    #...
+    {:vix, "~> 0.26"},
+    {:vega_lite_convert, "~> 0.6"},
+  ]
+end
+```
+
 #### Security
 
 Since it may contain sensitive data, `TelemetryUI` requires a special assign to render the page.
@@ -158,7 +173,7 @@ That’s it! You can declare as many metrics as you want and they will render in
 
 ## License
 
-`TelemetryUI` is © 2023 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/telemetry_ui/blob/master/LICENSE.md) file.
+`TelemetryUI` is © 2024 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/telemetry_ui/blob/master/LICENSE.md) file.
 
 ## About Mirego
 

@@ -10,22 +10,6 @@ body {
   z-index: 1005;
 }
 
-html.dark .dropdown .dropdown-menu::after {
-  border-bottom-color: #000;
-}
-
-.dropdown .dropdown-menu::after {
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 10px solid #fff;
-  content: '';
-  height: 0;
-  position: absolute;
-  top: -7px;
-  width: 0;
-  right: 10px;
-}
-
 .dropdown .dropdown-menu::before {
   content: '';
   position: absolute;
