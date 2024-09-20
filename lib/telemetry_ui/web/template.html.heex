@@ -15,6 +15,12 @@
   </head>
 
   <body class="flex flex-col justify-between min-h-screen bg-white dark:bg-black">
+    <%= if @current_page.ui_options[:styles] do %>
+      <style>
+        <%= {:safe, @current_page.ui_options[:styles]} %>
+      </style>
+    <% end %>
+
     <script type="text/javascript">
       (function () {
         try {
@@ -31,10 +37,10 @@
     <div class="px-2 md:px-4">
       <%= if @shared do %>
         <header class="max-w-6xl mx-auto flex justify-between flex-col md:flex-row px-2 py-8 gap-4" style={theme_color_style(@theme)}>
-          <h1 class="text-base font-light font-mono flex items-center gap-3 pe-none">
-            <%= {:safe, @theme.logo} %>
+          <h1 class="text-base font-light flex items-center gap-3 pe-none">
+            <span><%= {:safe, @theme.logo} %></span>
             <%= @theme.title %>
-            <span class="text-gray-400 dark:text-gray-600">| <%= @current_page.title %></span>
+            <span class="text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700 border-l pl-3"><%= @current_page.title %></span>
           </h1>
 
           <div class="flex items-center text-sm text-gray-400 gap-5">
@@ -56,8 +62,8 @@
       <% else %>
         <div class="bg-white dark:bg-black">
           <header class="max-w-6xl mx-auto flex justify-between py-2 mb-4 mt-0 md:mt-12" style={theme_color_style(@theme)}>
-            <a class="flex items-center gap-3 text-base font-light font-mono" href={page_href(List.first(@pages).id, %{frame: nil})}>
-              <%= {:safe, @theme.logo} %><%= @theme.title %>
+            <a class="flex items-center gap-3 text-base font-light" href={page_href(List.first(@pages).id, %{frame: nil})}>
+              <span><%= {:safe, @theme.logo} %></span><%= @theme.title %>
             </a>
 
             <div telemetry-component="Form">
@@ -135,7 +141,7 @@
       <div class={"max-w-6xl mx-auto grid #{@current_page.ui_options[:metrics_class] || ~s(grid-cols-1 md:grid-cols-3 gap-4)}"}>
         <%= for metric <- @current_page.metrics do %>
           <div class={metric.ui_options[:class] || "col-span-full"}>
-            <.component_html metric={metric} filters={@filters} conn={@conn} theme={@theme} />
+            <.component_html metric={metric} options={metric.options} filters={@filters} conn={@conn} theme={@theme} />
           </div>
         <% end %>
       </div>

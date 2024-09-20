@@ -5,11 +5,12 @@ defmodule TelemetryUI.Web.Components.StatList do
 
   alias VegaLite, as: Vl
 
-  def spec(%{tags: []} = metric, assigns, options) do
-    TelemetryUI.Web.Components.Stat.spec(metric, assigns, options)
+  def spec(%{tags: []} = metric, assigns) do
+    TelemetryUI.Web.Components.Stat.spec(metric, assigns)
   end
 
-  def spec(metric, assigns, options) do
+  def spec(metric, assigns) do
+    options = assigns.options
     chart_offset = 80
 
     assigns

@@ -15,16 +15,19 @@ defmodule TelemetryUI.Metrics.Distribution do
     }
 
     def to_image(metric, extension, assigns) do
-      spec = Components.Buckets.spec(metric, assigns, @options)
-      spec = VegaLite.Export.to_json(spec)
-      TelemetryUI.VegaLiteToImage.export(spec, extension)
+      assigns = TelemetryUI.Metrics.merge_assigns_options(assigns, @options)
+
+      metric
+      |> Components.Buckets.spec(assigns)
+      |> VegaLite.Export.to_json()
+      |> TelemetryUI.VegaLiteToImage.export(extension)
     end
 
     def to_html(metric, assigns) do
-      assigns = %{assigns | options: @options}
+      assigns = TelemetryUI.Metrics.merge_assigns_options(assigns, @options)
 
       metric
-      |> Components.Buckets.spec(assigns, @options)
+      |> Components.Buckets.spec(assigns)
       |> TelemetryUI.Web.VegaLite.draw(metric, assigns)
     end
   end

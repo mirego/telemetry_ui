@@ -5,7 +5,8 @@ defmodule TelemetryUI.Web.Components.Buckets do
 
   alias VegaLite, as: Vl
 
-  def spec(metric, assigns, options) do
+  def spec(metric, assigns) do
+    options = assigns.options
     unit = to_unit(metric.unit)
 
     tooltip = [
@@ -33,7 +34,7 @@ defmodule TelemetryUI.Web.Components.Buckets do
     Vl.layers(spec, [title(metric, y: -20), buckets_chart])
   end
 
-  def encode_offset_tags_color(spec, tags, assigns) do
+  defp encode_offset_tags_color(spec, tags, assigns) do
     bar_options = [
       align: "center",
       baseline: "line-bottom",

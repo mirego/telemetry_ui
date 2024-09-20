@@ -22,8 +22,13 @@ defmodule TelemetryUI.Metrics do
 
   defmacro __using__(_) do
     quote do
-      defstruct id: nil, title: nil, telemetry_metric: nil, data: nil, ui_options: [], unit: nil, tags: [], data_resolver: nil
+      defstruct id: nil, title: nil, telemetry_metric: nil, data: nil, options: %{}, ui_options: [], unit: nil, tags: [], data_resolver: nil
     end
+  end
+
+  def merge_assigns_options(assigns, options) do
+    options = Map.merge(options, Map.get(assigns, :options) || %{})
+    %{assigns | options: options}
   end
 
   for {metric_name, metric_struct} <- @telemetry_metrics do
@@ -33,6 +38,7 @@ defmodule TelemetryUI.Metrics do
       struct!(unquote(metric_struct),
         id: id(options[:description]),
         title: options[:description],
+        options: options[:options],
         unit: options[:unit],
         ui_options: ui_options,
         tags: Keyword.get(options, :tags, []),
@@ -57,6 +63,7 @@ defmodule TelemetryUI.Metrics do
         id: id(metric),
         title: metric.description || Event.cast_event_name(metric),
         unit: unit,
+        options: options[:options],
         ui_options: ui_options,
         tags: metric.tags,
         data_resolver: &{:async, fn -> TelemetryUI.metric_data(&1, metric, &2) end},

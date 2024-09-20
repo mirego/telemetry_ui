@@ -6,7 +6,8 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
   alias TelemetryUI.Web.Components.CompareAggregate
   alias VegaLite, as: Vl
 
-  def spec(%{tags: []} = metric, assigns, options) do
+  def spec(%{tags: []} = metric, assigns) do
+    options = assigns.options
     to = DateTime.to_unix(DateTime.add(assigns.filters.to, 60, :second), :millisecond)
     from = DateTime.to_unix(assigns.filters.from, :millisecond)
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)
@@ -45,7 +46,8 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
     Vl.layers(spec, [title(metric, y: -24), compare_aggregate_text_spec(options, metric), aggregate_text_spec(options, unit), summary_chart])
   end
 
-  def spec(metric, assigns, options) do
+  def spec(metric, assigns) do
+    options = assigns.options
     to = DateTime.to_unix(DateTime.add(assigns.filters.to, 60, :second), :millisecond)
     from = DateTime.to_unix(assigns.filters.from, :millisecond)
     time_unit = fetch_time_unit(assigns.filters.from, assigns.filters.to)

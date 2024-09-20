@@ -18,16 +18,19 @@ defmodule TelemetryUI.Metrics.AverageList do
     }
 
     def to_image(metric, extension, assigns) do
-      spec = Components.StatList.spec(metric, assigns, @options)
-      spec = VegaLite.Export.to_json(spec)
-      TelemetryUI.VegaLiteToImage.export(spec, extension)
+      assigns = TelemetryUI.Metrics.merge_assigns_options(assigns, @options)
+
+      metric
+      |> Components.StatList.spec(assigns)
+      |> VegaLite.Export.to_json()
+      |> TelemetryUI.VegaLiteToImage.export(extension)
     end
 
     def to_html(metric, assigns) do
-      assigns = %{assigns | options: @options}
+      assigns = TelemetryUI.Metrics.merge_assigns_options(assigns, @options)
 
       metric
-      |> Components.StatList.spec(assigns, @options)
+      |> Components.StatList.spec(assigns)
       |> TelemetryUI.Web.VegaLite.draw(metric, assigns)
     end
   end

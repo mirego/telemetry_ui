@@ -50,12 +50,12 @@ defmodule TelemetryUI.Web.View do
   end
 
   def component_image(conn, metric, extension, config) do
-    Component.to_image(metric, extension, %Component.Assigns{default_config: config, filters: conn.assigns.filters, theme: conn.assigns.theme})
+    Component.to_image(metric, extension, %Component.Assigns{options: metric.options, default_config: config, filters: conn.assigns.filters, theme: conn.assigns.theme})
   end
 
   defp component_html(assigns) do
     ~H"""
-    <%= Component.to_html(@metric, %Component.Assigns{filters: @filters, conn: @conn, theme: @theme}) %>
+    <%= Component.to_html(@metric, %Component.Assigns{options: @options, filters: @filters, conn: @conn, theme: @theme}) %>
     """
   end
 
