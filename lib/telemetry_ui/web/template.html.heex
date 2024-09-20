@@ -28,7 +28,7 @@
       })();
     </script>
 
-    <div>
+    <div class="px-2 md:px-4">
       <%= if @shared do %>
         <header class="max-w-6xl mx-auto flex justify-between flex-col md:flex-row px-2 py-8 gap-4" style={theme_color_style(@theme)}>
           <h1 class="text-base font-light font-mono flex items-center gap-3 pe-none">
@@ -55,7 +55,7 @@
         </div>
       <% else %>
         <div class="bg-white dark:bg-black">
-          <header class="max-w-6xl mx-auto flex justify-between p-2 mb-4 mt-12" style={theme_color_style(@theme)}>
+          <header class="max-w-6xl mx-auto flex justify-between py-2 mb-4 mt-0 md:mt-12" style={theme_color_style(@theme)}>
             <a class="flex items-center gap-3 text-base font-light font-mono" href={page_href(List.first(@pages).id, %{frame: nil})}>
               <%= {:safe, @theme.logo} %><%= @theme.title %>
             </a>
@@ -66,17 +66,17 @@
                 <select
                   id="filter_frame"
                   name="filter[frame]"
-                  class="p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
+                  class="p-2 rounded-l-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
                 >
                   <%= for {label, value} <- frame_options(@filters.frame, @theme) do %>
                     <option selected={f.data.frame === value} value={value}><%= label %></option>
                   <% end %>
                 </select>
 
-                <div class="dropdown inline-block relative">
+                <div class="cursor-pointer dropdown inline-block relative">
                   <button
                     onclick="event.preventDefault()"
-                    class="cursor-pointer p-2 rounded-md bg-transparent border-black/10 dark:border-slate-50/10 text-gray-500 dark:text-gray-200 text-xs"
+                    class="p-2 rounded-r-md bg-transparent border border-l-0 border-black/10 dark:border-slate-50/10 text-gray-500 dark:text-gray-200 text-xs"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-5">
                       <path
@@ -88,9 +88,13 @@
                     </svg>
                   </button>
 
-                  <ul class="dropdown-menu w-[160px] absolute hidden flex-col gap-3 bg-white dark:bg-black rounded shadow-lg mt-2 dark:border dark:border-white/10 text-gray-700 right-[-3px] p-3">
+                  <ul class="dropdown-menu w-[160px] absolute hidden flex-col gap-3 bg-white dark:bg-black rounded mt-1 mr-1 border border-black/10 dark:border-white/10 text-gray-700 right-[-3px] p-3">
                     <%= if @share do %>
-                      <a href={"#{@theme.share_path}?share=#{@share}"} target="_blank" class="flex items-center gap-1 dark:text-neutral-200 text-neutral-500 text-xs">
+                      <a
+                        href={"#{@theme.share_path}?share=#{@share}"}
+                        target="_blank"
+                        class="flex items-center gap-1 dark:text-neutral-200 text-neutral-500 hover:text-[var(--accent-color)] transition-colors text-xs"
+                      >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                           <path
                             stroke-linecap="round"

@@ -36,6 +36,8 @@ defmodule TelemetryUI.Web.Components.Stat do
           [op: "min", field: "date", as: "from_date"]
         ]
       )
+      |> Vl.transform(calculate: "toDate(datum.from_date)", as: "from_date")
+      |> Vl.transform(calculate: "toDate(datum.to_date)", as: "to_date")
       |> Vl.transform(calculate: "format(datum.aggregate_value#{options.aggregate_value_suffix}, '#{options.format}') + '#{unit}'", as: "formatted_aggregate_value")
       |> Vl.mark(:text, font_size: 30, font_weight: "bold", color: hd(assigns.theme.scale), x: 0, y: 30, align: "left")
       |> Vl.encode(:text, type: :nominal, field: "formatted_aggregate_value")

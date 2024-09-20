@@ -94,7 +94,7 @@ defmodule TelemetryUI.Web.VegaLite do
 
   defp empty_view(assigns) do
     ~H"""
-    <div id={@id <> "-empty"} class="absolute top-[70px] left-0 hidden flex flex-col grow items-center justify-center py-3 w-full">
+    <div id={@id <> "-empty"} class="absolute top-[90px] left-0 hidden flex flex-col grow items-center justify-center py-3 w-full">
       <div class="flex flex-col items-center">
         <span class="opacity-40 text-sm text-center">No data</span>
       </div>

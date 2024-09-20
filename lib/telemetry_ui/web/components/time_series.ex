@@ -126,6 +126,8 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
       as: "formatted_aggregate_value"
     )
     |> Vl.encode(:text, field: "formatted_aggregate_value")
+    |> Vl.transform(calculate: "toDate(datum.from_date)", as: "from_date")
+    |> Vl.transform(calculate: "toDate(datum.to_date)", as: "to_date")
     |> Vl.encode(:tooltip, [
       [field: "from_date", title: "From", type: :temporal, time_unit: [unit: "yearmonthdatehoursminutes"]],
       [field: "to_date", title: "To", type: :temporal, time_unit: [unit: "yearmonthdatehoursminutes"]]

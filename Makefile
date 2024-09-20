@@ -41,7 +41,7 @@ targets:
 prepare:
 	mix deps.get
 	npm ci --prefix assets
-	mix assets.compile
+	mix assets.deploy
 
 # Development targets
 # -------------------
