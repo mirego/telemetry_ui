@@ -7,6 +7,22 @@ module.exports = {
       variants: ['sm', 'lg']
     },
     {
+      pattern: /inline/,
+      variants: ['sm', 'lg']
+    },
+    {
+      pattern: /block/,
+      variants: ['sm', 'lg']
+    },
+    {
+      pattern: /shadow/,
+      variants: ['sm', 'lg']
+    },
+    {
+      pattern: /shadow-\w+/,
+      variants: ['sm', 'lg']
+    },
+    {
       pattern: /grid-cols-\w+/,
       variants: ['sm', 'lg']
     },
