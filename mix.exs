@@ -1,7 +1,7 @@
 defmodule TelemetryUI.Mixfile do
   use Mix.Project
 
-  @version "4.4.1"
+  @version "4.4.2"
 
   def project do
     [
@@ -127,10 +127,12 @@ defmodule TelemetryUI.Mixfile do
       licenses: ["BSD-3-Clause"],
       links: %{github: "https://github.com/mirego/telemetry_ui"},
       files: [
-        "dist",
         "lib",
+        "priv/static/assets",
+        "LICENSE.md",
         "mix.exs",
-        "README.md"
+        "README.md",
+        ".formatter.exs"
       ]
     ]
   end
