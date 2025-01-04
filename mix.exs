@@ -7,7 +7,7 @@ defmodule TelemetryUI.Mixfile do
     [
       app: :telemetry_ui,
       version: @version,
-      elixir: "~> 1.16",
+      elixir: "~> 1.17",
       package: package(),
       elixirc_paths: elixirc_paths(Mix.env()),
       consolidate_protocols: Mix.env() !== :test,
