@@ -1,7 +1,7 @@
 defmodule TelemetryUI.Mixfile do
   use Mix.Project
 
-  @version "4.4.3"
+  @version "5.0.0"
 
   def project do
     [
