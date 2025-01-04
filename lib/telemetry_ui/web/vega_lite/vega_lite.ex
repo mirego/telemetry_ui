@@ -7,7 +7,7 @@ defmodule TelemetryUI.Web.VegaLite do
 
     ~H"""
     <div class="vega-lite-metric group relative flex flex-col bg-white dark:bg-black/40 text-slate dark:text-white p-3 border border-black/5 dark:border-white/20 rounded-lg min-h-[220px] h-full">
-      <%= if TelemetryUI.VegaLiteToImage.enabled?() && @conn.assigns[:share] && @theme.share_path do %>
+      <%= if @conn.assigns[:share] && @theme.share_path do %>
         <img loading="lazy" class="hidden" src={@theme.share_path <> "?id=#{@metric.id}.png&share=" <> @conn.assigns.share} />
       <% end %>
 
@@ -52,7 +52,7 @@ defmodule TelemetryUI.Web.VegaLite do
     ~H"""
     <script>
       document.addEventListener("DOMContentLoaded", function() {
-        window.drawChart('#<%= @id %>', <%= {:safe, VegaLite.Export.to_json(@spec)} %>)
+        window.drawChart('#<%= @id %>', <%= {:safe, VegaLite.Convert.to_json(@spec)} %>)
       })
     </script>
     """
@@ -62,7 +62,7 @@ defmodule TelemetryUI.Web.VegaLite do
     ~H"""
     <%= if @title do %>
       <h2 id={@id <> "-title"} class="flex items-baseline gap-2 text-base opacity-80 mb-2 ml-[7px]">
-        <%= @title %>
+        {@title}
       </h2>
     <% end %>
     """

@@ -3,7 +3,7 @@ import Config
 alias TelemetryUI.Test.Repo
 
 config :logger, :console, format: "[$level] $message\n"
-config :logger, level: :warn
+config :logger, level: :warning
 
 config :phoenix, :json_library, Jason
 config :phoenix, :stacktrace_depth, 20

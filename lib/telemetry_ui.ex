@@ -216,7 +216,7 @@ defmodule TelemetryUI do
     pages
     |> Enum.flat_map(& &1.metrics)
     |> Enum.each(fn metric ->
-      unless TelemetryUI.Web.Component.impl_for(metric) do
+      if !TelemetryUI.Web.Component.impl_for(metric) do
         raise TelemetryUI.InvalidMetricWebComponentError.exception({metric})
       end
     end)

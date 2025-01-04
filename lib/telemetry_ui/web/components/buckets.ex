@@ -24,7 +24,7 @@ defmodule TelemetryUI.Web.Components.Buckets do
 
     buckets_chart =
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.transform(calculate: "datum.bucket_start + '#{unit}' + (datum.bucket_end ? ' - ' + datum.bucket_end + '#{unit}' : ' +')", as: "bucket_label")
       |> encode_offset_tags_color(metric.tags, assigns)
       |> Vl.encode(:tooltip, tooltip)

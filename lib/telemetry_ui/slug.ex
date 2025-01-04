@@ -675,7 +675,7 @@ defmodule TelemetryUI.Slug do
 
   # Create replacement
   for {search, replaces} <- replacements_by_search do
-    unless search == @separator_char do
+    if search != @separator_char do
       replace = hd(replaces)
       defp replace_chars([unquote(search) | t]), do: unquote(replace) ++ replace_chars(t)
     end

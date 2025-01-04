@@ -11,11 +11,11 @@ if Code.ensure_loaded?(Oban) do
       telemetry_name = get_telemetry_name(args)
       share_key = TelemetryUI.theme(telemetry_name).share_key
 
-      unless TelemetryUI.valid_share_key?(share_key) do
+      if !TelemetryUI.valid_share_key?(share_key) do
         raise TelemetryUI.InvalidThemeShareKeyError.exception(share_key)
       end
 
-      unless TelemetryUI.valid_share_url?(args["share_url"]) do
+      if !TelemetryUI.valid_share_url?(args["share_url"]) do
         raise TelemetryUI.InvalidDigestShareURLError.exception(share_key)
       end
 

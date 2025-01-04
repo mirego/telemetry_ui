@@ -8,7 +8,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             pruner_interval_ms: 84_000,
             max_buffer_size: 10_000,
             flush_interval_ms: 10_000,
-            insert_date_trunc: "minute",
+            insert_date_bin: Duration.new!(minute: 5),
             verbose: false,
             telemetry_prefix: [:telemetry_ui, :repo],
             telemetry_options: [telemetry_ui_conf: []]
@@ -40,15 +40,15 @@ defmodule TelemetryUI.Backend.EctoPostgres do
     def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1) do
       backend.repo.query!(
         """
-        INSERT INTO telemetry_ui_events (value, min_value, max_value, date, name, tags, count) VALUES($1, $1, $1, date_trunc($6::text, $2::timestamp), $3, $4, $5)
+        INSERT INTO telemetry_ui_events (value, min_value, max_value, date, name, tags, count) VALUES($1, $1, $1, date_bin($6::interval, $2::timestamp, 'epoch'::timestamp), $3, $4, $5)
         ON CONFLICT (date, name, tags)
         DO UPDATE SET
           max_value = GREATEST(telemetry_ui_events.value, $1),
           min_value = LEAST(telemetry_ui_events.value, $1),
-          value = (telemetry_ui_events.value + $1) / 2,
+          value = ROUND((telemetry_ui_events.value + $1)::numeric / 2, 4),
           count = telemetry_ui_events.count + $5
         """,
-        [value, date, event_name, tags, count, backend.insert_date_trunc],
+        [value, date, event_name, tags, count, backend.insert_date_bin],
         log: backend.verbose,
         telemetry_prefix: backend.telemetry_prefix,
         telemetry_options: backend.telemetry_options

@@ -7,7 +7,7 @@
     <meta property="og:description" content={@theme.description} />
     <meta property="og:type" content="website" />
 
-    <title><%= @theme.title %></title>
+    <title>{@theme.title}</title>
     <style>
       <%= {:safe, render("app.css")} %>
     </style>
@@ -38,20 +38,20 @@
       <%= if @shared do %>
         <header class="max-w-6xl mx-auto flex justify-between flex-col md:flex-row px-2 py-8 gap-4" style={theme_color_style(@theme)}>
           <h1 class="text-base font-light flex items-center gap-3 pe-none">
-            <span><%= {:safe, @theme.logo} %></span>
-            <%= @theme.title %>
-            <span class="text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700 border-l pl-3"><%= @current_page.title %></span>
+            <span>{{:safe, @theme.logo}}</span>
+            {@theme.title}
+            <span class="text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700 border-l pl-3">{@current_page.title}</span>
           </h1>
 
           <div class="flex items-center text-sm text-gray-400 gap-5">
             <div class="flex flex-col">
               <span class="text-xs text-gray-300 dark:text-gray-500">From:</span>
-              <time telemetry-component="LocalTime" title={@filters.from}><%= filter_datetime_format(@filters.from) %></time>
+              <time telemetry-component="LocalTime" title={@filters.from}>{filter_datetime_format(@filters.from)}</time>
             </div>
 
             <div class="flex flex-col">
               <span class="text-xs text-gray-300 dark:text-gray-500">To:</span>
-              <time telemetry-component="LocalTime" title={@filters.to}><%= filter_datetime_format(@filters.to) %></time>
+              <time telemetry-component="LocalTime" title={@filters.to}>{filter_datetime_format(@filters.to)}</time>
             </div>
           </div>
         </header>
@@ -63,7 +63,7 @@
         <div class="bg-white dark:bg-black">
           <header class="max-w-6xl mx-auto flex justify-between py-2 mb-4 mt-0 md:mt-12" style={theme_color_style(@theme)}>
             <a class="flex items-center gap-3 text-base font-light" href={page_href(List.first(@pages).id, %{frame: nil})}>
-              <span><%= {:safe, @theme.logo} %></span><%= @theme.title %>
+              <span>{{:safe, @theme.logo}}</span>{@theme.title}
             </a>
 
             <div telemetry-component="Form">
@@ -75,7 +75,7 @@
                   class="p-2 rounded-l-md bg-transparent border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
                 >
                   <%= for {label, value} <- frame_options(@filters.frame, @theme) do %>
-                    <option selected={f.data.frame === value} value={value}><%= label %></option>
+                    <option selected={f.data.frame === value} value={value}>{label}</option>
                   <% end %>
                 </select>
 
@@ -148,7 +148,7 @@
     </div>
 
     <footer class="relative p-5 text-center opacity-25 text-xs dark:text-gray-300">
-      <div class="absolute bottom-0 left-0 p-5 font-light font-mono text-xs"><%= version() %></div>
+      <div class="absolute bottom-0 left-0 p-5 font-light font-mono text-xs">{version()}</div>
       Built with ♥ by the team @ <a href="https://www.mirego.com">Mirego</a>.
     </footer>
 

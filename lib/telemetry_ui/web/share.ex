@@ -16,19 +16,13 @@ defmodule TelemetryUI.Web.Share do
   def index(%{params: %{"id" => id} = params} = conn, _opts) do
     metric = fetch_page_metric(conn.assigns.current_page, Path.rootname(id))
     metric = resolve_metric(conn, metric)
-
     config = fetch_config_from_params(params)
+    data = View.component_image(conn, metric, config)
 
-    case View.component_image(conn, metric, Path.extname(id), config) do
-      {:ok, data, content_type} ->
-        conn
-        |> put_resp_header("content-type", content_type)
-        |> delete_resp_header("content-security-policy")
-        |> send_resp(200, data)
-
-      {:error, error} ->
-        send_resp(conn, 400, "Bad request: #{error}")
-    end
+    conn
+    |> put_resp_header("content-type", "image/png")
+    |> delete_resp_header("content-security-policy")
+    |> send_resp(200, data)
   end
 
   def index(conn, _opts) do

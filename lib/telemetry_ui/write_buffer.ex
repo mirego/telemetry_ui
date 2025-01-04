@@ -71,7 +71,7 @@ defmodule TelemetryUI.WriteBuffer do
         info_log(backend, "Flushing #{length(events)} events")
 
         events
-        |> group_events(backend)
+        |> group_events()
         |> Enum.each(fn {event, {value, count}} ->
           TelemetryUI.Backend.insert_event(
             backend,
@@ -85,9 +85,8 @@ defmodule TelemetryUI.WriteBuffer do
     end
   end
 
-  defp group_events(events, backend) do
+  defp group_events(events) do
     events
-    |> Enum.map(&%{&1 | time: truncate_time(&1.time, backend)})
     |> Enum.group_by(fn event -> %{event | value: 0} end)
     |> Enum.reduce(%{}, fn {event, events}, acc ->
       case Enum.reduce(events, {0, 0}, &cast_value/2) do
@@ -95,7 +94,7 @@ defmodule TelemetryUI.WriteBuffer do
           acc
 
         {total_value, count} ->
-          value = Float.round(total_value / count, 3)
+          value = Float.round(Float.round(total_value / count, 3), 4)
           Map.put(acc, event, {value, count})
       end
     end)
@@ -112,15 +111,6 @@ defmodule TelemetryUI.WriteBuffer do
     error ->
       Logger.error("TelemetryUI - #{inspect(error)} Could not process event: #{inspect(event)}")
       {total_value, total_count}
-  end
-
-  defp truncate_time(time, backend) do
-    time = DateTime.truncate(time, :second)
-
-    case backend.insert_date_trunc do
-      "minute" -> Timex.set(time, second: 0)
-      "second" -> time
-    end
   end
 
   defp info_log(backend, message) do

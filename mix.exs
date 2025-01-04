@@ -7,7 +7,7 @@ defmodule TelemetryUI.Mixfile do
     [
       app: :telemetry_ui,
       version: @version,
-      elixir: "~> 1.14",
+      elixir: "~> 1.16",
       package: package(),
       elixirc_paths: elixirc_paths(Mix.env()),
       consolidate_protocols: Mix.env() !== :test,
@@ -80,8 +80,7 @@ defmodule TelemetryUI.Mixfile do
       {:phoenix_live_view, "~> 0.18 or ~> 1.0"},
 
       # Images
-      {:vega_lite_convert, "~> 0.6", optional: true},
-      {:vix, "~> 0.16", optional: true},
+      {:vega_lite_convert, "~> 1.0"},
 
       # Asset
       {:tailwind, "~> 0.1", only: [:dev, :test], runtime: false},

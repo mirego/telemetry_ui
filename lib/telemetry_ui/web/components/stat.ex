@@ -29,7 +29,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     |> Vl.layers([
       title(metric),
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.transform(
         aggregate: [
           [op: options.aggregate, field: options.aggregate_field || options.field, as: "aggregate_value"],
@@ -48,7 +48,7 @@ defmodule TelemetryUI.Web.Components.Stat do
       ]),
       compare_layer,
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.mark(:area,
         opacity: 0.2,
         interpolate: "monotone",
@@ -62,7 +62,7 @@ defmodule TelemetryUI.Web.Components.Stat do
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate),
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.mark(:line, opacity: 0.3, interpolate: "monotone", color: hd(assigns.theme.scale), y_offset: chart_offset, y2_offset: chart_offset)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, axis: nil, time_unit: [unit: time_unit])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, axis: nil, aggregate: options.summary_aggregate || options.aggregate)
@@ -80,7 +80,7 @@ defmodule TelemetryUI.Web.Components.Stat do
     |> Vl.layers([
       title(metric, y: -20),
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.transform(aggregate: [[op: options.aggregate, field: options.field, as: "aggregate_value"]], groupby: ["tags"])
       |> Vl.encode_field(:x, "tags", sort: "-y", type: :nominal, title: nil, axis: [label_angle: -30])
       |> Vl.encode_field(:color, "tags", title: nil, legend: nil)

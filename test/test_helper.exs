@@ -56,8 +56,8 @@ defmodule TestCustomRenderMetric do
   def new(attrs), do: struct!(__MODULE__, attrs)
 
   defimpl TelemetryUI.Web.Component do
-    def to_image(_metric, _extension, _assigns) do
-      {:error, "invalid"}
+    def to_image(_metric, _assigns) do
+      "png"
     end
 
     def to_html(_metric, _assigns) do

@@ -3,8 +3,10 @@ defmodule TelemetryUI.Backend.EctoPostgres.Migrations.V02 do
 
   use Ecto.Migration
 
-  def up(_) do
-    alter table(:telemetry_ui_events) do
+  def up(opts \\ %{}) do
+    prefix = opts[:prefix] || "public"
+
+    alter table(:telemetry_ui_events, prefix: prefix) do
       add(:min_value, :float, null: true)
       add(:max_value, :float, null: true)
     end
@@ -12,17 +14,19 @@ defmodule TelemetryUI.Backend.EctoPostgres.Migrations.V02 do
     flush()
 
     execute("""
-    UPDATE telemetry_ui_events SET min_value=value, max_value=value
+    UPDATE #{prefix}.telemetry_ui_events SET min_value=value, max_value=value
     """)
 
-    alter table(:telemetry_ui_events) do
+    alter table(:telemetry_ui_events, prefix: prefix) do
       modify(:min_value, :float, null: false)
       modify(:max_value, :float, null: false)
     end
   end
 
-  def down(_) do
-    alter table(:telemetry_ui_events) do
+  def down(opts \\ %{}) do
+    prefix = opts[:prefix] || "public"
+
+    alter table(:telemetry_ui_events, prefix: prefix) do
       remove(:min_value)
       remove(:max_value)
     end

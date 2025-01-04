@@ -3,9 +3,14 @@ defmodule TelemetryUI.Backend.EctoPostgres.Migrations.V03 do
 
   use Ecto.Migration
 
-  def up(%{prefix: prefix}) do
+  @disable_ddl_transaction true
+  @disable_migration_lock true
+
+  def up(opts \\ %{}) do
+    prefix = opts[:prefix] || "public"
+
     execute("""
-    DELETE FROM #{prefix || "public"}.telemetry_ui_events WHERE report_as IS NOT NULL
+    DELETE FROM #{prefix}.telemetry_ui_events WHERE report_as IS NOT NULL
     """)
 
     drop_if_exists(unique_index(:telemetry_ui_events, [:date, :name, :tags, :report_as], prefix: prefix, concurrently: true))
@@ -17,7 +22,9 @@ defmodule TelemetryUI.Backend.EctoPostgres.Migrations.V03 do
     create_if_not_exists(unique_index(:telemetry_ui_events, [:date, :name, :tags], prefix: prefix, concurrently: true))
   end
 
-  def down(%{prefix: prefix}) do
+  def down(opts \\ %{}) do
+    prefix = opts[:prefix] || "public"
+
     drop_if_exists(unique_index(:telemetry_ui_events, [:date, :name, :tags], prefix: prefix, concurrently: true))
 
     alter table(:telemetry_ui_events) do

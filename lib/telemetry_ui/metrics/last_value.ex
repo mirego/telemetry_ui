@@ -17,13 +17,12 @@ defmodule TelemetryUI.Metrics.LastValue do
       aggregate_value_suffix: "['value']"
     }
 
-    def to_image(metric, extension, assigns) do
+    def to_image(metric, assigns) do
       assigns = TelemetryUI.Metrics.merge_assigns_options(assigns, @options)
 
       metric
       |> Components.Stat.spec(assigns)
-      |> VegaLite.Export.to_json()
-      |> TelemetryUI.VegaLiteToImage.export(extension)
+      |> VegaLite.Convert.to_png()
     end
 
     def to_html(metric, assigns) do

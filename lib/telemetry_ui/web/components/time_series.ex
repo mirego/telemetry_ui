@@ -26,7 +26,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
 
     summary_chart =
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.mark(:bar,
         clip: true,
         align: "left",
@@ -38,7 +38,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         color: hd(assigns.theme.scale),
         corner_radius_end: 2
       )
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: [expr: "date_domain"]])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, format: options.format)
       |> Vl.encode(:tooltip, tooltip)
@@ -67,7 +67,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
 
     summary_chart =
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.mark(:area,
         clip: true,
         align: "left",
@@ -79,7 +79,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         fill_opacity: 0.3,
         color: hd(assigns.theme.scale)
       )
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> encode_tags_color(metric.tags)
       |> Vl.encode_field(:x, "date", type: :temporal, title: nil, time_unit: [unit: time_unit], scale: [domain: [expr: "date_domain"]])
       |> Vl.encode_field(:y, options.field, type: :quantitative, title: nil, aggregate: options.aggregate, stack: nil, format: options.format)
@@ -106,7 +106,7 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
 
   defp aggregate_text_spec(options, unit) do
     Vl.new()
-    |> Vl.transform(filter: "datum.compare==0")
+    |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
     |> Vl.mark(:text,
       font_size: 11,
       font_weight: "bold",

@@ -20,7 +20,7 @@ defmodule TelemetryUI.Web.Components.StatList do
     |> Vl.layers([
       title(metric, y: -20),
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.transform(
         aggregate: [[op: options.aggregate, field: options.field, as: "aggregate_value"]],
         groupby: ["tags"]
@@ -51,7 +51,7 @@ defmodule TelemetryUI.Web.Components.StatList do
         ]
       ]),
       Vl.new()
-      |> Vl.transform(filter: "datum.compare==0")
+      |> Vl.transform(filter: "datum.compare==0 || datum.compare == null")
       |> Vl.transform(
         aggregate: [[op: options.aggregate, field: options.field, as: "aggregate_value"]],
         groupby: ["tags"]

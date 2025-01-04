@@ -49,13 +49,13 @@ defmodule TelemetryUI.Web.View do
     Calendar.strftime(datetime, "%Y-%m-%d %H:%M")
   end
 
-  def component_image(conn, metric, extension, config) do
-    Component.to_image(metric, extension, %Component.Assigns{options: metric.options, default_config: config, filters: conn.assigns.filters, theme: conn.assigns.theme})
+  def component_image(conn, metric, config) do
+    Component.to_image(metric, %Component.Assigns{options: metric.options, default_config: config, filters: conn.assigns.filters, theme: conn.assigns.theme})
   end
 
   defp component_html(assigns) do
     ~H"""
-    <%= Component.to_html(@metric, %Component.Assigns{options: @options, filters: @filters, conn: @conn, theme: @theme}) %>
+    {Component.to_html(@metric, %Component.Assigns{options: @options, filters: @filters, conn: @conn, theme: @theme})}
     """
   end
 
@@ -82,7 +82,7 @@ defmodule TelemetryUI.Web.View do
         </svg>
       </span>
       <%= if assigns[:inner_block] do %>
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       <% end %>
     </button>
     """
@@ -91,7 +91,7 @@ defmodule TelemetryUI.Web.View do
   defp page_link(assigns) do
     ~H"""
     <a href={page_href(@page.id, @filters)} class={@class} style={Map.get(assigns, :style)}>
-      <%= @page.title %>
+      {@page.title}
     </a>
     """
   end

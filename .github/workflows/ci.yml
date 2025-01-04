@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         otp-version: [25.0.4]
-        elixir-version: [1.14.0]
+        elixir-version: [1.16.3]
 
     services:
       db:
