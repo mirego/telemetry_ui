@@ -16,7 +16,7 @@ jobs:
         env:
           POSTGRES_DB: telemetry_ui_test
           POSTGRES_PASSWORD: pass1234
-        image: postgres:10
+        image: postgres:16
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
         ports: ["5432:5432"]
 
