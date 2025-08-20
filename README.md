@@ -42,7 +42,7 @@ TelemetryUI is published on Hex. Add it to your list of dependencies in `mix.exs
 # mix.exs
 def deps do
   [
-    {:telemetry_ui, "~> 4.0"}
+    {:telemetry_ui, "~> 5.0"}
   ]
 end
 ```
