@@ -98,7 +98,7 @@ defmodule TelemetryUI.Mixfile do
 
       # Test
       {:factori, ">= 0.0.0", only: :test},
-      {:mimic, "~> 1.7", only: :test}
+      {:mimic, "~> 2.0", only: :test}
     ]
   end
 
