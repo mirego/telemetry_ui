@@ -26,9 +26,9 @@ jobs:
       MIX_ENV: test
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: erlef/setup-elixir@v1
+      - uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir-version }}
           otp-version: ${{ matrix.otp-version }}
@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: 20.16.0
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         id: deps-cache
         with:
           path: deps
@@ -45,13 +45,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-deps-
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         id: build-cache
         with:
           path: _build
           key: ${{ runner.os }}-build-${{ matrix.otp-version }}-${{ matrix.elixir-version }}-${{ hashFiles(format('{0}/mix.lock', github.workspace)) }}
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         id: npm-cache
         with:
           path: ~/.npm
