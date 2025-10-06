@@ -83,7 +83,7 @@ defmodule TelemetryUI.Mixfile do
       {:vega_lite_convert, "~> 1.0"},
 
       # Asset
-      {:tailwind, "~> 0.1", only: [:dev, :test], runtime: false},
+      {:tailwind, "~> 0.2", only: [:dev, :test], runtime: false},
       {:esbuild, "~> 0.5", only: [:dev, :test], runtime: false},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
 
@@ -109,7 +109,7 @@ defmodule TelemetryUI.Mixfile do
         "esbuild.install --if-missing",
         "cmd --cd assets npm install"
       ],
-      "assets.build": ["esbuild telemetry_ui", "tailwind default"],
+      "assets.build": ["esbuild telemetry_ui", "tailwind telemetry_ui"],
       "assets.watch.esbuild": ["esbuild telemetry_ui --watch"],
       "assets.watch.tailwind": ["tailwind telemetry_ui --watch"],
       "assets.deploy": [

@@ -1,10 +1,21 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import 'tailwindcss';
 
-body {
-  background: #f7f7f7;
-}
+@plugin "@tailwindcss/forms";
+
+@source "../../lib/telemetry_ui/web/**/*.ex";
+@source "../../lib/telemetry_ui/web/**/*.html.heex";
+@source "./js/**/*.ts";
+
+@source inline("{sm:,lg:,}gap-{0..96}");
+@source inline("{sm:,lg:,}inline");
+@source inline("{sm:,lg:,}block");
+@source inline("{sm:,lg:,}shadow{,-xs,-sm,-md,-lg,-xl,-2xl}");
+@source inline("{sm:,lg:,}grid-cols-{1..12}");
+@source inline("{sm:,lg:,}{col,row}-{start,end}-{1..12}");
+@source inline("{sm:,lg:,}{col,row}-span-{1..12}");
+@source inline("{sm:,lg:,}{col,row}-auto");
+
+@variant dark (.dark &);
 
 .dropdown .dropdown-menu {
   z-index: 1005;

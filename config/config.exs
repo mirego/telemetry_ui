@@ -18,9 +18,9 @@ if config_env() in [:dev, :test] do
     ]
 
   config :tailwind,
-    version: "3.2.7",
+    version: "4.1.14",
     telemetry_ui: [
-      args: ~w(--config=tailwind.config.js --input=css/app.css --output=../priv/static/assets/app.css),
+      args: ~w(--input=css/app.css --output=../priv/static/assets/app.css),
       cd: Path.expand("../assets", __DIR__)
     ]
 end
