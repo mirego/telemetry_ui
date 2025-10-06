@@ -31,12 +31,6 @@ defmodule TelemetryUI.Backend.EctoPostgres do
   end
 
   defimpl TelemetryUI.Backend do
-    defmacro date_trunc(left, right) do
-      quote do
-        fragment("date_trunc(?::text, ?::timestamp)", unquote(left), unquote(right))
-      end
-    end
-
     def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1) do
       backend.repo.query!(
         """
@@ -103,10 +97,10 @@ defmodule TelemetryUI.Backend.EctoPostgres do
 
       from(
         entries in queryable,
-        group_by: [fragment("group_date"), entries.tags],
-        order_by: fragment("group_date ASC"),
+        group_by: [selected_as(:group_date), entries.tags],
+        order_by: selected_as(:group_date),
         select_merge: %{
-          date: fragment("? as group_date", date_trunc(^interval, entries.date))
+          date: selected_as(fragment("date_trunc(?::text, ?::timestamp)", ^interval, entries.date), :group_date)
         }
       )
     end
@@ -124,8 +118,8 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             entries.date <= ^to,
         select: %{
           compare: 1,
-          value: fragment("avg(?)", entries.value),
-          count: fragment("sum(?)", entries.count),
+          value: avg(entries.value),
+          count: sum(entries.count),
           tags: entries.tags
         }
       )
@@ -140,8 +134,8 @@ defmodule TelemetryUI.Backend.EctoPostgres do
             entries.date <= ^options.to,
         select: %{
           compare: 0,
-          value: fragment("avg(?)", entries.value),
-          count: fragment("sum(?)", entries.count),
+          value: avg(entries.value),
+          count: sum(entries.count),
           tags: entries.tags
         }
       )
@@ -200,8 +194,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
           on: true,
           select_merge: %{
             bucket_start:
-              fragment(
-                "min(?)",
+              min(
                 fragment(
                   "?[width_bucket(?::double precision,  ?)]",
                   buckets.values,
@@ -210,8 +203,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
                 )
               ),
             bucket_end:
-              fragment(
-                "min(?)",
+              min(
                 fragment(
                   "?[width_bucket(?::double precision,  ?) + 1]",
                   buckets.values,
@@ -240,7 +232,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
           where: fragment("ARRAY(SELECT jsonb_object_keys(?))", entries.tags) == ^tags
         )
       else
-        from(entries in queryable, where: entries.tags == ^%{})
+        from(queryable, where: [tags: ^%{}])
       end
     end
   end
