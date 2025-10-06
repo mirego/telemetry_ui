@@ -30,4 +30,8 @@ defmodule TelemetryUI.Config do
   def handle_call(:backend, _, state) do
     {:reply, state.backend, state}
   end
+
+  def handle_call(:config_fun, _, state) do
+    {:reply, {:ok, state.config_fun}, state}
+  end
 end

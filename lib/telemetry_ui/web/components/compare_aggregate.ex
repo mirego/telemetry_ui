@@ -10,7 +10,7 @@ defmodule TelemetryUI.Web.Components.CompareAggregate do
   end
 
   def compare_icon_expression(_options) do
-    "datum.compare_percentage >= 1 ? '▲ ' : '▼ '"
+    "datum.compare_percentage >= 1 ? '▲ ' : '▼ '"
   end
 
   def spec(options) do
@@ -44,7 +44,7 @@ defmodule TelemetryUI.Web.Components.CompareAggregate do
       as: "compare_percentage_icon"
     )
     |> Vl.transform(
-      calculate: "datum.compare_percentage > 0 ? datum.compare_percentage_icon+format(format(datum.compare_percentage, '.4'), '~%') : ''",
+      calculate: "datum.compare_percentage > 0 ? datum.compare_percentage_icon+format(datum.compare_percentage, '.2f')+'%' : ''",
       as: "formatted_compare_percentage"
     )
     |> Vl.encode(:text, type: :nominal, field: "formatted_compare_percentage")

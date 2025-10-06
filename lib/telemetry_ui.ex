@@ -25,7 +25,7 @@ defmodule TelemetryUI do
         {"System", [last_value("vm.memory.total", unit: {:byte, :megabyte})]}
       ],
       theme: %{title: "Metrics"},
-      backend: 
+      backend:
         %TelemetryUI.Backend.EctoPostgres{
           repo: MyApp.Repo,
           pruner_threshold: [months: -1],
@@ -108,25 +108,8 @@ defmodule TelemetryUI do
   end
 
   def start_link(opts) do
-    opts[:metrics] || raise ArgumentError, "the :metrics option is required by #{inspect(__MODULE__)}"
-    pages = Page.cast_all(opts[:metrics])
-
-    name = Keyword.get(opts, :name, :default)
-    theme = struct!(TelemetryUI.Theme, opts[:theme] || %{})
-    scale = Enum.uniq([theme.primary_color] ++ theme.scale)
-    theme = %{theme | scale: scale}
-
-    state = %{
-      name: name,
-      backend: opts[:backend],
-      theme: theme,
-      pages: pages
-    }
-
-    validate_pages!(state.pages)
-    validate_theme!(state.theme)
-
-    Supervisor.start_link(__MODULE__, state, name: Module.concat(__MODULE__, name))
+    state = build_state(opts)
+    Supervisor.start_link(__MODULE__, state, name: Module.concat(__MODULE__, state.name))
   end
 
   def child_spec(opts) do
@@ -136,6 +119,47 @@ defmodule TelemetryUI do
 
   @impl Supervisor
   def init(state) do
+    children =
+      if Application.get_env(:telemetry_ui, :disabled, false) do
+        []
+      else
+        build_children(state)
+      end
+
+    Supervisor.init(children, strategy: :one_for_one)
+  end
+
+  defp build_state(opts) do
+    config_fun = opts[:config]
+
+    opts =
+      if is_valid_config_fun(config_fun) do
+        evaluate_config_fun(config_fun)
+      else
+        opts
+      end
+
+    opts[:metrics] || raise ArgumentError, "the :metrics option is required by #{inspect(__MODULE__)}"
+    pages = Page.cast_all(opts[:metrics])
+
+    name = Keyword.get(opts, :name, :default)
+    theme = struct!(TelemetryUI.Theme, opts[:theme] || %{})
+    scale = Enum.uniq([theme.primary_color] ++ theme.scale)
+    theme = %{theme | scale: scale}
+
+    validate_pages!(pages)
+    validate_theme!(theme)
+
+    %{
+      name: name,
+      backend: opts[:backend],
+      theme: theme,
+      pages: pages,
+      config_fun: config_fun
+    }
+  end
+
+  defp build_children(state) do
     children = [
       {TelemetryUI.Config, config: state, name: config_name(state.name)}
     ]
@@ -158,24 +182,14 @@ defmodule TelemetryUI do
           []
         end
 
-    children =
-      children ++
-        if state.backend && state.backend.pruner_interval_ms do
-          [
-            {TelemetryUI.Pruner, backend: state.backend}
-          ]
-        else
-          []
-        end
-
-    children =
-      if Application.get_env(:telemetry_ui, :disabled, false) do
-        []
+    children ++
+      if state.backend && state.backend.pruner_interval_ms do
+        [
+          {TelemetryUI.Pruner, backend: state.backend}
+        ]
       else
-        children
+        []
       end
-
-    Supervisor.init(children, strategy: :one_for_one)
   end
 
   def metric_data(name, metric, filters) do
@@ -206,6 +220,35 @@ defmodule TelemetryUI do
     |> Enum.reject(&is_nil(Map.get(&1, :id)))
     |> Enum.find(&(&1.id === id))
   end
+
+  def reload(opts) do
+    name = Keyword.get(opts, :name, :default)
+    supervisor_name = Module.concat(__MODULE__, name)
+
+    supervisor_name
+    |> Supervisor.which_children()
+    |> Enum.reverse()
+    |> Enum.each(fn {id, _pid, _type, _modules} ->
+      Supervisor.terminate_child(supervisor_name, id)
+      Supervisor.delete_child(supervisor_name, id)
+    end)
+
+    state = build_state(opts)
+    new_children = build_children(state)
+
+    Enum.each(new_children, fn child_spec ->
+      Supervisor.start_child(supervisor_name, child_spec)
+    end)
+
+    :ok
+  end
+
+  defp is_valid_config_fun(config_fun) do
+    is_function(config_fun, 0) or (is_tuple(config_fun) and tuple_size(config_fun) == 2)
+  end
+
+  defp evaluate_config_fun(config_fun) when is_function(config_fun, 0), do: config_fun.()
+  defp evaluate_config_fun({mod, fun}) when is_atom(mod) and is_atom(fun), do: apply(mod, fun, [])
 
   def writer_buffer_name(name), do: Module.concat(TelemetryUI.WriteBuffer, name)
   def config_name(name), do: Module.concat(TelemetryUI.Config, name)
