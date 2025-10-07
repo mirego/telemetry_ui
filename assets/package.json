@@ -4,17 +4,17 @@
   "private": true,
   "engine-strict": true,
   "engines": {
-    "node": "^20.16.0"
+    "node": "^22.12"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/eslintrc": "^3.3",
     "@tailwindcss/forms": "^0.5.10",
-    "eslint": "^9.8.0",
-    "prettier": "2.7.1"
+    "eslint": "^9.37",
+    "prettier": "^3.6"
   },
   "dependencies": {
-    "vega": "^5.22",
-    "vega-embed": "^6.21",
-    "vega-lite": "^5.5"
+    "vega": "^6.2",
+    "vega-embed": "^7.0",
+    "vega-lite": "^6.4"
   }
 }

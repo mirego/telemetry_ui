@@ -34,6 +34,7 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
     options = Keyword.merge([font_size: 16, description: "main-title", color: "#333", x: 0, y: 0, align: "left"], mark_options)
 
     Vl.new()
+    |> update_in([Access.key(:spec)], &Map.put(&1, "$schema", "https://vega.github.io/schema/vega-lite/v6.json"))
     |> Vl.transform(aggregate: [[op: "min", field: "date", as: "single_value"]])
     |> Vl.mark(:text, options)
     |> Vl.encode(:text, value: metric.title)
@@ -42,7 +43,11 @@ defmodule TelemetryUI.Web.VegaLite.Spec do
   def base_spec(assigns, config \\ [], options \\ []) do
     options = Keyword.merge(base_options(assigns), options)
 
-    Vl.config(Vl.new(Keyword.merge(assigns.default_config, config)), options)
+    assigns.default_config
+    |> Keyword.merge(config)
+    |> Vl.new()
+    |> update_in([Access.key(:spec)], &Map.put(&1, "$schema", "https://vega.github.io/schema/vega-lite/v6.json"))
+    |> Vl.config(options)
   end
 
   defp base_options(assigns) do

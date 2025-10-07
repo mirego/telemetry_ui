@@ -57,7 +57,7 @@ html.dark .vega-lite-metric .vega-embed.has-actions summary {
 .vega-lite-metric .vega-embed.has-actions details {
   position: absolute;
   right: -38px;
-  top: -5px;
+  top: -9px;
   transform: scale(0.8);
   display: none;
   z-index: 1001;
