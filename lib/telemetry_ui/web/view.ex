@@ -5,7 +5,7 @@ defmodule TelemetryUI.Web.View do
 
   alias TelemetryUI.Web.Component
 
-  embed_templates("template.html")
+  embed_templates("templates/*")
 
   js_path = :telemetry_ui |> :code.priv_dir() |> Path.join("static/assets/app.js")
   css_path = :telemetry_ui |> :code.priv_dir() |> Path.join("static/assets/app.css")
@@ -32,8 +32,6 @@ defmodule TelemetryUI.Web.View do
 
     {:safe, "data:image/svg+xml,#{logo}"}
   end
-
-  def render("index.html", assigns), do: template(assigns)
 
   defp version do
     case :application.get_key(:telemetry_ui, :vsn) do
@@ -94,7 +92,11 @@ defmodule TelemetryUI.Web.View do
   defp page_link(assigns) do
     ~H"""
     <a href={page_href(@page.id, @filters)} class={@class} style={Map.get(assigns, :style)}>
-      {@page.title}
+      <%= if @page.title === "" do %>
+        Untitled
+      <% else %>
+        {@page.title}
+      <% end %>
     </a>
     """
   end

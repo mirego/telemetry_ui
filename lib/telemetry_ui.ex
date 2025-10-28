@@ -87,10 +87,17 @@ defmodule TelemetryUI do
 
     defstruct id: nil, title: nil, metrics: [], ui_options: []
 
-    def cast_all([{_, _} | _] = pages), do: Enum.map(pages, &cast/1)
-    def cast_all([{_, _, _} | _] = pages), do: Enum.map(pages, &cast/1)
-    def cast_all(metrics), do: [cast({"", metrics})]
+    def cast_all(pages) do
+      {orphan_metrics, pages} = Enum.split_with(pages, &is_struct/1)
 
+      if Enum.any?(orphan_metrics) do
+        [cast({"", orphan_metrics})] ++ Enum.map(pages, &cast/1)
+      else
+        Enum.map(pages, &cast/1)
+      end
+    end
+
+    defp cast(metric) when is_struct(metric), do: cast({"", [metric], []})
     defp cast({title, metrics}), do: cast({title, metrics, []})
 
     defp cast({title, metrics, options}) do
@@ -135,7 +142,7 @@ defmodule TelemetryUI do
     config_fun = opts[:config]
 
     opts =
-      if is_valid_config_fun(config_fun) do
+      if valid_config_fun?(config_fun) do
         evaluate_config_fun(config_fun)
       else
         opts
@@ -145,7 +152,8 @@ defmodule TelemetryUI do
 
     backend = opts[:backend]
     internal_metrics = TelemetryUI.InternalMetrics.metrics(backend)
-    all_metrics = List.wrap(opts[:metrics]) ++ internal_metrics
+    metrics = List.wrap(opts[:metrics])
+    all_metrics = if Enum.any?(metrics), do: internal_metrics ++ metrics, else: metrics
 
     pages = Page.cast_all(all_metrics)
 
@@ -250,7 +258,7 @@ defmodule TelemetryUI do
     :ok
   end
 
-  defp is_valid_config_fun(config_fun) do
+  defp valid_config_fun?(config_fun) do
     is_function(config_fun, 0) or (is_tuple(config_fun) and tuple_size(config_fun) == 2)
   end
 

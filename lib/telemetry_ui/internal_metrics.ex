@@ -10,11 +10,17 @@ defmodule TelemetryUI.InternalMetrics do
 
   import Ecto.Query
 
+  alias TelemetryUI.Metrics
+
+  @table "telemetry_ui_events"
+
   @doc """
   Returns a list of internal metrics that should be appended to the user's metrics list.
 
   These metrics use custom data resolvers to query the backend directly.
   """
+  def metrics(nil), do: []
+
   def metrics(backend) do
     [
       {"TelemetryUI Internal", Enum.map(metric_configs(), &build_metric(&1, backend)), ui_options: [hidden: true, metrics_class: "grid-cols-8 gap-4"]}
@@ -24,7 +30,7 @@ defmodule TelemetryUI.InternalMetrics do
   defp metric_configs do
     [
       %{
-        type: &TelemetryUI.Metrics.counter/2,
+        type: &Metrics.counter/2,
         description: "Sum of events in time range",
         unit: " events",
         query_fn: &query_events_sum/2,
@@ -32,7 +38,7 @@ defmodule TelemetryUI.InternalMetrics do
         ui_options: [class: "col-span-4"]
       },
       %{
-        type: &TelemetryUI.Metrics.counter/2,
+        type: &Metrics.counter/2,
         description: "Count of rows in time range",
         unit: " rows",
         query_fn: &query_rows_count/2,
@@ -40,21 +46,21 @@ defmodule TelemetryUI.InternalMetrics do
         ui_options: [class: "col-span-4"]
       },
       %{
-        type: &TelemetryUI.Metrics.counter/2,
+        type: &Metrics.counter/2,
         description: "Sum of events by name",
         unit: " events",
         tags: [:name],
         query_fn: &query_events_by_tag/2
       },
       %{
-        type: &TelemetryUI.Metrics.count_list/2,
+        type: &Metrics.count_list/2,
         description: "Entropy of tags",
         unit: " distinct tags",
         tags: [:name],
         query_fn: &query_tag_entropy/2
       },
       %{
-        type: &TelemetryUI.Metrics.counter/2,
+        type: &Metrics.counter/2,
         description: "Sum of events total",
         unit: " events",
         query_fn: &query_events_sum/2,
@@ -62,7 +68,7 @@ defmodule TelemetryUI.InternalMetrics do
         ui_options: [class: "col-span-4"]
       },
       %{
-        type: &TelemetryUI.Metrics.counter/2,
+        type: &Metrics.counter/2,
         description: "Count of rows total",
         unit: " rows",
         query_fn: &query_rows_count/2,
@@ -117,7 +123,7 @@ defmodule TelemetryUI.InternalMetrics do
   end
 
   def query_tag_entropy(options, _time_range) do
-    from e in "telemetry_ui_events",
+    from e in @table,
       where: e.date >= ^options.from and e.date <= ^options.to,
       group_by: e.name,
       select: %{
@@ -146,7 +152,7 @@ defmodule TelemetryUI.InternalMetrics do
   end
 
   defp base_query do
-    from e in "telemetry_ui_events",
+    from e in @table,
       select: %{
         date: e.date,
         count: e.count,

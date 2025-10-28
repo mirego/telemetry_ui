@@ -8,6 +8,7 @@ defmodule TelemetryUI.Web do
   use Plug.Builder
 
   alias Ecto.Changeset
+  alias Phoenix.HTML.Safe
   alias TelemetryUI.Web.Filter
   alias TelemetryUI.Web.View
 
@@ -34,16 +35,29 @@ defmodule TelemetryUI.Web do
     conn
     |> put_resp_header("content-type", "application/json")
     |> send_resp(200, Jason.encode!(data))
+    |> halt()
   end
 
   def index(conn, _opts) do
     conn = assign(conn, :shared, false)
-    content = Phoenix.HTML.Safe.to_iodata(View.render("index.html", Map.put(conn.assigns, :conn, conn)))
+    content = Safe.to_iodata(View.index(Map.put(conn.assigns, :conn, conn)))
 
     conn
     |> put_resp_header("content-type", "text/html")
     |> delete_resp_header("content-security-policy")
     |> send_resp(200, content)
+    |> halt()
+  end
+
+  defp not_found(conn) do
+    conn = assign(conn, :shared, false)
+    content = Safe.to_iodata(View.not_found(Map.put(conn.assigns, :conn, conn)))
+
+    conn
+    |> put_resp_header("content-type", "text/html")
+    |> delete_resp_header("content-security-policy")
+    |> send_resp(200, content)
+    |> halt()
   end
 
   defp assign_telemetry_name(conn, _) do
@@ -78,7 +92,7 @@ defmodule TelemetryUI.Web do
   end
 
   defp assign_share(conn, _) do
-    if TelemetryUI.valid_share_key?(conn.assigns.theme.share_key) do
+    if TelemetryUI.valid_share_key?(conn.assigns.theme.share_key) and not is_nil(conn.assigns.current_page) do
       filters = %{conn.assigns.filters | page: conn.assigns.current_page.id}
       share = Filter.encrypt(filters, conn.assigns.theme.share_key)
       assign(conn, :share, share)
@@ -96,15 +110,21 @@ defmodule TelemetryUI.Web do
   end
 
   defp fetch_current_page(conn, _) do
-    page =
-      with %{"page" => page_id} when not is_nil(page_id) <- conn.params["filter"],
-           page when not is_nil(page) <- TelemetryUI.page_by_id(conn.assigns.telemetry_ui_name, page_id) do
-        fetch_metric_data(conn, page)
-      else
-        _ -> fetch_metric_data(conn, hd(conn.assigns.pages))
-      end
+    with %{"page" => page_id} when not is_nil(page_id) <- conn.params["filter"],
+         page when not is_nil(page) <- TelemetryUI.page_by_id(conn.assigns.telemetry_ui_name, page_id) do
+      page = fetch_metric_data(conn, page)
+      assign(conn, :current_page, page)
+    else
+      _ ->
+        case conn.assigns.pages do
+          [] ->
+            not_found(conn)
 
-    assign(conn, :current_page, page)
+          [page | _] ->
+            page = fetch_metric_data(conn, page)
+            assign(conn, :current_page, page)
+        end
+    end
   end
 
   defp fetch_pages(conn, _) do

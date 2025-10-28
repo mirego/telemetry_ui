@@ -30,7 +30,7 @@ defmodule TelemetryUI.Web.Share do
     conn = assign(conn, :share, conn.params["share"])
     conn = assign(conn, :current_page, %{conn.assigns.current_page | metrics: metrics})
 
-    content = Phoenix.HTML.Safe.to_iodata(View.render("index.html", Map.put(conn.assigns, :conn, conn)))
+    content = Phoenix.HTML.Safe.to_iodata(View.index(Map.put(conn.assigns, :conn, conn)))
 
     conn
     |> put_resp_header("content-type", "text/html")
