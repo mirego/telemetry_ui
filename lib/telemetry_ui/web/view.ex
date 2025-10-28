@@ -61,7 +61,10 @@ defmodule TelemetryUI.Web.View do
 
   defp theme_switch(assigns) do
     ~H"""
-    <button telemetry-component="ThemeSwitch" class="flex items-center gap-1 dark:text-neutral-200 hover:text-[var(--accent-color)] transition-colors text-neutral-500 text-xs">
+    <button
+      telemetry-component="ThemeSwitch"
+      class="flex cursor-pointer items-center gap-1 dark:text-neutral-200 hover:text-[var(--accent-color)] transition-colors text-neutral-500 text-xs"
+    >
       <span class="dark:block hidden">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
           <path
@@ -110,7 +113,10 @@ defmodule TelemetryUI.Web.View do
     "?" <> URI.encode_query(query)
   end
 
-  defp theme_color_style(theme), do: ~s(color: #{theme.header_color}; --accent-color: #{theme.header_color};)
+  defp theme_color_variable(theme), do: ~s[
+      --accent-color: #{theme.header_color};
+      --accent-border: color-mix(in srgb, var(--accent-color), transparent 90%);
+  ]
 
   defp frame_options(frame, theme) do
     for {value, _, _} <- TelemetryUI.Web.Filter.frame_options(frame, theme) do

@@ -4,6 +4,7 @@
 
 @source "../../lib/telemetry_ui/web/**/*.ex";
 @source "../../lib/telemetry_ui/web/**/*.html.heex";
+@source "../../lib/telemetry_ui/metrics/**/*.ex";
 @source "./js/**/*.ts";
 
 @source inline("{sm:,lg:,}gap-{0..96}");
@@ -13,9 +14,16 @@
 @source inline("{sm:,lg:,}grid-cols-{1..12}");
 @source inline("{sm:,lg:,}{col,row}-{start,end}-{1..12}");
 @source inline("{sm:,lg:,}{col,row}-span-{1..12}");
+@source inline("{sm:,lg:,}{col,row}-span-full");
 @source inline("{sm:,lg:,}{col,row}-auto");
+@source inline("{sm:,lg:,}min-h-auto");
+@source inline("{sm:,lg:,}text{,-xs,-sm,-md,-lg,-xl,-2xl}");
 
 @variant dark (.dark &);
+
+:root {
+  --current-color: currentColor;
+}
 
 .dropdown .dropdown-menu {
   z-index: 1005;
@@ -35,16 +43,6 @@
   display: flex;
 }
 
-.vega-lite-metric::before {
-  content: '';
-  height: 60px;
-  width: 70px;
-  position: absolute;
-  right: -70px;
-  top: 0;
-  background: transparent;
-}
-
 html.dark .vega-lite-metric .vega-embed.has-actions .vega-actions,
 html.dark .vega-lite-metric .vega-embed.has-actions summary {
   filter: invert(1);
@@ -56,8 +54,8 @@ html.dark .vega-lite-metric .vega-embed.has-actions summary {
 
 .vega-lite-metric .vega-embed.has-actions details {
   position: absolute;
-  right: -38px;
-  top: -9px;
+  right: 25px;
+  bottom: 15px;
   transform: scale(0.8);
   display: none;
   z-index: 1001;
@@ -66,8 +64,8 @@ html.dark .vega-lite-metric .vega-embed.has-actions summary {
 .vega-lite-metric .vega-embed.has-actions summary {
   box-shadow: none;
   opacity: 1;
-  border-color: transparent;
-  background: transparent;
+  border: 0;
+  background: var(--color-white);
 }
 
 .vega-lite-metric:hover .vega-embed.has-actions details {
@@ -112,11 +110,11 @@ header h1 > svg {
   height: 20px;
 }
 
-header select {
+header select#filter_frame {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
 
-.dark header select {
+.dark header select#filter_frame {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23fafafa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
 

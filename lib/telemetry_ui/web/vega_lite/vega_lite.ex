@@ -6,7 +6,10 @@ defmodule TelemetryUI.Web.VegaLite do
     assigns = Map.merge(assigns, %{spec: spec, metric: metric})
 
     ~H"""
-    <div class="vega-lite-metric group relative flex flex-col bg-white dark:bg-black/40 text-slate dark:text-white p-3 border border-black/10 dark:border-white/20 rounded-lg min-h-[220px] h-full">
+    <div class={[
+      "vega-lite-metric h-full group relative flex flex-col bg-white border border-(--accent-border) dark:bg-black/40 text-slate dark:text-white p-3 rounded-lg",
+      Enum.empty?(@metric.tags) && "min-w-[220px]"
+    ]}>
       <%= if @conn.assigns[:share] && @theme.share_path do %>
         <img loading="lazy" class="hidden" src={@theme.share_path <> "?id=#{@metric.id}.png&share=" <> @conn.assigns.share} />
       <% end %>
@@ -16,7 +19,6 @@ defmodule TelemetryUI.Web.VegaLite do
       <.legend :if={Map.has_key?(@options, :legend) && @options.legend} id={@metric.id} />
       <.loading_view id={@metric.id} />
       <.empty_view id={@metric.id} />
-      <.close_fullscreen_button id={@metric.id} />
       <.fullscreen_button id={@metric.id} />
     </div>
 
@@ -26,23 +28,18 @@ defmodule TelemetryUI.Web.VegaLite do
 
   defp fullscreen_button(assigns) do
     ~H"""
-    <button role="button" telemetry-component="ToggleFullscreen" data-view-id={@id} class="group-hover:block absolute right-[-55px] top-0 py-2 px-3 hidden hover:opacity-50">
+    <button
+      role="button"
+      telemetry-component="ToggleFullscreen"
+      data-view-id={@id}
+      class="group-hover:block cursor-pointer absolute bg-white dark:bg-black right-[5px] bottom-[3px] rounded-full p-2 hidden"
+    >
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
           d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
         />
-      </svg>
-    </button>
-    """
-  end
-
-  defp close_fullscreen_button(assigns) do
-    ~H"""
-    <button role="button" telemetry-component="ToggleFullscreen" data-view-id={@id} class="close-fullscreen-button absolute right-0 top-0 py-2 px-3 hidden hover:opacity-50">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
     """

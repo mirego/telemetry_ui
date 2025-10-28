@@ -6,11 +6,11 @@ defmodule TelemetryUI.Web.Components.CompareAggregate do
   def fill_expression(metric) do
     {good, bad} = Keyword.get(metric.ui_options, :compare_value_scale, {"green", "red"})
 
-    "datum.compare_percentage >= 1 ? '#{good}' : '#{bad}'"
+    "datum.compare_percentage >= 50 ? '#{good}' : '#{bad}'"
   end
 
   def compare_icon_expression(_options) do
-    "datum.compare_percentage >= 1 ? '▲ ' : '▼ '"
+    "datum.compare_percentage >= 50 ? '▲ ' : '▼ '"
   end
 
   def spec(options) do
@@ -36,7 +36,7 @@ defmodule TelemetryUI.Web.Components.CompareAggregate do
       as: "formatted_compare_aggregate_value"
     )
     |> Vl.transform(
-      calculate: "datum.compare_aggregate_value['aggregate_value'] > 0 ? datum.current_aggregate_value['aggregate_value']/datum.compare_aggregate_value['aggregate_value'] : 0",
+      calculate: "datum.compare_aggregate_value['aggregate_value'] > 0 ? datum.current_aggregate_value['aggregate_value']/datum.compare_aggregate_value['aggregate_value']*100 : 0",
       as: "compare_percentage"
     )
     |> Vl.transform(

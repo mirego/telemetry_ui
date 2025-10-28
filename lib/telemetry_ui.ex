@@ -94,11 +94,13 @@ defmodule TelemetryUI do
     defp cast({title, metrics}), do: cast({title, metrics, []})
 
     defp cast({title, metrics, options}) do
+      default_ui_options = [hidden: false, styles: "", metrics_class: ~s(grid-cols-1 md:grid-cols-3 gap-4)]
+
       %__MODULE__{
         id: cast_id(title),
         title: title,
         metrics: List.wrap(metrics),
-        ui_options: Keyword.get(options, :ui_options, [])
+        ui_options: Keyword.merge(default_ui_options, Keyword.get(options, :ui_options, []))
       }
     end
 
@@ -140,7 +142,12 @@ defmodule TelemetryUI do
       end
 
     opts[:metrics] || raise ArgumentError, "the :metrics option is required by #{inspect(__MODULE__)}"
-    pages = Page.cast_all(opts[:metrics])
+
+    backend = opts[:backend]
+    internal_metrics = TelemetryUI.InternalMetrics.metrics(backend)
+    all_metrics = List.wrap(opts[:metrics]) ++ internal_metrics
+
+    pages = Page.cast_all(all_metrics)
 
     name = Keyword.get(opts, :name, :default)
     theme = struct!(TelemetryUI.Theme, opts[:theme] || %{})
@@ -152,7 +159,7 @@ defmodule TelemetryUI do
 
     %{
       name: name,
-      backend: opts[:backend],
+      backend: backend,
       theme: theme,
       pages: pages,
       config_fun: config_fun

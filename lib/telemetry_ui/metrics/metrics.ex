@@ -22,7 +22,7 @@ defmodule TelemetryUI.Metrics do
 
   defmacro __using__(_) do
     quote do
-      defstruct id: nil, title: nil, telemetry_metric: nil, data: nil, options: %{}, ui_options: [], unit: nil, tags: [], data_resolver: nil
+      defstruct id: nil, title: nil, telemetry_metric: nil, data: nil, options: %{}, ui_options: [class: "col-span-full"], unit: nil, tags: [], data_resolver: nil
     end
   end
 
@@ -34,6 +34,7 @@ defmodule TelemetryUI.Metrics do
   for {metric_name, metric_struct} <- @telemetry_metrics do
     def unquote(metric_name)(:data, options) do
       {ui_options, options} = Keyword.pop(options, :ui_options, [])
+      ui_options = Keyword.merge([class: "col-span-full"], ui_options)
 
       struct!(unquote(metric_struct),
         id: id(options[:description]),
@@ -51,6 +52,7 @@ defmodule TelemetryUI.Metrics do
   for {metric_name, metric_struct} <- @telemetry_metrics do
     def unquote(metric_name)(event_name, options) do
       {ui_options, options} = Keyword.pop(options, :ui_options, [])
+      ui_options = Keyword.merge([class: "col-span-full"], ui_options)
       metric = Metrics.summary(event_name, options)
 
       unit =
@@ -70,6 +72,17 @@ defmodule TelemetryUI.Metrics do
         telemetry_metric: metric
       )
     end
+  end
+
+  def title(title, options \\ []) do
+    {ui_options, options} = Keyword.pop(options, :ui_options, [])
+    ui_options = Keyword.merge([class: "col-span-full min-h-auto"], ui_options)
+
+    %UIMetrics.Title{
+      title: title,
+      options: options,
+      ui_options: ui_options
+    }
   end
 
   defp id(name) when is_binary(name) do

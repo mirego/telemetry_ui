@@ -125,6 +125,8 @@ defmodule TelemetryUI.Web do
     %{page | metrics: metrics}
   end
 
+  defp fetch_component_metric_data(_conn, %{data_resolver: nil}), do: nil
+
   defp fetch_component_metric_data(conn, metric) do
     case Function.info(metric.data_resolver, :arity) do
       {:arity, 0} -> metric.data_resolver.()

@@ -197,6 +197,8 @@ const emptySource = (source) => {
   return false;
 };
 
+const escapeHandlersById = {};
+
 const toggleFullscreen = (parentElement: HTMLElement, id: string) => {
   const fixedStyle = [
     'fixed',
@@ -207,8 +209,9 @@ const toggleFullscreen = (parentElement: HTMLElement, id: string) => {
     'overflow-y-auto',
     'overflow-x-hidden',
     'z-10',
+    'border-0',
     'overscroll-contain',
-    'dark:bg-neutral-900'
+    'dark:bg-black'
   ];
   const closeButton = parentElement.querySelector('.close-fullscreen-button');
 
@@ -219,6 +222,11 @@ const toggleFullscreen = (parentElement: HTMLElement, id: string) => {
     closeButton?.classList.add('hidden');
 
     viewsById[id].signal('height', heightsById[id]);
+
+    if (escapeHandlersById[id]) {
+      document.removeEventListener('keydown', escapeHandlersById[id]);
+      delete escapeHandlersById[id];
+    }
   } else {
     parentElement.classList.add(...fixedStyle);
     parentElement.classList.remove('relative');
@@ -227,6 +235,14 @@ const toggleFullscreen = (parentElement: HTMLElement, id: string) => {
 
     heightsById[id] = viewsById[id].signal('height');
     viewsById[id].signal('height', window.innerHeight - 130);
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        toggleFullscreen(parentElement, id);
+      }
+    };
+    escapeHandlersById[id] = handleEscape;
+    document.addEventListener('keydown', handleEscape);
   }
 
   window.dispatchEvent(new Event('resize'));
@@ -347,8 +363,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('[telemetry-component="Form"]').forEach((form) => {
     const formElement = form.querySelector('form') as HTMLFormElement;
-    form.querySelectorAll('input, select').forEach((input) => {
-      input.addEventListener('change', () => formElement.submit());
-    });
+    form
+      .querySelectorAll(
+        'input, select:not([telemetry-component="ActionsSelect"])'
+      )
+      .forEach((input) => {
+        input.addEventListener('change', () => formElement.submit());
+      });
   });
+
+  document
+    .querySelectorAll('[telemetry-component="ActionsSelect"]')
+    .forEach((select) => {
+      const selectElement = select as HTMLSelectElement;
+
+      select.addEventListener('change', () => {
+        const value = selectElement.value;
+
+        if (value === 'toggle-theme') {
+          if (localStorage.theme === 'dark') {
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+          } else {
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+          }
+        } else if (value === 'internal-page') {
+          const url = new URL(window.location.href);
+          url.searchParams.set('filter[page]', 'telemetryui-internal');
+          window.location.href = url.toString();
+        } else if (value) {
+          window.open(value, '_blank');
+        }
+
+        selectElement.value = '';
+      });
+    });
 });

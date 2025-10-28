@@ -26,6 +26,20 @@ defmodule MyApp.Application do
 end
 ```
 
+## Dynamic Configuration
+
+Instead of calling the config function directly, you can pass it as a reference to enable hot-reloading:
+
+```elixir
+# Using module and function tuple (recommended for hot-reload)
+{TelemetryUI, config: {MyApp.TelemetryUI, :config}}
+
+# Or using anonymous function
+{TelemetryUI, config: fn -> MyApp.TelemetryUI.config() end}
+```
+
+This allows you to reload the configuration at runtime without restarting your application. See guides/hot-reload.md for more details.
+
 ## The config
 
 ```elixir
@@ -41,7 +55,8 @@ defmodule MyApp.TelemetryUI do
         {"GraphQL", graphql_metrics(), ui_options: ui_options},
         {"Absinthe", absinthe_metrics(), ui_options: ui_options},
         {"Ecto", ecto_metrics(), ui_options: ui_options},
-        {"System", system_metrics()}
+        {"System", system_metrics()},
+        {"Internal (hidden)", internal_metrics(), ui_options: [hidden: true, metrics_class: "grid-cols-2"]}
       ],
       theme: theme(),
       backend: backend()
@@ -254,6 +269,12 @@ defmodule MyApp.TelemetryUI do
     ]
   end
 
+  defp internal_metrics do
+    [
+      counter("telemetry_ui.some_internal_metric")
+    ]
+  end
+
   defp theme do
     %{
       header_color: "#28cb87",
@@ -293,4 +314,34 @@ defmodule MyApp.TelemetryUI do
     }
   end
 end
+```
+
+## Page UI Options
+
+Each page (metrics group) supports the following `ui_options`:
+
+### `metrics_class`
+
+Controls the grid layout for metrics within a page. Default is `"grid-cols-1 md:grid-cols-3 gap-4"`.
+
+```elixir
+{"HTTP", http_metrics(), ui_options: [metrics_class: "grid-cols-8 gap-4"]}
+```
+
+All TailwindCSS grid classes are available with responsive variants (`sm:`, `md:`, `lg:`).
+
+### `hidden`
+
+Hides the page from the navigation and main view. Useful for internal metrics or pages you want to keep but not display.
+
+```elixir
+{"Internal", internal_metrics(), ui_options: [hidden: true]}
+```
+
+### `styles`
+
+Adds custom CSS styles to the page container.
+
+```elixir
+{"Debug", debug_metrics(), ui_options: [styles: "background-color: #f0f0f0; padding: 20px;"]}
 ```

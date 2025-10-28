@@ -112,6 +112,10 @@ defmodule TelemetryUI.Mixfile do
       "assets.build": ["esbuild telemetry_ui", "tailwind telemetry_ui"],
       "assets.watch.esbuild": ["esbuild telemetry_ui --watch"],
       "assets.watch.tailwind": ["tailwind telemetry_ui --watch"],
+      "assets.deploy.watch": [
+        "tailwind telemetry_ui --minify --watch",
+        "esbuild telemetry_ui --minify --watch --metafile=meta.json"
+      ],
       "assets.deploy": [
         "tailwind telemetry_ui --minify",
         "esbuild telemetry_ui --minify --metafile=meta.json"

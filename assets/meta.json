@@ -10052,7 +10052,7 @@
       "format": "esm"
     },
     "js/app.ts": {
-      "bytes": 10461,
+      "bytes": 11907,
       "imports": [
         {
           "path": "node_modules/vega/build/vega.module.js",
@@ -11017,7 +11017,7 @@
           "bytesInOutput": 7569
         },
         "node_modules/vega-view/build/vega-view.js": {
-          "bytesInOutput": 15789
+          "bytesInOutput": 15793
         },
         "node_modules/vega-event-selector/build/vega-event-selector.js": {
           "bytesInOutput": 2121
@@ -11047,10 +11047,10 @@
           "bytesInOutput": 37113
         },
         "js/app.ts": {
-          "bytesInOutput": 5250
+          "bytesInOutput": 6000
         }
       },
-      "bytes": 827041
+      "bytes": 827795
     }
   }
 }

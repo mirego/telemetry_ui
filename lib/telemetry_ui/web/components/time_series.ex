@@ -33,7 +33,6 @@ defmodule TelemetryUI.Web.Components.TimeSeries do
         baseline: "line-bottom",
         interpolate: "monotone",
         tooltip: true,
-        width: [band: 0.6],
         fill_opacity: 1,
         color: hd(assigns.theme.scale),
         corner_radius_end: 2

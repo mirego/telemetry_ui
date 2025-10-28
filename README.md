@@ -29,6 +29,9 @@ It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to
 - Shareable metrics page (secured, cacheable, without external requests)
 - Slack digest with rendered images
 - Multiple metrics dashboard living in the same app
+- Hot-reloading configuration without restarting your application
+- Dynamic configuration via functions for runtime flexibility
+- Hidden pages and custom styling per page
 
 Checkout the Guides for more informations.
 
@@ -47,7 +50,7 @@ def deps do
 end
 ```
 
-Configure TelemetryUI for test.
+Configure TelemetryUI for test. This disables all TelemetryUI processes during testing.
 
 ```elixir
 # config/test.exs
@@ -125,7 +128,7 @@ defp telemetry_config do
 end
 ```
 
-Since the config is read once at startup, you need to restart the server of you add new metrics to track.
+Since the config is read once at startup, you need to restart the server if you add new metrics to track. Alternatively, you can use the hot-reload feature (see guides/hot-reload.md).
 
 To see the rendered metrics, you need to add a route to your router.
 
@@ -169,7 +172,55 @@ end
 def enable_telemetry_ui(conn, _), do: assign(conn, :telemetry_ui_allowed, true)
 ```
 
-That’s it! You can declare as many metrics as you want and they will render in HTML on your page!
+That's it! You can declare as many metrics as you want and they will render in HTML on your page!
+
+## Configuration
+
+### Dynamic Configuration
+
+Instead of passing configuration directly, you can pass a function that returns the configuration. This enables dynamic configuration that can be reloaded at runtime:
+
+```elixir
+# Using anonymous function
+{TelemetryUI, config: fn -> telemetry_config() end}
+
+# Using module and function tuple
+{TelemetryUI, config: {MyApp.Telemetry, :config}}
+```
+
+This is particularly useful with the hot-reload feature (see guides/hot-reload.md).
+
+### Named Instances
+
+When running multiple TelemetryUI instances (e.g., for different dashboards with different permissions), you must give each instance a unique name:
+
+```elixir
+# lib/my_app/application.ex
+children = [
+  {TelemetryUI, telemetry_config() ++ [name: :admin]},
+  {TelemetryUI, user_config() ++ [name: :user_dashboard]}
+]
+```
+
+Then reference the name in your router:
+
+```elixir
+get("/admin/metrics", TelemetryUI.Web, [], [assigns: %{telemetry_ui_allowed: true, telemetry_ui_name: :admin}])
+get("/user/metrics", TelemetryUI.Web, [], [assigns: %{telemetry_ui_allowed: true, telemetry_ui_name: :user_dashboard}])
+```
+
+See guides/multi-metrics-endpoints.md for a complete example.
+
+### Disabling TelemetryUI
+
+You can disable all TelemetryUI processes (useful for testing):
+
+```elixir
+# config/test.exs
+config :telemetry_ui, disabled: true
+```
+
+For all configuration options, see guides/configuration-reference.md.
 
 ## License
 
