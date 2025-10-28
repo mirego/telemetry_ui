@@ -23,7 +23,7 @@ defmodule TelemetryUI.DigestTest do
       }
 
       expect(:httpc, :request, fn :post, {_url, _, _type, body}, [], [] ->
-        body = Jason.decode!(body)
+        body = JSON.decode!(body)
         image_block = Enum.find(body["blocks"], &(&1["type"] === "image"))
         image_uri = URI.parse(image_block["image_url"])
         assert URI.decode_query(image_uri.query)["id"] === "T3Hwd9L68ku.png"
@@ -84,7 +84,7 @@ defmodule TelemetryUI.DigestTest do
 
       expect(:httpc, :request, fn :post, {url, [], ~c"application/json", received_body}, [], [] ->
         assert url === args["slack_hook_url"]
-        assert Jason.decode!(received_body) === body
+        assert JSON.decode!(received_body) === body
         {:ok, {{~c"HTTP/1.1", 200, ~c"OK"}, [], ~c"ok"}}
       end)
 

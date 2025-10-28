@@ -20,7 +20,18 @@ defmodule TelemetryUI.Mixfile do
       source_url: "https://github.com/mirego/telemetry_ui",
       homepage_url: "https://github.com/mirego/telemetry_ui",
       docs: [
-        extras: ["README.md", "guides/application-data.md", "guides/custom-ui.md", "guides/multi-metrics-endpoints.md"],
+        extras: [
+          "README.md",
+          "guides/application-data.md",
+          "guides/complex-config.md",
+          "guides/configuration-reference.md",
+          "guides/custom-ui.md",
+          "guides/hot-reload.md",
+          "guides/multi-metrics-endpoints.md",
+          "guides/share.md",
+          "guides/slack-digest.md",
+          "guides/testing.md"
+        ],
         extra_section: "GUIDES",
         groups_for_modules: [
           TelemetryUI: [

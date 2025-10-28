@@ -34,30 +34,35 @@ defmodule TelemetryUI.Web do
 
     conn
     |> put_resp_header("content-type", "application/json")
-    |> send_resp(200, Jason.encode!(data))
+    |> send_resp(200, JSON.encode!(data))
     |> halt()
   end
 
   def index(conn, _opts) do
     conn = assign(conn, :shared, false)
-    content = Safe.to_iodata(View.index(Map.put(conn.assigns, :conn, conn)))
+    assigns = Map.put(conn.assigns, :conn, conn)
+
+    content =
+      if conn.assigns.current_page do
+        View.index(assigns)
+      else
+        View.not_found(assigns)
+      end
 
     conn
     |> put_resp_header("content-type", "text/html")
     |> delete_resp_header("content-security-policy")
-    |> send_resp(200, content)
-    |> halt()
+    |> send_resp(200, Safe.to_iodata(content))
   end
 
-  defp not_found(conn) do
-    conn = assign(conn, :shared, false)
-    content = Safe.to_iodata(View.not_found(Map.put(conn.assigns, :conn, conn)))
+  def fetch_component_metric_data(_conn, %{data_resolver: nil}), do: nil
 
-    conn
-    |> put_resp_header("content-type", "text/html")
-    |> delete_resp_header("content-security-policy")
-    |> send_resp(200, content)
-    |> halt()
+  def fetch_component_metric_data(conn, metric) do
+    case Function.info(metric.data_resolver, :arity) do
+      {:arity, 0} -> metric.data_resolver.()
+      {:arity, 1} -> metric.data_resolver.(conn.assigns.filters)
+      {:arity, 2} -> metric.data_resolver.(conn.assigns.telemetry_ui_name, conn.assigns.filters)
+    end
   end
 
   defp assign_telemetry_name(conn, _) do
@@ -118,7 +123,7 @@ defmodule TelemetryUI.Web do
       _ ->
         case conn.assigns.pages do
           [] ->
-            not_found(conn)
+            assign(conn, :current_page, nil)
 
           [page | _] ->
             page = fetch_metric_data(conn, page)
@@ -143,15 +148,5 @@ defmodule TelemetryUI.Web do
       end)
 
     %{page | metrics: metrics}
-  end
-
-  defp fetch_component_metric_data(_conn, %{data_resolver: nil}), do: nil
-
-  defp fetch_component_metric_data(conn, metric) do
-    case Function.info(metric.data_resolver, :arity) do
-      {:arity, 0} -> metric.data_resolver.()
-      {:arity, 1} -> metric.data_resolver.(conn.assigns.filters)
-      {:arity, 2} -> metric.data_resolver.(conn.assigns.telemetry_ui_name, conn.assigns.filters)
-    end
   end
 end

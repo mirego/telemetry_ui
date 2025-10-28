@@ -33,7 +33,7 @@ defmodule TelemetryUI.Digest.Slack do
           apparence
         )
 
-      case :httpc.request(:post, {slack.url, [], ~c"application/json", Jason.encode!(body)}, [], []) do
+      case :httpc.request(:post, {slack.url, [], ~c"application/json", JSON.encode!(body)}, [], []) do
         {:ok, {{~c"HTTP/1.1", 200, ~c"OK"}, _, _}} -> :ok
         {_, error} -> {:error, error}
       end

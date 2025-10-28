@@ -39,7 +39,7 @@ defmodule TelemetryUI.Web.Share do
   end
 
   defp resolve_metric(conn, metric) do
-    case fetch_component_metric_data(conn, metric) do
+    case TelemetryUI.Web.fetch_component_metric_data(conn, metric) do
       {:ok, data} -> %{metric | data: data}
       {:async, async} -> %{metric | data: async.()}
       _ -> metric
@@ -103,14 +103,6 @@ defmodule TelemetryUI.Web.Share do
       assign(conn, :current_page, page)
     else
       _ -> halt(send_resp(conn, 404, "Not found"))
-    end
-  end
-
-  defp fetch_component_metric_data(conn, metric) do
-    case Function.info(metric.data_resolver, :arity) do
-      {:arity, 0} -> metric.data_resolver.()
-      {:arity, 1} -> metric.data_resolver.(conn.assigns.filters)
-      {:arity, 2} -> metric.data_resolver.(conn.assigns.telemetry_ui_name, conn.assigns.filters)
     end
   end
 

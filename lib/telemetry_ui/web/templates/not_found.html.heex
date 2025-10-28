@@ -1,119 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta property="og:title" content={@theme.title} />
-    <meta property="og:description" content={@theme.description} />
-    <meta property="og:type" content="website" />
+<Layout.render theme={@theme}>
+  <Layout.simple_header
+    theme={@theme}
+    filter_form={@filter_form}
+    frame_options={frame_options(@filters.frame, @theme)}
+  />
 
-    <title>{@theme.title}</title>
-    <style>
-      <%= {:safe, render("app.css")} %>
-    </style>
-    <link rel="icon" href={favicon(@theme)} type="image/svg+xml" />
-  </head>
-
-  <body class="flex flex-col justify-between min-h-screen bg-[#f7f7f7] dark:bg-[#0b0b0b]" style={theme_color_variable(@theme)}>
-    <script type="text/javascript">
-      (function () {
-        try {
-          var theme = localStorage.getItem('theme');
-          var supportDarkMode =
-            window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-          if (!theme) return;
-          if (!theme && supportDarkMode) return document.querySelector('html').classList.add('dark');
-          if (theme === 'dark') return document.querySelector('html').classList.add('dark');
-        } catch (e) {}
-      })();
-    </script>
-
-    <div class="px-2 md:px-4 text-(--accent-color)">
-      <header class="max-w-7xl mx-auto flex justify-between py-2 mb-4 mt-0 md:mt-12 text-black/50 dark:text-white/50">
-        <span class="flex items-center gap-3 font-light">
-          <span>{{:safe, @theme.logo}}</span>{@theme.title}
-        </span>
-
-        <div telemetry-component="Form">
-          <.form :let={f} for={@filter_form} method="get" class="flex gap-2 align-items-center">
-            <select
-              id="filter_frame"
-              name="filter[frame]"
-              class="px-4 py-1 rounded-md bg-white dark:bg-black border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
-            >
-              <%= for {label, value} <- frame_options(@filters.frame, @theme) do %>
-                <option selected={f.data.frame === value} value={value}>{label}</option>
-              <% end %>
-            </select>
-
-            <div class="relative inline-block">
-              <select
-                id="filter_actions"
-                name="filter[actions]"
-                telemetry-component="ActionsSelect"
-                class="size-10 p-2 text-xs rounded-md bg-transparent border-0 text-transparent appearance-none cursor-pointer"
-                style="background-image: none;"
-              >
-                <option value=""></option>
-                <option value="toggle-theme">Switch theme</option>
-              </select>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-200"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"
-                />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-          </.form>
-        </div>
-      </header>
-
-      <%= if not @shared and length(@pages) > 1 do %>
-        <div class="max-w-7xl mx-auto flex flex-wrap mb-8 relative divide-x">
-          <%= for page <- @pages, not page.ui_options[:hidden] do %>
-            <.page_link
-              page={page}
-              filters={@filters}
-              class="transition font-bold text-sm opacity-75 hover:opacity-100 text-black dark:text-white first-of-type:ps-0 px-4 border-black/10 dark:border-white/10"
-            />
-          <% end %>
-        </div>
-      <% end %>
-      <div class="flex-grow max-w-7xl mx-auto px-2 md:px-0 mb-12">
-        <div class="text-center mt-20">
-          <h1 class="text-3xl font-bold mb-4 text-(--accent-color)">No metrics</h1>
-          <p class="text-sm text-black/50 dark:text-white/50">
-            Oops! Looks like you need to add metrics in the configuration.
-          </p>
-          <a
-            href="https://github.com/mirego/telemetry_ui/blob/master/guides/configuration-reference.md"
-            target="_blank"
-            class="inline-block text-sm mt-6 px-4 py-2 bg-(--accent-color) shadow text-white rounded-md transition"
-          >
-            Read the documentation
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <footer class="relative p-5 text-center opacity-25 text-xs dark:text-gray-300">
-      <a href={"https://github.com/mirego/telemetry_ui/tree/v#{version()}"} target="_blank" class="absolute bottom-0 left-0 p-5 font-light font-mono text-xs">
-        {version()}
+  <div class="flex-grow max-w-7xl mx-auto px-2 md:px-0 mb-12">
+    <div class="text-center mt-20">
+      <h1 class="text-3xl font-bold mb-4 text-(--accent-color)">No metrics</h1>
+      <p class="text-sm text-black/50 dark:text-white/50">
+        Oops! Looks like you need to add metrics in the configuration.
+      </p>
+      <a
+        href="https://github.com/mirego/telemetry_ui/blob/master/guides/configuration-reference.md"
+        target="_blank"
+        class="inline-block text-sm mt-6 px-4 py-2 bg-(--accent-color) shadow text-white rounded-md transition"
+      >
+        Read the documentation
       </a>
-      Built with ♥ by the team @ <a href="https://www.mirego.com" target="_blank">Mirego</a>.
-    </footer>
-
-    <script type="text/javascript" integrity={app_js_integrity()}>
-      <%= {:safe, render("app.js")} %>
-    </script>
-  </body>
-</html>
+    </div>
+  </div>
+</Layout.render>

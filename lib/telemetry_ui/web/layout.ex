@@ -1,0 +1,319 @@
+defmodule TelemetryUI.Web.Layout do
+  @moduledoc false
+
+  use Phoenix.Component
+
+  alias TelemetryUI.Web.View
+
+  attr :theme, :map, required: true
+  attr :filter_form, :map, required: true
+  attr :frame_options, :list, required: true
+  attr :share, :string, default: nil
+  attr :show_internal_page, :boolean, default: false
+
+  def simple_header(assigns) do
+    ~H"""
+    <header class="max-w-7xl mx-auto flex justify-between py-2 mb-4 mt-0 md:mt-12 text-black/50 dark:text-white/50">
+      <span class="flex items-center gap-3 font-light">
+        <span>{{:safe, @theme.logo}}</span>{@theme.title}
+      </span>
+
+      <div telemetry-component="Form">
+        <.form :let={f} for={@filter_form} method="get" class="flex gap-2 align-items-center">
+          <select
+            id="filter_frame"
+            name="filter[frame]"
+            class="px-4 py-1 rounded-md bg-white dark:bg-black border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
+          >
+            <%= for {label, value} <- @frame_options do %>
+              <option selected={f.data.frame === value} value={value}>{label}</option>
+            <% end %>
+          </select>
+
+          <.settings_menu theme={@theme} share={@share} show_internal_page={@show_internal_page} />
+        </.form>
+      </div>
+    </header>
+    """
+  end
+
+  attr :theme, :map, required: true
+  attr :filter_form, :map, required: true
+  attr :frame_options, :list, required: true
+  attr :share, :string, default: nil
+  attr :current_page, :map, required: true
+  attr :pages, :list, required: true
+
+  def full_header(assigns) do
+    ~H"""
+    <header class="max-w-7xl mx-auto flex justify-between py-2 mb-4 mt-0 md:mt-12 text-black/50 dark:text-white/50">
+      <a class="flex items-center gap-3 font-light" href={page_href(List.first(@pages).id, %{frame: nil})}>
+        <span>{{:safe, @theme.logo}}</span>{@theme.title}
+      </a>
+
+      <div telemetry-component="Form">
+        <.form :let={f} for={@filter_form} method="get" class="flex gap-2 align-items-center">
+          <input id="filter_page" name="filter[page]" type="hidden" value={@current_page.id} />
+          <select
+            id="filter_frame"
+            name="filter[frame]"
+            class="px-4 py-1 rounded-md bg-white dark:bg-black border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
+          >
+            <%= for {label, value} <- @frame_options do %>
+              <option selected={f.data.frame === value} value={value}>{label}</option>
+            <% end %>
+          </select>
+
+          <.settings_menu theme={@theme} share={@share} show_internal_page={true} />
+        </.form>
+      </div>
+    </header>
+    """
+  end
+
+  attr :theme, :map, required: true
+  attr :current_page, :map, required: true
+  attr :filters, :map, required: true
+
+  def shared_header(assigns) do
+    ~H"""
+    <header class="max-w-7xl mx-auto flex justify-between flex-col md:flex-row py-8 gap-4 mt-0 md:mt-12 text-black/50 dark:text-white/50">
+      <h1 class="text-base font-light flex items-center gap-3 pe-none">
+        <span>{{:safe, @theme.logo}}</span>
+        {@theme.title}
+        <span class="text-black/50 dark:text-white/50 border-black/20 dark:border-white/20 border-l pl-3">{@current_page.title}</span>
+      </h1>
+
+      <div class="flex items-center text-sm gap-5">
+        <div class="flex flex-col">
+          <span class="text-xs text-black/40 dark:text-white/40">From:</span>
+          <time telemetry-component="LocalTime" title={@filters.from}>{filter_datetime_format(@filters.from)}</time>
+        </div>
+
+        <div class="flex flex-col">
+          <span class="text-xs text-black/40 dark:text-white/40">To:</span>
+          <time telemetry-component="LocalTime" title={@filters.to}>{filter_datetime_format(@filters.to)}</time>
+        </div>
+      </div>
+    </header>
+
+    <div class="absolute top-2 right-2">
+      <.theme_switch />
+    </div>
+    """
+  end
+
+  attr :theme, :map, required: true
+  attr :share, :string, default: nil
+  attr :show_internal_page, :boolean, default: false
+
+  defp settings_menu(assigns) do
+    ~H"""
+    <div class="relative inline-block">
+      <select
+        id="filter_actions"
+        name="filter[actions]"
+        telemetry-component="ActionsSelect"
+        class="size-10 p-2 text-xs rounded-md bg-transparent border-0 text-transparent appearance-none cursor-pointer"
+        style="background-image: none;"
+      >
+        <option value=""></option>
+        <%= if @share do %>
+          <option value={"#{@theme.share_path}?share=#{@share}"}>Share URL</option>
+        <% end %>
+        <%= if @show_internal_page do %>
+          <option value="internal-page">Internal metrics</option>
+        <% end %>
+        <option value="toggle-theme">Switch theme</option>
+      </select>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-200"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"
+        />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    </div>
+    """
+  end
+
+  attr :pages, :list, required: true
+  attr :current_page, :map, required: true
+  attr :filters, :map, required: true
+
+  def page_navigation(assigns) do
+    ~H"""
+    <div class="max-w-7xl mx-auto flex flex-wrap mb-8 relative divide-x">
+      <%= for page <- @pages, not page.ui_options[:hidden] do %>
+        <%= if page.id === @current_page.id do %>
+          <.page_link
+            page={page}
+            filters={@filters}
+            class="text-(--accent-color) font-bold text-sm cursor-default first-of-type:ps-0 px-4 border-black/10 dark:border-white/10"
+          />
+        <% else %>
+          <.page_link
+            page={page}
+            filters={@filters}
+            class="transition font-bold text-sm opacity-75 hover:opacity-100 text-black dark:text-white first-of-type:ps-0 px-4 border-black/10 dark:border-white/10"
+          />
+        <% end %>
+      <% end %>
+    </div>
+    """
+  end
+
+  defp theme_switch(assigns) do
+    ~H"""
+    <button
+      telemetry-component="ThemeSwitch"
+      class="flex cursor-pointer items-center gap-1 dark:text-neutral-200 hover:text-[var(--accent-color)] transition-colors text-neutral-500 text-xs"
+    >
+      <span class="dark:block hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+          />
+        </svg>
+      </span>
+
+      <span class="dark:hidden block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+          />
+        </svg>
+      </span>
+      <%= if assigns[:inner_block] do %>
+        {render_slot(@inner_block)}
+      <% end %>
+    </button>
+    """
+  end
+
+  defp page_link(assigns) do
+    ~H"""
+    <a href={page_href(@page.id, @filters)} class={@class} style={Map.get(assigns, :style)}>
+      <%= if @page.title === "" do %>
+        Untitled
+      <% else %>
+        {@page.title}
+      <% end %>
+    </a>
+    """
+  end
+
+  defp page_href(page_id, params) do
+    query =
+      %{
+        "filter[page]": page_id,
+        "filter[frame]": params.frame,
+        "filter[to]": if(params.frame === :custom, do: params.to && DateTime.to_iso8601(params.to)),
+        "filter[from]": if(params.frame === :custom, do: params.from && DateTime.to_iso8601(params.from))
+      }
+      |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+      |> Map.new()
+
+    "?" <> URI.encode_query(query)
+  end
+
+  defp filter_datetime_format(datetime) do
+    Calendar.strftime(datetime, "%Y-%m-%d %H:%M")
+  end
+
+  def render(assigns) do
+    ~H"""
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta property="og:title" content={@theme.title} />
+        <meta property="og:description" content={@theme.description} />
+        <meta property="og:type" content="website" />
+
+        <title>{@theme.title}</title>
+        <style>
+          <%= {:safe, View.render("app.css")} %>
+        </style>
+        <link rel="icon" href={View.favicon(@theme)} type="image/svg+xml" />
+      </head>
+
+      <body class="flex flex-col justify-between min-h-screen bg-[#f7f7f7] dark:bg-[#0b0b0b]" style={theme_color_variable(@theme)}>
+        <%= if Map.get(assigns, :page_styles) do %>
+          <style>
+            <%= {:safe, @page_styles} %>
+          </style>
+        <% end %>
+
+        <.dark_mode_script />
+
+        <div class="px-2 md:px-4 text-(--accent-color)">
+          {render_slot(@inner_block)}
+        </div>
+
+        <.footer />
+
+        <script type="text/javascript" integrity={View.app_js_integrity()}>
+          <%= {:safe, View.render("app.js")} %>
+        </script>
+      </body>
+    </html>
+    """
+  end
+
+  defp dark_mode_script(assigns) do
+    ~H"""
+    <script type="text/javascript">
+      (function () {
+        try {
+          var theme = localStorage.getItem('theme');
+          var supportDarkMode =
+            window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+          if (!theme) return;
+          if (!theme && supportDarkMode) return document.querySelector('html').classList.add('dark');
+          if (theme === 'dark') return document.querySelector('html').classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+    """
+  end
+
+  defp footer(assigns) do
+    ~H"""
+    <footer class="relative p-5 text-center opacity-25 text-xs dark:text-gray-300">
+      <a href={"https://github.com/mirego/telemetry_ui/tree/v#{version()}"} target="_blank" class="absolute bottom-0 left-0 p-5 font-light font-mono text-xs">
+        {version()}
+      </a>
+      Built with ♥ by the team @ <a href="https://www.mirego.com" target="_blank">Mirego</a>.
+    </footer>
+    """
+  end
+
+  defp version do
+    case :application.get_key(:telemetry_ui, :vsn) do
+      {:ok, current} ->
+        List.to_string(current)
+
+      _ ->
+        "dev"
+    end
+  end
+
+  defp theme_color_variable(theme), do: ~s[
+      --accent-color: #{theme.header_color};
+      --accent-border: color-mix(in srgb, var(--accent-color), transparent 90%);
+  ]
+end
