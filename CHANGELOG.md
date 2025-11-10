@@ -1,5 +1,25 @@
 # Changelog
 
+## v5.2.0 (2025-10-06)
+
+### Features
+
+- Add `TelemetryUI.Reloader` plug for hot-reloading metrics configuration
+- Add `:config` option to support dynamic configuration via MFA tuple or function
+- Use Ecto built-in `avg/1` and `sum/1` functions instead of fragments
+- Fix compare aggregate percentage formatting
+- Update Tailwind CSS to v4
+- Update Vega dependencies
+
+## v5.0.0 (2025-01-04)
+
+### BREAKING CHANGES
+
+- Minimum Elixir version raised to `~> 1.17` (requires `Duration` module)
+- Minimum PostgreSQL version raised to 16 (requires `date_bin` function)
+- `vega_lite_convert` upgraded to `~> 1.0` and is now a required dependency (no longer optional)
+- `vix` dependency removed
+
 ## v4.0.0 (2023-06-26)
 
 ### BREAKING CHANGES
