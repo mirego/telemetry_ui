@@ -8,8 +8,8 @@ jobs:
 
     strategy:
       matrix:
-        otp-version: [26.2.5, 27.2]
-        elixir-version: [1.17, 1.18]
+        otp-version: [27.2, 28.1]
+        elixir-version: [1.17, 1.18, 1.19]
 
     services:
       db:

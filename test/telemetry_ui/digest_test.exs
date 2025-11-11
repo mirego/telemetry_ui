@@ -3,6 +3,7 @@ defmodule TelemetryUI.DigestTest do
   use Mimic
 
   alias TelemetryUI.Digest
+  alias TelemetryUI.JSON
 
   describe "worker" do
     test "slack with images" do
