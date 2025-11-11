@@ -83,6 +83,10 @@ defmodule TelemetryUI.WriteBuffer do
           )
         end)
     end
+  rescue
+    error ->
+      Logger.error("TelemetryUI - #{inspect(error)} Could not insert #{length(buffer)} events")
+      nil
   end
 
   defp group_events(events) do

@@ -87,6 +87,20 @@ defmodule TelemetryUI.EctoPostgresTest do
       assert %{} in Enum.map(events, & &1.tags)
       assert %{"foo" => "bar"} in Enum.map(events, & &1.tags)
     end
+
+    test "large count overflow protection", %{backend: backend} do
+      # Insert with a count near max int4 (2,147,483,647)
+      large_count = 2_147_483_640
+      Backend.insert_event(backend, 10.0, ~N[2022-02-10T00:00:32], "test", %{}, large_count)
+
+      # This would overflow int4 if not using bigint (2,147,483,640 + 100 > max)
+      Backend.insert_event(backend, 20.0, ~N[2022-02-10T00:00:33], "test", %{}, 100)
+
+      [event] = backend.repo.all(Entry)
+
+      # Should not crash and should have the sum
+      assert event.count === large_count + 100
+    end
   end
 
   describe "metric_data/2 " do

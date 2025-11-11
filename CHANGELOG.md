@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.3.0 (2025-11-10)
+
+### Bug Fixes
+
+- Fix integer overflow crash in `insert_event` by changing `count` column from `int4` to `bigint` (migration V04)
+  - High-traffic events that accumulate more than 2.1B counts in a single time bucket would cause PostgreSQL "integer out of range" errors
+  - Existing installations should run migration V04 to upgrade
+
 ## v5.2.0 (2025-10-06)
 
 ### Features

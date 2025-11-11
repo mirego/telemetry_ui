@@ -1,6 +1,8 @@
 defmodule TelemetryUI.WriteBufferTest do
   use TelemetryUI.Test.DataCase, async: true
 
+  import ExUnit.CaptureLog
+
   alias TelemetryUI.WriteBuffer
 
   defmodule FakeBackend do
@@ -9,11 +11,16 @@ defmodule TelemetryUI.WriteBufferTest do
               self: nil,
               flush_interval_ms: 10_000,
               insert_date_trunc: "minute",
-              verbose: false
+              verbose: false,
+              mock_insert_event: nil
 
     defimpl TelemetryUI.Backend do
       def insert_event(backend, value, time, event_name, tags, count) do
-        send(backend.self, {value, time, event_name, tags, count})
+        if is_function(backend.mock_insert_event, 0) do
+          backend.mock_insert_event.()
+        else
+          send(backend.self, {value, time, event_name, tags, count})
+        end
       end
 
       def prune_events!(_backend, _date) do
@@ -27,6 +34,38 @@ defmodule TelemetryUI.WriteBufferTest do
   end
 
   describe "insert/1 " do
+    test "when backend insert fails - buffer is cleared" do
+      backend = %FakeBackend{
+        self: self(),
+        max_buffer_size: 1,
+        flush_interval_ms: 1,
+        mock_insert_event: fn ->
+          raise "Database error: too many SQL parameters"
+        end
+      }
+
+      {:ok, write_buffer} = WriteBuffer.start_link(name: :memory_leak_test, backend: backend)
+
+      write_log =
+        capture_log(fn ->
+          WriteBuffer.insert(
+            write_buffer,
+            %TelemetryUI.Event{
+              value: 1,
+              time: DateTime.utc_now(),
+              event_name: "test_event",
+              tags: []
+            }
+          )
+
+          Process.sleep(100)
+        end)
+
+      assert :sys.get_state(write_buffer).buffer === []
+      assert write_log =~ "Database error: too many SQL parameters"
+      assert write_log =~ "Could not insert 1 events"
+    end
+
     test "insert with flush" do
       backend = %FakeBackend{self: self(), max_buffer_size: 100, flush_interval_ms: 400}
       {:ok, write_buffer} = WriteBuffer.start_link(name: :flush_test, backend: backend)

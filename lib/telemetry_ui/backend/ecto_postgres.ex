@@ -119,7 +119,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
         select: %{
           compare: 1,
           value: avg(entries.value),
-          count: sum(entries.count),
+          count: type(sum(entries.count), :integer),
           tags: entries.tags
         }
       )
@@ -135,7 +135,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
         select: %{
           compare: 0,
           value: avg(entries.value),
-          count: sum(entries.count),
+          count: type(sum(entries.count), :integer),
           tags: entries.tags
         }
       )
