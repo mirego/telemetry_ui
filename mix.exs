@@ -74,7 +74,7 @@ defmodule TelemetryUI.Mixfile do
     [
       {:phoenix, "~> 1.4"},
       {:phoenix_ecto, "~> 4.4"},
-      {:jason, "~> 1.0"},
+      {:jason, "~> 1.0", optional: true},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, "~> 0.16"},

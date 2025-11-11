@@ -9,6 +9,7 @@ defmodule TelemetryUI.Web do
 
   alias Ecto.Changeset
   alias Phoenix.HTML.Safe
+  alias TelemetryUI.JSON
   alias TelemetryUI.Web.Filter
   alias TelemetryUI.Web.View
 

@@ -4,6 +4,8 @@ defmodule TelemetryUI.Digest.Slack do
   defstruct url: nil, pages: [], to: nil, from: nil, apparence: nil, metric_images: []
 
   defimpl TelemetryUI.Digest.Service do
+    alias TelemetryUI.JSON
+
     @default_header "Metrics overview"
     @default_icon ":bar_chart:"
     @default_username "TelemetryUI"
