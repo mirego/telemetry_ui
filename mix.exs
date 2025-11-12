@@ -74,15 +74,14 @@ defmodule TelemetryUI.Mixfile do
     [
       {:phoenix, "~> 1.4"},
       {:phoenix_ecto, "~> 4.4"},
-      {:jason, "~> 1.0", optional: true},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, "~> 0.16"},
       {:telemetry, "~> 1.0"},
       {:telemetry_metrics, ">= 0.6.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:timex, "~> 3.7"},
       {:oban, "~> 2.13", optional: true},
+      {:jason, "~> 1.0", optional: true},
 
       # Frontend
       {:vega_lite, "~> 0.1"},

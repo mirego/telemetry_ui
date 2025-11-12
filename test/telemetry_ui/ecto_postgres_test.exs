@@ -15,14 +15,14 @@ defmodule TelemetryUI.EctoPostgresTest do
   def default_options(event \\ %{date: DateTime.utc_now(), name: nil}, shift \\ [seconds: -600]) do
     to =
       event.date
-      |> Timex.Timezone.convert("Etc/UTC")
+      |> DateTime.shift_zone!("Etc/UTC")
       |> DateTime.truncate(:second)
-      |> Timex.shift(seconds: 1)
+      |> DateTime.add(1, :second)
 
     from =
       to
-      |> Timex.set(second: 0)
-      |> Timex.shift(shift)
+      |> set_time(second: 0)
+      |> shift_datetime(shift)
 
     %Options{
       from: from,
@@ -30,6 +30,32 @@ defmodule TelemetryUI.EctoPostgresTest do
       event_name: event.name,
       compare: false
     }
+  end
+
+  defp set_time(datetime, fields) do
+    %{year: year, month: month, day: day, hour: hour, minute: minute, second: second} = DateTime.to_naive(datetime)
+
+    second = Keyword.get(fields, :second, second)
+    minute = Keyword.get(fields, :minute, minute)
+    hour = Keyword.get(fields, :hour, hour)
+
+    {:ok, naive} = NaiveDateTime.new(year, month, day, hour, minute, second)
+    DateTime.from_naive!(naive, "Etc/UTC")
+  end
+
+  defp shift_datetime(datetime, shifts) do
+    Enum.reduce(shifts, datetime, fn {unit, value}, acc ->
+      case unit do
+        :years -> DateTime.add(acc, value * 365, :day)
+        :months -> DateTime.add(acc, value * 30, :day)
+        :weeks -> DateTime.add(acc, value * 7, :day)
+        :days -> DateTime.add(acc, value, :day)
+        :hours -> DateTime.add(acc, value, :hour)
+        :minutes -> DateTime.add(acc, value, :minute)
+        :seconds -> DateTime.add(acc, value, :second)
+        _ -> acc
+      end
+    end)
   end
 
   setup_all do

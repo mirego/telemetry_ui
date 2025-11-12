@@ -45,12 +45,12 @@ defmodule TelemetryUI.Web.Filter do
     to =
       DateTime.utc_now()
       |> DateTime.truncate(:second)
-      |> Timex.shift(seconds: 1)
+      |> DateTime.add(1, :second)
 
     from =
       to
-      |> Timex.set(time_set)
-      |> Timex.shift(time_duration)
+      |> set_time(time_set)
+      |> shift_datetime(time_duration)
 
     %__MODULE__{from: from, to: to, frame: option, page: params["page"]}
   end
@@ -97,4 +97,30 @@ defmodule TelemetryUI.Web.Filter do
   defp fetch_time_frame(:year, duration), do: {[second: 0, minute: 0, hour: 0], [years: -duration]}
 
   defp fetch_time_frame(_, duration), do: fetch_time_frame(:hour, duration)
+
+  defp set_time(datetime, fields) do
+    %{year: year, month: month, day: day, hour: hour, minute: minute, second: second} = DateTime.to_naive(datetime)
+
+    second = Keyword.get(fields, :second, second)
+    minute = Keyword.get(fields, :minute, minute)
+    hour = Keyword.get(fields, :hour, hour)
+
+    {:ok, naive} = NaiveDateTime.new(year, month, day, hour, minute, second)
+    DateTime.from_naive!(naive, "Etc/UTC")
+  end
+
+  defp shift_datetime(datetime, shifts) do
+    Enum.reduce(shifts, datetime, fn {unit, value}, acc ->
+      case unit do
+        :years -> DateTime.add(acc, value * 365, :day)
+        :months -> DateTime.add(acc, value * 30, :day)
+        :weeks -> DateTime.add(acc, value * 7, :day)
+        :days -> DateTime.add(acc, value, :day)
+        :hours -> DateTime.add(acc, value, :hour)
+        :minutes -> DateTime.add(acc, value, :minute)
+        :seconds -> DateTime.add(acc, value, :second)
+        _ -> acc
+      end
+    end)
+  end
 end
