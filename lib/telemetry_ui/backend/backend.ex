@@ -13,10 +13,10 @@ defprotocol TelemetryUI.Backend do
 
   ## Pruning
   Pruning is implemented to keep the datastore clean. Keeping data forever will increase the size of the storage and affect performance.
-  - `pruner_threshold`: *Example:* `[months: -1]`. Delete events older than a month. 
+  - `pruner_threshold`: *Example:* `[months: -1]`. Delete events older than a month.
   - `pruner_interval_ms`: *Example:* 84_000. Time interval for the pruner process to run. The process simply calls `#prune_events!/2`.
   """
-  def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1)
+  def insert_event(backend, entry)
   def prune_events!(backend, datetime)
   def metric_data(backend, metric, filters)
 end

@@ -3,6 +3,8 @@ defmodule TelemetryUI.WriteBuffer do
 
   use GenServer
 
+  alias TelemetryUI.Backend.Entry
+
   require Logger
 
   defmodule State do
@@ -71,17 +73,8 @@ defmodule TelemetryUI.WriteBuffer do
         info_log(backend, "Flushing #{length(events)} events")
 
         events
-        |> group_events()
-        |> Enum.each(fn {event, {value, count}} ->
-          TelemetryUI.Backend.insert_event(
-            backend,
-            value,
-            event.time,
-            event.event_name,
-            event.tags,
-            count
-          )
-        end)
+        |> to_entries(backend)
+        |> Enum.each(&TelemetryUI.Backend.insert_event(backend, &1))
     end
   rescue
     error ->
@@ -89,17 +82,44 @@ defmodule TelemetryUI.WriteBuffer do
       nil
   end
 
-  defp group_events(events) do
+  def truncate_to_bin(%DateTime{} = datetime, %{insert_date_bin: %Duration{} = date_bin}) do
+    total_minutes_in_hour = datetime.minute + datetime.second / 60
+    bin_time = date_bin.hour * 60 + date_bin.minute + date_bin.second / 60
+    bin_minute = floor(total_minutes_in_hour / bin_time) * bin_time
+    %{datetime | minute: round(bin_minute), second: 0, microsecond: {0, 0}}
+  end
+
+  def truncate_to_bin(datetime, _) do
+    datetime
+  end
+
+  defp to_entries(events, backend) do
     events
-    |> Enum.group_by(fn event -> %{event | value: 0} end)
-    |> Enum.reduce(%{}, fn {event, events}, acc ->
+    |> Enum.group_by(fn event ->
+      {event.event_name, event.tags, truncate_to_bin(event.time, backend)}
+    end)
+    |> Enum.flat_map(fn {{name, tags, date}, events} ->
+      min_value = Enum.min_by(events, & &1.value).value
+      max_value = Enum.max_by(events, & &1.value).value
+
       case Enum.reduce(events, {0, 0}, &cast_value/2) do
         {_, 0} ->
-          acc
+          []
 
         {total_value, count} ->
           value = Float.round(Float.round(total_value / count, 3), 4)
-          Map.put(acc, event, {value, count})
+
+          [
+            %Entry{
+              value: value,
+              min_value: min_value,
+              max_value: max_value,
+              date: date,
+              name: name,
+              tags: tags,
+              count: count
+            }
+          ]
       end
     end)
   end

@@ -38,9 +38,18 @@ defmodule TelemetryUI.EctoPostgresTest do
     [backend: backend]
   end
 
-  describe "insert_event/5 " do
+  describe "insert_event/2 " do
     test "single", %{backend: backend} do
-      Backend.insert_event(backend, 90.0, ~N[2022-02-10T00:00:31], "test", %{}, 5)
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 90.0,
+        min_value: 90.0,
+        max_value: 90.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{},
+        count: 5
+      })
+
       [event] = backend.repo.all(Entry)
 
       assert event.value === 90.0
@@ -50,8 +59,25 @@ defmodule TelemetryUI.EctoPostgresTest do
     end
 
     test "conflict", %{backend: backend} do
-      Backend.insert_event(backend, 10.0, ~N[2022-02-10T00:00:32], "test", %{}, 2)
-      Backend.insert_event(backend, 20.0, ~N[2022-02-10T00:00:33], "test", %{}, 4)
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 10.0,
+        min_value: 10.0,
+        max_value: 10.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{},
+        count: 2
+      })
+
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 20.0,
+        min_value: 20.0,
+        max_value: 20.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{},
+        count: 4
+      })
 
       [event] = backend.repo.all(Entry)
 
@@ -62,8 +88,25 @@ defmodule TelemetryUI.EctoPostgresTest do
     end
 
     test "conflict min/max", %{backend: backend} do
-      Backend.insert_event(backend, 10.0, ~N[2022-02-10T00:00:32], "test", %{}, 2)
-      Backend.insert_event(backend, 20.0, ~N[2022-02-10T00:00:33], "test", %{}, 4)
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 10.0,
+        min_value: 10.0,
+        max_value: 10.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{},
+        count: 2
+      })
+
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 20.0,
+        min_value: 20.0,
+        max_value: 20.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{},
+        count: 4
+      })
 
       [event] = backend.repo.all(Entry)
 
@@ -76,8 +119,25 @@ defmodule TelemetryUI.EctoPostgresTest do
     end
 
     test "conflict tags", %{backend: backend} do
-      Backend.insert_event(backend, 10.0, ~N[2022-02-10T00:00:32], "test", %{}, 2)
-      Backend.insert_event(backend, 20.0, ~N[2022-02-10T00:00:33], "test", %{"foo" => "bar"}, 4)
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 10.0,
+        min_value: 10.0,
+        max_value: 10.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{},
+        count: 2
+      })
+
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 20.0,
+        min_value: 20.0,
+        max_value: 20.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{"foo" => "bar"},
+        count: 4
+      })
 
       events = backend.repo.all(Entry)
 
@@ -91,10 +151,27 @@ defmodule TelemetryUI.EctoPostgresTest do
     test "large count overflow protection", %{backend: backend} do
       # Insert with a count near max int4 (2,147,483,647)
       large_count = 2_147_483_640
-      Backend.insert_event(backend, 10.0, ~N[2022-02-10T00:00:32], "test", %{}, large_count)
+
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 10.0,
+        min_value: 10.0,
+        max_value: 10.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{},
+        count: large_count
+      })
 
       # This would overflow int4 if not using bigint (2,147,483,640 + 100 > max)
-      Backend.insert_event(backend, 20.0, ~N[2022-02-10T00:00:33], "test", %{}, 100)
+      Backend.insert_event(backend, %TelemetryUI.Backend.Entry{
+        value: 20.0,
+        min_value: 20.0,
+        max_value: 20.0,
+        date: ~U[2022-02-10T00:00:00Z],
+        name: "test",
+        tags: %{},
+        count: 100
+      })
 
       [event] = backend.repo.all(Entry)
 

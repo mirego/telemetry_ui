@@ -24,32 +24,35 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       field(:value, :float)
       field(:min_value, :float)
       field(:max_value, :float)
-      field(:count, :integer)
+      field(:count, :integer, default: 1)
       field(:date, :utc_datetime)
-      field(:tags, :map)
+      field(:tags, :map, default: %{})
     end
   end
 
   defimpl TelemetryUI.Backend do
-    def insert_event(backend, value, date, event_name, tags \\ %{}, count \\ 1) do
+    alias TelemetryUI.Backend.EctoPostgres, as: Backend
+    alias TelemetryUI.Backend.Entry, as: BackendEntry
+
+    def insert_event(%Backend{} = backend, %BackendEntry{} = entry) do
       backend.repo.query!(
         """
-        INSERT INTO telemetry_ui_events (value, min_value, max_value, date, name, tags, count) VALUES($1, $1, $1, date_bin($6::interval, $2::timestamp, 'epoch'::timestamp), $3, $4, $5)
+        INSERT INTO telemetry_ui_events (value, date, name, tags, count, min_value, max_value) VALUES($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (date, name, tags)
         DO UPDATE SET
-          max_value = GREATEST(telemetry_ui_events.value, $1),
-          min_value = LEAST(telemetry_ui_events.value, $1),
-          value = ROUND((telemetry_ui_events.value + $1)::numeric / 2, 4),
-          count = telemetry_ui_events.count + $5
+          max_value = GREATEST(telemetry_ui_events.max_value, EXCLUDED.value),
+          min_value = LEAST(telemetry_ui_events.min_value, EXCLUDED.value),
+          value = ROUND((telemetry_ui_events.value + EXCLUDED.value)::numeric / 2, 4),
+          count = telemetry_ui_events.count + EXCLUDED.count
         """,
-        [value, date, event_name, tags, count, backend.insert_date_bin],
+        [entry.value, entry.date, entry.name, entry.tags, entry.count, entry.min_value, entry.max_value],
         log: backend.verbose,
         telemetry_prefix: backend.telemetry_prefix,
         telemetry_options: backend.telemetry_options
       )
     end
 
-    def prune_events!(backend, date) do
+    def prune_events!(%Backend{} = backend, %DateTime{} = date) do
       backend.repo.delete_all(
         from(entries in Entry, where: entries.date <= ^date),
         log: backend.verbose,
@@ -58,7 +61,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
       )
     end
 
-    def metric_data(backend, metric, %TelemetryUI.Scraper.Options{} = options) do
+    def metric_data(%Backend{} = backend, metric, %TelemetryUI.Scraper.Options{} = options) do
       current =
         Entry
         |> aggregated_query(options)
