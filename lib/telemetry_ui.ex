@@ -153,7 +153,7 @@ defmodule TelemetryUI do
     backend = opts[:backend]
     internal_metrics = TelemetryUI.InternalMetrics.metrics(backend)
     metrics = List.wrap(opts[:metrics])
-    all_metrics = if Enum.any?(metrics), do: internal_metrics ++ metrics, else: metrics
+    all_metrics = if Enum.any?(metrics), do: metrics ++ internal_metrics, else: metrics
 
     pages = Page.cast_all(all_metrics)
 

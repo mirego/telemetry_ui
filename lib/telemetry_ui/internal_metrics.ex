@@ -30,6 +30,22 @@ defmodule TelemetryUI.InternalMetrics do
   defp metric_configs do
     [
       %{
+        type: &Metrics.counter_value/2,
+        description: "Sum of events total",
+        unit: " events",
+        query_fn: &query_events_sum/2,
+        time_range: false,
+        ui_options: [class: "col-span-4"]
+      },
+      %{
+        type: &Metrics.counter_value/2,
+        description: "Count of rows total",
+        unit: " rows",
+        query_fn: &query_rows_count/2,
+        time_range: false,
+        ui_options: [class: "col-span-4"]
+      },
+      %{
         type: &Metrics.counter/2,
         description: "Sum of events in time range",
         unit: " events",
@@ -58,22 +74,6 @@ defmodule TelemetryUI.InternalMetrics do
         unit: " distinct tags",
         tags: [:name],
         query_fn: &query_tag_entropy/2
-      },
-      %{
-        type: &Metrics.counter/2,
-        description: "Sum of events total",
-        unit: " events",
-        query_fn: &query_events_sum/2,
-        time_range: false,
-        ui_options: [class: "col-span-4"]
-      },
-      %{
-        type: &Metrics.counter/2,
-        description: "Count of rows total",
-        unit: " rows",
-        query_fn: &query_rows_count/2,
-        time_range: false,
-        ui_options: [class: "col-span-4"]
       }
     ]
   end
@@ -98,43 +98,114 @@ defmodule TelemetryUI.InternalMetrics do
   end
 
   def query_events_sum(options, true) do
-    from e in base_query(),
-      where: e.date >= ^options.from and e.date <= ^options.to
+    interval = fetch_time_unit(options.from, options.to)
+
+    from e in @table,
+      where: e.date >= ^options.from and e.date <= ^options.to,
+      group_by: selected_as(:group_date),
+      order_by: selected_as(:group_date),
+      select: %{
+        date: selected_as(fragment("date_trunc(?::text, ?::timestamp)", ^interval, e.date), :group_date),
+        count: type(sum(e.count), :integer),
+        compare: 0,
+        value: 0,
+        min_value: 0,
+        max_value: 0,
+        tags: type(^"", :string)
+      }
   end
 
   def query_events_sum(_options, false) do
-    base_query()
+    from e in @table,
+      select: %{
+        date: type(^nil, :naive_datetime),
+        count: type(sum(e.count), :integer),
+        compare: 0,
+        value: 0,
+        min_value: 0,
+        max_value: 0,
+        tags: type(^"", :string)
+      }
   end
 
+  def query_events_sum(options, _), do: query_events_sum(options, false)
+
   def query_rows_count(options, true) do
-    from e in base_query(),
+    interval = fetch_time_unit(options.from, options.to)
+
+    from e in @table,
       where: e.date >= ^options.from and e.date <= ^options.to,
-      select_merge: %{count: 1}
+      group_by: selected_as(:group_date),
+      order_by: selected_as(:group_date),
+      select: %{
+        date: selected_as(fragment("date_trunc(?::text, ?::timestamp)", ^interval, e.date), :group_date),
+        count: fragment("COUNT(*)::integer"),
+        compare: 0,
+        value: 0,
+        min_value: 0,
+        max_value: 0,
+        tags: type(^"", :string)
+      }
   end
 
   def query_rows_count(_options, false) do
-    from e in base_query(), select_merge: %{count: 1}
+    from e in @table,
+      select: %{
+        date: type(^nil, :naive_datetime),
+        count: fragment("COUNT(*)::integer"),
+        compare: 0,
+        value: 0,
+        min_value: 0,
+        max_value: 0,
+        tags: type(^"", :string)
+      }
   end
 
+  def query_rows_count(options, _), do: query_rows_count(options, false)
+
   def query_events_by_tag(options, _time_range) do
-    from e in base_query(),
+    interval = fetch_time_unit(options.from, options.to)
+
+    from e in @table,
       where: e.date >= ^options.from and e.date <= ^options.to,
-      select_merge: %{tags: e.name}
+      group_by: [selected_as(:group_date), e.name],
+      order_by: selected_as(:group_date),
+      select: %{
+        date: selected_as(fragment("date_trunc(?::text, ?::timestamp)", ^interval, e.date), :group_date),
+        count: type(sum(e.count), :integer),
+        compare: 0,
+        value: 0,
+        min_value: 0,
+        max_value: 0,
+        tags: e.name
+      }
   end
 
   def query_tag_entropy(options, _time_range) do
+    interval = fetch_time_unit(options.from, options.to)
+
     from e in @table,
       where: e.date >= ^options.from and e.date <= ^options.to,
-      group_by: e.name,
+      group_by: [selected_as(:group_date), e.name],
+      order_by: selected_as(:group_date),
       select: %{
-        date: nil,
-        count: fragment("COUNT(DISTINCT ?)", e.tags),
+        date: selected_as(fragment("date_trunc(?::text, ?::timestamp)", ^interval, e.date), :group_date),
+        count: fragment("COUNT(DISTINCT ?)::integer", e.tags),
         compare: 0,
         value: fragment("COUNT(DISTINCT ?)", e.tags),
         min_value: 0,
         max_value: 0,
         tags: e.name
       }
+  end
+
+  defp fetch_time_unit(from, to) do
+    case DateTime.diff(to, from) do
+      diff when diff <= 18_000 -> "second"
+      diff when diff <= 43_200 -> "minute"
+      diff when diff <= 691_200 -> "hour"
+      _ -> "day"
+    end
   end
 
   defp empty_compare_row do
@@ -149,18 +220,5 @@ defmodule TelemetryUI.InternalMetrics do
       max_value: 0.0,
       tags: %{}
     }
-  end
-
-  defp base_query do
-    from e in @table,
-      select: %{
-        date: e.date,
-        count: e.count,
-        compare: 0,
-        value: 0,
-        min_value: 0,
-        max_value: 0,
-        tags: %{}
-      }
   end
 end

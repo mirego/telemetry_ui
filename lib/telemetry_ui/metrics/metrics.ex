@@ -2,7 +2,6 @@ defmodule TelemetryUI.Metrics do
   @moduledoc false
   alias Telemetry.Metrics
   alias TelemetryUI.Event
-  alias TelemetryUI.JSON
   alias TelemetryUI.Metrics, as: UIMetrics
 
   @telemetry_metrics [
@@ -12,6 +11,7 @@ defmodule TelemetryUI.Metrics do
     {:count_over_time, UIMetrics.CountOverTime},
     {:count_list, UIMetrics.CountList},
     {:counter, UIMetrics.Counter},
+    {:counter_value, UIMetrics.CounterValue},
     {:distribution, UIMetrics.Distribution},
     {:last_value, UIMetrics.LastValue},
     {:median, UIMetrics.Median},
@@ -101,18 +101,6 @@ defmodule TelemetryUI.Metrics do
   end
 
   defp id(metric) do
-    reporter_options = Enum.reject(List.wrap(Map.get(metric, :reporter_options)), fn {_, value} -> is_function(value) end)
-    reporter_options = JSON.encode!(Map.new(reporter_options))
-
-    [
-      metric.description,
-      metric.name,
-      metric.tags,
-      reporter_options
-    ]
-    |> List.flatten()
-    |> Enum.reject(&(&1 in [nil, ""]))
-    |> Enum.join()
-    |> id()
+    id(:erlang.term_to_binary(metric))
   end
 end

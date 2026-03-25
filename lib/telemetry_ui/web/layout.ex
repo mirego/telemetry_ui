@@ -314,6 +314,5 @@ defmodule TelemetryUI.Web.Layout do
 
   defp theme_color_variable(theme), do: ~s[
       --accent-color: #{theme.header_color};
-      --accent-border: color-mix(in srgb, var(--accent-color), transparent 90%);
   ]
 end

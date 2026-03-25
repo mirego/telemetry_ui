@@ -18,7 +18,7 @@
 
   <div class={"max-w-7xl mx-auto grid #{@current_page.ui_options[:metrics_class]}"}>
     <%= for metric <- @current_page.metrics do %>
-      <div class={["min-h-[220px]", metric.ui_options[:class]]}>
+      <div class={metric.ui_options[:class]}>
         <.component_html metric={metric} options={metric.options} filters={@filters} conn={@conn} theme={@theme} />
       </div>
     <% end %>
