@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add `counter_value` metric type with `StatValue` component for displaying aggregate count values
+- Improve internal metrics queries
+
+### Bug Fixes
+
+- Fix compare aggregate percentage formatting
+- Pretty format float values in metrics display
+
+## v5.3.2 (2025-11-12)
+
+### Bug Fixes
+
+- Fix `date_bin` query for non-grouped events (migration V05)
+- Remove `timex` dependency in favor of native Elixir `Duration` and date handling
+
+## v5.3.1 (2025-11-11)
+
+### Bug Fixes
+
+- Add configurable JSON library module (`TelemetryUI.JSON`) with support for Elixir 1.18 built-in `JSON`, `Jason`, or custom library
+- Fix JSON encoding compatibility on Elixir 1.17
+
 ## v5.3.0 (2025-11-10)
 
 ### Bug Fixes
