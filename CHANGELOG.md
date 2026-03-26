@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v5.4.0 (2026-03-26)
 
 ### Features
 
