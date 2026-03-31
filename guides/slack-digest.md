@@ -1,6 +1,6 @@
 # Slack Digest
 
-`telemetry_ui` has amodule to send shareable links to external resources. The only resource implemented for now is Slack.
+`telemetry_ui` has a module to send shareable links to external resources. The only resource implemented for now is Slack.
 
 To schedule a weekly digest, we rely on [Oban](https://hexdocs.pm/oban/) to have a safe, unique and _schedulable_ queue across our system.
 
@@ -22,7 +22,7 @@ telemetry_ui_digest_args = %{
   metric_images: [
     %{"page" => "Ecto", "description" => "Requests average duration"}
   ],
-  apparence: %{
+  appearance: %{
     header: "Here is your digest, each minute.",
     icon_emoji: ":smile:",
     username: "TelemetryUI - Hook"

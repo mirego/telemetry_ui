@@ -12,7 +12,7 @@ First you need to configure your theme with a secret share key
   backend: backend(),
   theme: %{
     share_key: "012345678912345",
-    share_path: "/metrics/public"
+    share_path: "/metrics/public",
     title: "User dashboard metrics"
   }
 ]

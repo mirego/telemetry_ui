@@ -432,7 +432,7 @@ data_resolver: fn options ->
 end
 ```
 
-See guides/application-data.md for more details.
+See [Application Data](application-data.md) for more details.
 
 ## Application-Level Configuration
 

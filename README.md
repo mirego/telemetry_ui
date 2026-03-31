@@ -10,7 +10,7 @@
 
 `TelemetryUI`’s primary goal is to display [your application metrics](https://hexdocs.pm/telemetry_metrics) without external infrastructure dependencies. [Plug](https://hexdocs.pm/plug/Plug.Telemetry.html), [Phoenix](https://hexdocs.pm/phoenix/telemetry.html), [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view/telemetry.html), [Absinthe](https://hexdocs.pm/absinthe/telemetry.html), [Ecto](https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events), [Erlang VM](https://hexdocs.pm/telemetry_poller/readme.html), [Tesla](https://hexdocs.pm/tesla/Tesla.Middleware.Telemetry.html), [Finch](https://hexdocs.pm/finch/Finch.Telemetry.html), [Redix](https://hexdocs.pm/redix/telemetry.html), [Oban](https://hexdocs.pm/oban/Oban.Telemetry.html), [Broadway](https://hexdocs.pm/broadway/Broadway.html#module-telemetry) and others expose all sorts of data that can be useful. You can also emit your own events from your application.
 
-Your data should not have to be uploaded somewhere else to have insighful metrics.
+Your data should not have to be uploaded somewhere else to have insightful metrics.
 
 It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to quickly (and efficiently) store and query your application events.
 
@@ -33,7 +33,7 @@ It comes with a Postgres backend, powered by [Ecto](https://hexdocs.pm/ecto), to
 - Dynamic configuration via functions for runtime flexibility
 - Hidden pages and custom styling per page
 
-Checkout the Guides for more informations.
+Check out the Guides for more information.
 
 ## Usage
 
@@ -57,7 +57,7 @@ Configure TelemetryUI for test. This disables all TelemetryUI processes during t
 config :telemetry_ui, disabled: true
 ```
 
-Then run mix deps.get to install Telemetry and its dependencies.
+Then run `mix deps.get` to install Telemetry and its dependencies.
 
 After the packages are installed you must create a database migration to add the `telemetry_ui_events` table to your database:
 
@@ -65,7 +65,7 @@ After the packages are installed you must create a database migration to add the
 mix ecto.gen.migration add_telemetry_ui_events_table
 ```
 
-Open the generated migration in your editor and call the up and down functions on `TelemetryUI.Adapter.EctoPostgres.Migrations`:
+Open the generated migration in your editor and call the up and down functions on `TelemetryUI.Backend.EctoPostgres.Migrations`:
 
 ```elixir
 defmodule MyApp.Repo.Migrations.AddTelemetryUIEventsTable do
@@ -128,7 +128,7 @@ defp telemetry_config do
 end
 ```
 
-Since the config is read once at startup, you need to restart the server if you add new metrics to track. Alternatively, you can use the hot-reload feature (see guides/hot-reload.md).
+Since the config is read once at startup, you need to restart the server if you add new metrics to track. Alternatively, you can use the hot-reload feature (see [Hot Reload](guides/hot-reload.md)).
 
 To see the rendered metrics, you need to add a route to your router.
 
@@ -188,7 +188,7 @@ Instead of passing configuration directly, you can pass a function that returns 
 {TelemetryUI, config: {MyApp.Telemetry, :config}}
 ```
 
-This is particularly useful with the hot-reload feature (see guides/hot-reload.md).
+This is particularly useful with the hot-reload feature (see [Hot Reload](guides/hot-reload.md)).
 
 ### Named Instances
 
@@ -209,7 +209,7 @@ get("/admin/metrics", TelemetryUI.Web, [], [assigns: %{telemetry_ui_allowed: tru
 get("/user/metrics", TelemetryUI.Web, [], [assigns: %{telemetry_ui_allowed: true, telemetry_ui_name: :user_dashboard}])
 ```
 
-See guides/multi-metrics-endpoints.md for a complete example.
+See [Multi Metrics Endpoints](guides/multi-metrics-endpoints.md) for a complete example.
 
 ### Disabling TelemetryUI
 
@@ -220,11 +220,11 @@ You can disable all TelemetryUI processes (useful for testing):
 config :telemetry_ui, disabled: true
 ```
 
-For all configuration options, see guides/configuration-reference.md.
+For all configuration options, see [Configuration Reference](guides/configuration-reference.md).
 
 ## License
 
-`TelemetryUI` is © 2024 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/telemetry_ui/blob/master/LICENSE.md) file.
+`TelemetryUI` is © 2026 [Mirego](https://www.mirego.com) and may be freely distributed under the [New BSD license](http://opensource.org/licenses/BSD-3-Clause). See the [`LICENSE.md`](https://github.com/mirego/telemetry_ui/blob/master/LICENSE.md) file.
 
 ## About Mirego
 

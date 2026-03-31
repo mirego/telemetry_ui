@@ -38,7 +38,7 @@ Instead of calling the config function directly, you can pass it as a reference 
 {TelemetryUI, config: fn -> MyApp.TelemetryUI.config() end}
 ```
 
-This allows you to reload the configuration at runtime without restarting your application. See guides/hot-reload.md for more details.
+This allows you to reload the configuration at runtime without restarting your application. See [Hot Reload](hot-reload.md) for more details.
 
 ## The config
 

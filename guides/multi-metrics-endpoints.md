@@ -1,6 +1,6 @@
 # Multiple metrics endpoints
 
-The `/metrics` endpoint exposes different pages of metrics. We can also have multiple metrics endpoint.
+The `/metrics` endpoint exposes different pages of metrics. We can also have multiple metrics endpoints.
 The benefit is to have different metrics exposed with different permissions. Here is an example:
 
 We have our router defining routes with different `telemetry_ui_name` Plug.Conn assign.
@@ -58,7 +58,7 @@ defmodule MyApp.Telemetry do
 end
 ```
 
-Don’t forget to start all `TelemetryUI` process in `application.ex`:
+Don’t forget to start all `TelemetryUI` processes in `application.ex`:
 
 ```elixir
 defmodule MyApp.Application do
