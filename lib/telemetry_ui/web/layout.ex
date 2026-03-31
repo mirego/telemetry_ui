@@ -19,11 +19,11 @@ defmodule TelemetryUI.Web.Layout do
       </span>
 
       <div telemetry-component="Form">
-        <.form :let={f} for={@filter_form} method="get" class="flex gap-2 align-items-center">
+        <.form :let={f} for={@filter_form} method="get" class="flex gap-2 items-center">
           <select
             id="filter_frame"
             name="filter[frame]"
-            class="px-4 py-1 rounded-md bg-white dark:bg-black border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
+            class="px-4 py-2 rounded-md bg-white dark:bg-black border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
           >
             <%= for {label, value} <- @frame_options do %>
               <option selected={f.data.frame === value} value={value}>{label}</option>
@@ -52,12 +52,12 @@ defmodule TelemetryUI.Web.Layout do
       </a>
 
       <div telemetry-component="Form">
-        <.form :let={f} for={@filter_form} method="get" class="flex gap-2 align-items-center">
+        <.form :let={f} for={@filter_form} method="get" class="flex gap-2 items-center">
           <input id="filter_page" name="filter[page]" type="hidden" value={@current_page.id} />
           <select
             id="filter_frame"
             name="filter[frame]"
-            class="px-4 py-1 rounded-md bg-white dark:bg-black border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
+            class="px-4 py-2 rounded-md bg-white dark:bg-black border-black/10 dark:border-slate-50/10 text-black dark:text-slate-50 text-xs pr-8"
           >
             <%= for {label, value} <- @frame_options do %>
               <option selected={f.data.frame === value} value={value}>{label}</option>
