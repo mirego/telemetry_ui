@@ -46,6 +46,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
           count = telemetry_ui_events.count + EXCLUDED.count
         """,
         [entry.value, entry.date, entry.name, entry.tags, entry.count, entry.min_value, entry.max_value],
+        source: Entry.__schema__(:source),
         log: backend.verbose,
         telemetry_prefix: backend.telemetry_prefix,
         telemetry_options: backend.telemetry_options
