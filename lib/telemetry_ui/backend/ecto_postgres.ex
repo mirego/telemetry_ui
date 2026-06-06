@@ -42,7 +42,7 @@ defmodule TelemetryUI.Backend.EctoPostgres do
         DO UPDATE SET
           max_value = GREATEST(telemetry_ui_events.max_value, EXCLUDED.value),
           min_value = LEAST(telemetry_ui_events.min_value, EXCLUDED.value),
-          value = ROUND((telemetry_ui_events.value + EXCLUDED.value)::numeric / 2, 4),
+          value = ROUND(((telemetry_ui_events.value * telemetry_ui_events.count) + (EXCLUDED.value * EXCLUDED.count))::numeric / (telemetry_ui_events.count + EXCLUDED.count), 4),
           count = telemetry_ui_events.count + EXCLUDED.count
         """,
         [entry.value, entry.date, entry.name, entry.tags, entry.count, entry.min_value, entry.max_value],

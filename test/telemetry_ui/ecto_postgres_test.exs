@@ -107,7 +107,7 @@ defmodule TelemetryUI.EctoPostgresTest do
 
       [event] = backend.repo.all(Entry)
 
-      assert event.value === 15.0
+      assert event.value === 16.6667
       assert event.tags === %{}
       assert event.count === 6
       assert event.date === ~U[2022-02-10T00:00:00Z]
@@ -136,7 +136,7 @@ defmodule TelemetryUI.EctoPostgresTest do
 
       [event] = backend.repo.all(Entry)
 
-      assert event.value === 15.0
+      assert event.value === 16.6667
       assert event.min_value === 10.0
       assert event.max_value === 20.0
       assert event.tags === %{}
